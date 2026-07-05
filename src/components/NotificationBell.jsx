@@ -3,7 +3,8 @@ import { Bell } from 'lucide-react'
 import { useNotifications } from '../context/NotificationsContext'
 
 // Cloche + petit panneau listant les notifications reçues.
-export default function NotificationBell() {
+// "clair" adapte le bouton aux fonds sombres (en-tête prune).
+export default function NotificationBell({ clair = false }) {
   const { notifications, nonLues, marquerToutLu } = useNotifications()
   const [ouvert, setOuvert] = useState(false)
 
@@ -19,7 +20,11 @@ export default function NotificationBell() {
         type="button"
         onClick={basculer}
         aria-label="Notifications"
-        className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-sand bg-paper text-ink transition-colors hover:border-crust/40"
+        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
+          clair
+            ? 'bg-white/10 text-white/85 ring-1 ring-white/20 hover:bg-white/20 hover:text-white'
+            : 'border border-sand bg-paper text-ink hover:border-crust/40'
+        }`}
       >
         <Bell size={18} />
         {nonLues > 0 && (

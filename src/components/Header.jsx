@@ -3,16 +3,17 @@ import { useCart } from '../context/CartContext'
 import Logo from './Logo'
 import NotificationBell from './NotificationBell'
 
-// En-tête : logo PainPrêt, recherche, historique, notifications, panier, accès pro.
+// En-tête aux couleurs de la devanture La Pétrie : bandeau prune,
+// lettrage clair — comme l'enseigne de la boutique.
 export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPanier, onEspacePro, onHistorique }) {
   const { nombreArticles } = useCart()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-sand bg-cream/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b-2 border-[#e9cd90]/60 bg-crust">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-5">
         {/* Logo */}
         <button type="button" onClick={onAccueil} className="shrink-0">
-          <Logo taille="sm" />
+          <Logo taille="sm" clair />
         </button>
 
         {/* Recherche */}
@@ -26,7 +27,7 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher un pain…"
-            className="w-full rounded-lg border border-sand bg-paper py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
+            className="w-full rounded-lg border border-white/20 bg-white py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:ring-2 focus:ring-[#e9cd90]/50"
           />
         </div>
 
@@ -36,7 +37,7 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
           onClick={onHistorique}
           aria-label="Mes commandes"
           title="Mes commandes"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sand bg-paper text-stone-warm transition-colors hover:border-crust/40 hover:text-crust"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/20 hover:text-white"
         >
           <History size={18} />
         </button>
@@ -47,20 +48,20 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
           onClick={onEspacePro}
           aria-label="Espace boulanger"
           title="Espace boulanger"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sand bg-paper text-stone-warm transition-colors hover:border-crust/40 hover:text-crust"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/20 hover:text-white"
         >
           <Store size={18} />
         </button>
 
         {/* Notifications */}
-        <NotificationBell />
+        <NotificationBell clair />
 
         {/* Panier */}
         <button
           type="button"
           onClick={onOuvrirPanier}
           aria-label="Voir le panier"
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink text-white transition-colors hover:bg-crust-dark"
+          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-crust transition-colors hover:bg-[#f2d3d8]"
         >
           <ShoppingBag size={18} />
           {nombreArticles > 0 && (

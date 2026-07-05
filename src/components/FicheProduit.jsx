@@ -226,7 +226,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi }) {
               <button
                 type="button"
                 aria-label="Augmenter la quantité"
-                onClick={() => setQuantite((q) => q + 1)}
+                onClick={() => setQuantite((q) => Math.min(q + 1, produit.stock ?? 99))}
                 className="flex h-11 w-11 items-center justify-center text-stone-warm transition-colors hover:text-ink"
               >
                 <Plus size={18} />

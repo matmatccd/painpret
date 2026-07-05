@@ -21,38 +21,45 @@ export function CartProvider({ children }) {
   // Chaque ligne : { cle, produit, quantite, varianteNom, prixUnitaire, remarque }
   const [lignes, setLignes] = useState([])
 
-  // --- Ajouter un produit au panier ---
+  // --- Ajouter un produit au panier (sans dépasser le stock disponible) ---
   function ajouter(produit, { quantite = 1, varianteNom = null, prixUnitaire, remarque = '' } = {}) {
     // Si pas de prix précisé, on prend le prix de base du produit
     const prix = prixUnitaire ?? produit.prix
     const cle = cleLigne(produit.id, varianteNom)
+    const stockMax = produit.stock ?? Infinity
 
     setLignes((actuelles) => {
       const existante = actuelles.find((l) => l.cle === cle)
       if (existante) {
-        // Déjà dans le panier → on augmente juste la quantité
+        // Déjà dans le panier → on augmente, plafonné au stock
         return actuelles.map((l) =>
           l.cle === cle
-            ? { ...l, quantite: l.quantite + quantite, remarque: remarque || l.remarque }
+            ? {
+                ...l,
+                quantite: Math.min(l.quantite + quantite, stockMax),
+                remarque: remarque || l.remarque,
+              }
             : l,
         )
       }
-      // Sinon, nouvelle ligne
+      // Sinon, nouvelle ligne (plafonnée au stock)
       return [
         ...actuelles,
-        { cle, produit, quantite, varianteNom, prixUnitaire: prix, remarque },
+        { cle, produit, quantite: Math.min(quantite, stockMax), varianteNom, prixUnitaire: prix, remarque },
       ]
     })
   }
 
-  // --- Changer la quantité d'une ligne (0 = on la retire) ---
+  // --- Changer la quantité d'une ligne (0 = on la retire, plafonnée au stock) ---
   function modifierQuantite(cle, nouvelleQuantite) {
     setLignes((actuelles) => {
       if (nouvelleQuantite <= 0) {
         return actuelles.filter((l) => l.cle !== cle)
       }
       return actuelles.map((l) =>
-        l.cle === cle ? { ...l, quantite: nouvelleQuantite } : l,
+        l.cle === cle
+          ? { ...l, quantite: Math.min(nouvelleQuantite, l.produit.stock ?? Infinity) }
+          : l,
       )
     })
   }

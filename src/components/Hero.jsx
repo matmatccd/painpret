@@ -1,23 +1,51 @@
+import { useEffect, useState } from 'react'
 import { MapPin, Star, Timer } from 'lucide-react'
 import { bakery } from '../data/bakery'
 import boutique from '../assets/photos/boutique.jpg'
+import fournil from '../assets/photos/fournil.jpg'
 
-// Bannière d'accueil de La Pétrie — éditoriale, posée, chaleureuse.
+// Photos du diaporama — il suffit d'ajouter une ligne pour une nouvelle photo
+// (ex : le portrait de Sandra & Johnatan quand il sera prêt).
+const PHOTOS = [
+  { src: boutique, alt: 'La boutique La Pétrie' },
+  { src: fournil, alt: 'Le fournil de La Pétrie' },
+]
+
+// Bannière d'accueil : diaporama automatique des photos de la boulangerie.
 export default function Hero() {
+  const [index, setIndex] = useState(0)
+
+  // Défilement automatique toutes les 5 s — sauf si l'utilisateur
+  // a demandé à réduire les animations (accessibilité).
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (PHOTOS.length < 2) return
+    const minuteur = setInterval(() => {
+      setIndex((i) => (i + 1) % PHOTOS.length)
+    }, 5000)
+    return () => clearInterval(minuteur)
+  }, [])
+
   return (
     <section className="mx-auto w-full max-w-6xl animate-fade-up px-4 pt-6">
       <div className="relative overflow-hidden rounded-2xl border border-sand">
-        {/* Vraie photo de la boutique La Pétrie */}
         <div className="relative flex min-h-[300px] flex-col justify-end p-7 sm:min-h-[380px] sm:p-10">
-          <img
-            src={boutique}
-            alt="La boutique La Pétrie"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          {/* Voile sombre pour la lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          {/* Les photos, empilées : seule celle d'index visible (fondu doux) */}
+          {PHOTOS.map((photo, i) => (
+            <img
+              key={photo.src}
+              src={photo.src}
+              alt={i === index ? photo.alt : ''}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+                i === index ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
 
-          {/* Badges d'état (sobres) */}
+          {/* Voile prune (couleurs de la devanture) pour la lisibilité */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/85 via-[#2c1019]/35 to-[#2c1019]/15" />
+
+          {/* Badges d'état */}
           <div className="relative mb-5 flex flex-wrap items-center gap-2">
             {bakery.ouvertMaintenant && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
@@ -53,6 +81,23 @@ export default function Hero() {
               </span>
             </div>
           </div>
+
+          {/* Points du diaporama (cliquables) */}
+          {PHOTOS.length > 1 && (
+            <div className="absolute bottom-4 right-5 flex gap-1.5">
+              {PHOTOS.map((photo, i) => (
+                <button
+                  key={photo.src}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={`Photo ${i + 1} : ${photo.alt}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === index ? 'w-5 bg-white' : 'w-2 bg-white/45 hover:bg-white/70'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

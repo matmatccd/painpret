@@ -11,7 +11,11 @@ export default function Logo({ taille = 'md', clair = false }) {
 
   return (
     <span className="inline-flex items-center gap-2">
-      <span className={`flex ${dims.tuile} items-center justify-center bg-crust text-white`}>
+      <span
+        className={`flex ${dims.tuile} items-center justify-center ${
+          clair ? 'bg-white/15 text-white ring-1 ring-white/25' : 'bg-crust text-white'
+        }`}
+      >
         <Wheat size={dims.icone} strokeWidth={2.2} />
       </span>
       <span className={`font-display ${dims.texte} ${clair ? 'text-white' : 'text-ink'}`}>
