@@ -1,0 +1,66 @@
+# ============================================================
+#  Déploiement automatique de PainPrêt sur GitHub Pages
+#  ------------------------------------------------------------
+#  À chaque "push" sur la branche main, GitHub :
+#   1. installe les dépendances
+#   2. construit le site (npm run build -> dossier dist)
+#   3. publie ce dossier sur GitHub Pages (met le site en ligne)
+#
+#  Adapté à un projet Vite (contrairement au fichier d'origine
+#  qui était fait pour un portfolio Next.js).
+# ============================================================
+
+name: Déployer PainPrêt sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permet aussi de lancer le déploiement à la main
+
+# Droits nécessaires pour publier sur Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Construire le site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Construire (Vite -> dossier dist)
+        run: npm run build
+
+      - name: Préparer la publication
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Mettre en ligne
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

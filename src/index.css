@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* ===========================================================
+   PainPrêt — Thème de marque
+   Boulangerie artisanale : crème, croûte dorée, encre espresso.
+   Typo : Calistoga (titres) + Inter (texte).
+   =========================================================== */
+
+@theme {
+  /* Couleurs de marque — celles de la vraie façade La Pétrie :
+     prune/bordeaux profond, rose poudré, filets dorés, crème. */
+  --color-cream: #faf3f1; /* fond de page (crème rosée) */
+  --color-paper: #ffffff; /* cartes */
+  --color-sand: #ecd9d6; /* bordures douces (rose grisé) */
+  --color-sand-soft: #f4e6e3; /* séparateurs très légers */
+  --color-crust: #6f2f43; /* prune La Pétrie (marque, boutons) */
+  --color-crust-dark: #521f30; /* survol / texte fort */
+  --color-ember: #a13352; /* accent framboise / prix */
+  --color-ink: #33222a; /* titres & texte fort (encre prune) */
+  --color-stone-warm: #6d5560; /* texte secondaire (mauve chaud) */
+  --color-gilt: #b98a2f; /* filet doré de la devanture */
+
+  /* Police */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Calistoga', Georgia, 'Times New Roman', serif;
+
+  /* Courbes d'animation sobres */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Styles de base dans @layer base : ainsi les utilitaires Tailwind
+   (ex : font-sans sur un titre de carte) peuvent reprendre la main. */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    background: var(--color-cream);
+    color: var(--color-ink);
+  }
+
+  /* Titres en Calistoga par défaut, posés et chaleureux */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Confort tactile : pas de flash gris au tap, moins de latence */
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, a, [role='button'], input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Accessibilité clavier : anneau de focus net et cohérent
+     (uniquement au clavier, pas au clic souris) */
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  [role='button']:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-crust);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+}
+
+/* La classe .font-display reste disponible hors layer pour forcer Calistoga */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Chiffres alignés (prix, timers) — pas de saut de largeur */
+.tnum, .price, time { font-variant-numeric: tabular-nums; }
+
+/* Sélection texte aux couleurs de la marque */
+::selection { background: #f0ccd6; color: var(--color-ink); }
+
+/* Barre de défilement masquée pour les rangées horizontales */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* --- Animations discrètes (entrée douce, utilisées avec parcimonie) --- */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.4s var(--ease-out-soft) both; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in { animation: pop-in 0.35s var(--ease-out-soft) both; }
+
+/* Effet "shimmer" pour les squelettes de chargement */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #ecd9d6 25%, #f7ecea 50%, #ecd9d6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Respect des préférences d'accessibilité : on coupe le mouvement */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
