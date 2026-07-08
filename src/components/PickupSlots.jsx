@@ -29,8 +29,10 @@ export default function PickupSlots({ onRetour, onConfirme }) {
   function confirmer() {
     if (!creneauChoisi) return
 
-    // On transforme les lignes du panier en articles lisibles pour le boulanger
+    // On transforme les lignes du panier en articles lisibles pour le boulanger.
+    // "produitId" permet de décompter le stock au moment de la commande.
     const articles = lignes.map((l) => ({
+      produitId: l.produit.id,
       nom: l.varianteNom ? `${l.produit.nom} (${l.varianteNom})` : l.produit.nom,
       quantite: l.quantite,
     }))

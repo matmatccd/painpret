@@ -253,6 +253,10 @@ export default function App() {
             produit={produitOuvert}
             onRetour={() => setProduitOuvertId(null)}
             onAjoutReussi={() => setPanierOuvert(true)}
+            suggestions={produits
+              .filter((p) => p.id !== produitOuvert.id && p.categorie === produitOuvert.categorie && p.disponible)
+              .slice(0, 3)}
+            onOpen={ouvrirProduit}
           />
         ) : termeRecherche ? (
           <section className="mx-auto w-full max-w-6xl px-4 py-8">

@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { ArrowLeft, Minus, Plus, Timer, CheckCircle2, Leaf, ShieldAlert } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
+import ProductCard from './ProductCard'
 
-// Fiche détaillée d'un produit.
-export default function FicheProduit({ produit, onRetour, onAjoutReussi }) {
+// Fiche détaillée d'un produit (+ suggestions de la même catégorie).
+export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggestions = [], onOpen }) {
   const { ajouter } = useCart()
   const [quantite, setQuantite] = useState(1)
   const [remarque, setRemarque] = useState('')
@@ -244,6 +245,21 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi }) {
           </div>
         </div>
       </div>
+
+      {/* Suggestions de la même catégorie */}
+      {suggestions.length > 0 && (
+        <section className="mt-10">
+          <header className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Nos suggestions</p>
+            <h2 className="mt-1 text-2xl text-ink">À goûter aussi</h2>
+          </header>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {suggestions.map((p, i) => (
+              <ProductCard key={p.id} produit={p} onOpen={onOpen} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

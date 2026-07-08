@@ -112,7 +112,8 @@ export function ShopProvider({ children }) {
   }
 
   // --- Côté client : passer une commande (commande en ligne, retrait en boutique) ---
-  // Crée une commande "à préparer" qui apparaît aussitôt côté boulanger.
+  // Crée une commande "à préparer" qui apparaît aussitôt côté boulanger,
+  // et DÉCOMPTE le stock des produits commandés (épuisé automatique à 0).
   // Renvoie la commande créée (pour afficher le numéro + QR Code).
   function ajouterCommande({ articles, total, creneau, heureRetrait }) {
     const nouvelle = {
@@ -128,6 +129,17 @@ export function ShopProvider({ children }) {
       nouvelle: true, // pour signaler une commande fraîche côté boulanger
     }
     setCommandes((cmds) => [...cmds, nouvelle])
+
+    // Le stock baisse immédiatement (les articles portent l'id du produit)
+    setProduitsBase((arr) =>
+      arr.map((p) => {
+        const commande = articles
+          .filter((a) => a.produitId === p.id)
+          .reduce((n, a) => n + a.quantite, 0)
+        return commande > 0 ? { ...p, stock: Math.max(0, p.stock - commande) } : p
+      }),
+    )
+
     return nouvelle
   }
 
