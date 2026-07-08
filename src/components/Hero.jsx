@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Star, Timer } from 'lucide-react'
-import { bakery } from '../data/bakery'
+import { MapPin, Star, Timer, Navigation } from 'lucide-react'
+import { bakery, lienItineraire } from '../data/bakery'
 import boutique from '../assets/photos/boutique.jpg'
 import fournil from '../assets/photos/fournil.jpg'
 
@@ -79,6 +79,15 @@ export default function Hero() {
                 <MapPin size={15} />
                 {bakery.adresse}, {bakery.ville}
               </span>
+              {/* Itinéraire pour ceux qui ne connaissent pas la boutique */}
+              <a
+                href={lienItineraire}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-crust transition-colors hover:bg-[#f2d3d8]"
+              >
+                <Navigation size={13} /> Itinéraire
+              </a>
             </div>
           </div>
 

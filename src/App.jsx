@@ -9,6 +9,8 @@ import CartDrawer from './components/CartDrawer'
 import PickupSlots from './components/PickupSlots'
 import Confirmation from './components/Confirmation'
 import Historique from './components/Historique'
+import Faq from './components/Faq'
+import CommentCaMarche from './components/CommentCaMarche'
 import Footer from './components/Footer'
 import MerchantLogin from './components/MerchantLogin'
 import MerchantDashboard from './components/MerchantDashboard'
@@ -222,6 +224,8 @@ export default function App() {
       <main className="flex-1">
         {vue === 'confirmation' && commandeConfirmee ? (
           <Confirmation commande={commandeConfirmee} onTermine={retourBoutique} />
+        ) : vue === 'faq' ? (
+          <Faq onRetour={retourBoutique} />
         ) : vue === 'historique' ? (
           <Historique
             historique={historique}
@@ -293,11 +297,12 @@ export default function App() {
             )}
             <ProductRow surtitre="La gamme Pétrisane" titre="Baguettes" produits={produitsPains} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
             <ProductRow surtitre="Le fournil" titre="Pains spéciaux" produits={produitsSpeciaux} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+            <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
           </>
         )}
       </main>
 
-      <Footer />
+      <Footer onFAQ={() => { setVue('faq'); setProduitOuvertId(null); window.scrollTo({ top: 0 }) }} />
 
       {/* Espace en bas pour ne pas masquer le contenu derrière la barre mobile */}
       {vue !== 'checkout' && vue !== 'confirmation' && <div className="h-20 sm:hidden" />}

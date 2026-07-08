@@ -72,15 +72,15 @@ export function ShopProvider({ children }) {
     setProduitsBase((arr) => arr.filter((p) => p.id !== id))
   }
 
-  // --- Catégories : ajouter une nouvelle catégorie ---
-  function ajouterCategorie({ nom, emoji, from, to }) {
+  // --- Catégories : ajouter une nouvelle catégorie (avec photo facultative) ---
+  function ajouterCategorie({ nom, emoji, from, to, image = null }) {
     // id "slug" à partir du nom (ex : "Pains spéciaux" -> "pains-speciaux")
     const sansAccents = nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     const id =
       sansAccents.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `cat-${Date.now()}`
     setCategories((arr) => {
       if (arr.some((c) => c.id === id)) return arr // évite les doublons
-      return [...arr, { id, nom: nom.trim(), emoji: emoji || '🥐', from: from || '#e9b872', to: to || '#c98a3a', sousCategories: [] }]
+      return [...arr, { id, nom: nom.trim(), emoji: emoji || '🥐', from: from || '#e9b872', to: to || '#c98a3a', image, sousCategories: [] }]
     })
   }
 

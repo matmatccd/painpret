@@ -1,10 +1,10 @@
-import { MapPin, Clock } from 'lucide-react'
-import { bakery } from '../data/bakery'
+import { MapPin, Clock, Navigation, HelpCircle } from 'lucide-react'
+import { bakery, lienItineraire } from '../data/bakery'
 import Logo from './Logo'
 
 // Pied de page aux couleurs de la devanture : fond prune, filet doré,
 // slogan rose poudré — comme l'enseigne de La Pétrie.
-export default function Footer() {
+export default function Footer({ onFAQ }) {
   // Horaires du jour : getDay() renvoie 0 pour dimanche, notre tableau commence lundi
   const jourJS = new Date().getDay()
   const aujourdHui = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
@@ -28,6 +28,25 @@ export default function Footer() {
             <Clock size={16} className="shrink-0" />
             <span>Aujourd'hui ({aujourdHui.jour.toLowerCase()}) : {aujourdHui.heures}</span>
           </p>
+
+          {/* Liens utiles */}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <a
+              href={lienItineraire}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3.5 py-2 text-xs font-semibold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20"
+            >
+              <Navigation size={14} /> Itinéraire
+            </a>
+            <button
+              type="button"
+              onClick={onFAQ}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3.5 py-2 text-xs font-semibold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20"
+            >
+              <HelpCircle size={14} /> Questions fréquentes
+            </button>
+          </div>
         </div>
       </div>
 

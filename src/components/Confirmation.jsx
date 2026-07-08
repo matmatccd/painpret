@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { CheckCircle2, Clock, Store } from 'lucide-react'
+import { CheckCircle2, Clock, Store, Navigation } from 'lucide-react'
 import { formatPrix } from '../lib/format'
+import { lienItineraire } from '../data/bakery'
 import { useShop } from '../context/ShopContext'
 import { useNotifications } from '../context/NotificationsContext'
 
@@ -96,6 +97,16 @@ export default function Confirmation({ commande, onTermine }) {
             <p className="mt-1 font-display text-xl text-crust">{texteMinuteur}</p>
           </div>
         </div>
+
+        {/* Itinéraire vers la boutique */}
+        <a
+          href={lienItineraire}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-crust hover:underline"
+        >
+          <Navigation size={15} /> Itinéraire vers la boutique
+        </a>
 
         {/* Total */}
         <div className="mt-5 flex items-center justify-between border-t border-sand pt-4 text-left">

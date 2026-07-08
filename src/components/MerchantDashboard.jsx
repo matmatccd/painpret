@@ -1012,20 +1012,29 @@ function GestionCategories({
   )
 }
 
-// Formulaire de création d'une catégorie
+// Formulaire de création d'une catégorie (avec photo facultative)
 function CategorieForm({ onAjouter }) {
   const [nom, setNom] = useState('')
   const [emoji, setEmoji] = useState('')
+  const [image, setImage] = useState('')
   const [from, setFrom] = useState('#e9b872')
   const [to, setTo] = useState('#c98a3a')
 
   const champ =
     'w-full rounded-lg border border-sand bg-cream px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15'
 
+  function chargerPhoto(e) {
+    const fichier = e.target.files?.[0]
+    if (!fichier) return
+    const lecteur = new FileReader()
+    lecteur.onload = () => setImage(lecteur.result)
+    lecteur.readAsDataURL(fichier)
+  }
+
   function soumettre(e) {
     e.preventDefault()
     if (!nom.trim()) return
-    onAjouter({ nom, emoji, from, to })
+    onAjouter({ nom, emoji, from, to, image: image || null })
   }
 
   return (
@@ -1034,11 +1043,33 @@ function CategorieForm({ onAjouter }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block sm:col-span-2">
           <span className="mb-1 block text-xs font-medium text-stone-warm">Nom *</span>
-          <input className={champ} value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Glaces" />
+          <input className={champ} value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Viennoiseries" />
         </label>
+
+        {/* Photo de la catégorie */}
+        <div className="sm:col-span-2">
+          <span className="mb-1 block text-xs font-medium text-stone-warm">Photo</span>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-white"
+              style={image ? undefined : { background: `linear-gradient(150deg, ${from}, ${to})` }}
+            >
+              {image ? (
+                <img src={image} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-2xl">{emoji || '🥐'}</span>
+              )}
+            </div>
+            <label className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-lg border border-sand bg-cream px-3 py-2 text-xs font-semibold text-ink transition-colors hover:border-crust/40">
+              <ImageIcon size={14} /> {image ? 'Changer la photo' : 'Téléverser une photo'}
+              <input type="file" accept="image/*" onChange={chargerPhoto} className="hidden" />
+            </label>
+          </div>
+        </div>
+
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-stone-warm">Emoji</span>
-          <input className={champ} value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="🍦" maxLength={4} />
+          <span className="mb-1 block text-xs font-medium text-stone-warm">Emoji (si pas de photo)</span>
+          <input className={champ} value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="🥐" maxLength={4} />
         </label>
         <div className="flex items-end gap-3">
           <label className="block">
@@ -1078,10 +1109,14 @@ function CategorieCard({ categorie, nbProduits, onSupprimer, onAjouterSous, onSu
     <div className="rounded-xl border border-sand bg-paper p-4">
       <div className="flex items-center gap-3">
         <span
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl text-white"
-          style={{ background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-xl text-white"
+          style={categorie.image ? undefined : { background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
         >
-          {categorie.emoji}
+          {categorie.image ? (
+            <img src={categorie.image} alt="" className="h-full w-full object-contain" />
+          ) : (
+            categorie.emoji
+          )}
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-ink">{categorie.nom}</p>

@@ -19,7 +19,7 @@ import paveFibres from '../assets/photos/pave-fibres.jpg'
 // --- Infos de la boulangerie ---
 export const bakery = {
   nom: 'La Pétrie',
-  slogan: 'Artisan boulanger depuis 1987',
+  slogan: 'Artisan boulanger depuis 2012',
   equipe: 'Sandra & Johnatan',
   adresse: '164 Avenue Jean Jaurès',
   ville: '51100 Reims',
@@ -35,17 +35,22 @@ export const bakery = {
     { jour: 'Jeudi', heures: '07:00 – 20:00' },
     { jour: 'Vendredi', heures: '07:00 – 20:00' },
     { jour: 'Samedi', heures: '07:00 – 20:00' },
-    { jour: 'Dimanche', heures: '07:30 – 13:00' },
+    { jour: 'Dimanche', heures: '07:30 – 14:00' },
   ],
   ouvertMaintenant: true,
 }
+
+// Lien "Itinéraire" vers Google Maps (s'ouvre dans l'app Plans sur mobile)
+export const lienItineraire =
+  'https://www.google.com/maps/dir/?api=1&destination=' +
+  encodeURIComponent(`${bakery.nom}, ${bakery.adresse}, ${bakery.ville}`)
 
 // --- Catégories (issues du cahier des charges) ---
 // Chaque catégorie a un emoji, un dégradé de couleurs, et une liste de
 // sous-catégories. Le boulanger peut ajouter/supprimer catégories et sous-catégories.
 export const categoriesInitiales = [
-  { id: 'pains', nom: 'Baguettes', emoji: '🥖', from: '#e9b872', to: '#c98a3a', sousCategories: ['Pétrisane', 'Baguettes'] },
-  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', sousCategories: ['Pains ronds'] },
+  { id: 'pains', nom: 'Baguettes', emoji: '🥖', from: '#e9b872', to: '#c98a3a', image: baguetteTradition, sousCategories: ['Pétrisane', 'Baguettes'] },
+  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', image: painComplet, sousCategories: ['Pains ronds'] },
 ]
 
 // --- Produits (100% pain) ---
@@ -56,7 +61,7 @@ export const productsInitiaux = [
     nom: 'La Pétrisane',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
-    prix: 1.25,
+    prix: 1.35,
     emoji: '🥖',
     from: '#e9b872',
     to: '#c98a3a',
@@ -75,7 +80,7 @@ export const productsInitiaux = [
     nom: 'Pétrisane Bio',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
-    prix: 1.25,
+    prix: 1.35,
     emoji: '🥖',
     from: '#8fae4a',
     to: '#5f8a2c',
@@ -94,7 +99,7 @@ export const productsInitiaux = [
     nom: 'La Pétrisane Graines',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
-    prix: 1.25,
+    prix: 1.35,
     emoji: '🌾',
     from: '#d9a05b',
     to: '#a86a2c',
@@ -113,7 +118,7 @@ export const productsInitiaux = [
     nom: 'La Pétrisane Fibres',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
-    prix: 1.25,
+    prix: 1.35,
     emoji: '🥖',
     from: '#e08a3c',
     to: '#b45309',
@@ -132,7 +137,7 @@ export const productsInitiaux = [
     nom: 'Baguette ordinaire',
     categorie: 'pains',
     sousCategorie: 'Baguettes',
-    prix: 1.1,
+    prix: 1.2,
     emoji: '🥖',
     from: '#e9b872',
     to: '#c98a3a',
@@ -218,7 +223,7 @@ export const commandesInitiales = [
       { nom: 'La Pétrisane', quantite: 2 },
       { nom: 'La Pétrisane Graines', quantite: 1 },
     ],
-    total: 3.75,
+    total: 4.05,
     arrive: false,
   },
   {
@@ -227,7 +232,7 @@ export const commandesInitiales = [
     creneau: '11:30',
     statut: 'a-preparer',
     articles: [{ nom: 'La Pétrisane Fibres', quantite: 2 }],
-    total: 2.5,
+    total: 2.7,
     arrive: false,
   },
   {
@@ -239,7 +244,7 @@ export const commandesInitiales = [
       { nom: 'Pain Complet', quantite: 1 },
       { nom: 'Pétrisane Bio', quantite: 2 },
     ],
-    total: 5.2,
+    total: 5.4,
     arrive: false,
   },
   {
@@ -250,7 +255,7 @@ export const commandesInitiales = [
     articles: [
       { nom: 'La Pétrisane', quantite: 3 },
     ],
-    total: 3.75,
+    total: 4.05,
     arrive: false,
   },
   {
