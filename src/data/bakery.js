@@ -15,6 +15,18 @@ import baguetteFibres from '../assets/photos/baguette-fibres.jpg'
 import painComplet from '../assets/photos/pain-complet.jpg'
 import painNoir from '../assets/photos/pain-noir.jpg'
 import paveFibres from '../assets/photos/pave-fibres.jpg'
+// Brioche et boissons (photos fournies par Mathis)
+import brioche from '../assets/photos/brioche.jpg'
+import cocaCanette from '../assets/photos/coca-canette.jpg'
+import cocaZeroCanette from '../assets/photos/coca-zero-canette.jpg'
+import cocaBouteille from '../assets/photos/coca-bouteille.jpg'
+import cocaZeroBouteille from '../assets/photos/coca-zero-bouteille.jpg'
+import orangina from '../assets/photos/orangina.jpg'
+import oasisTropical from '../assets/photos/oasis-tropical.jpg'
+import liptonPeche from '../assets/photos/lipton-peche.jpg'
+import minuteMaid from '../assets/photos/minute-maid.jpg'
+import cristaline from '../assets/photos/cristaline.jpg'
+import sanPellegrino from '../assets/photos/san-pellegrino.jpg'
 
 // --- Infos de la boulangerie ---
 export const bakery = {
@@ -23,6 +35,7 @@ export const bakery = {
   equipe: 'Sandra & Johnatan',
   adresse: '164 Avenue Jean Jaurès',
   ville: '51100 Reims',
+  telephone: '03 26 02 76 28',
   // Temps moyen de préparation affiché en accueil (en minutes)
   tempsPreparation: 15,
   // Note réelle relevée sur boulangerie.contact (fiche "La Pétrie Johnatan et Sandra")
@@ -92,7 +105,8 @@ export const lienAvisGoogle =
 // sous-catégories. Le boulanger peut ajouter/supprimer catégories et sous-catégories.
 export const categoriesInitiales = [
   { id: 'pains', nom: 'Baguettes', emoji: '🥖', from: '#e9b872', to: '#c98a3a', image: baguetteTradition, sousCategories: ['Pétrisane', 'Baguettes'] },
-  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', image: painComplet, sousCategories: ['Pains ronds'] },
+  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', image: painComplet, sousCategories: ['Pains ronds', 'Brioches'] },
+  { id: 'boissons', nom: 'Boissons', emoji: '🥤', from: '#e05252', to: '#a32222', image: cocaBouteille, sousCategories: ['Sodas', 'Jus', 'Eaux'] },
 ]
 
 // --- Produits (100% pain) ---
@@ -250,6 +264,186 @@ export const productsInitiaux = [
     populaire: false,
     nouveau: true,
   },
+  {
+    id: 11,
+    nom: 'Brioche',
+    categorie: 'pains-speciaux',
+    sousCategorie: 'Brioches',
+    prix: 4.5,
+    emoji: '🥮',
+    from: '#f2c464',
+    to: '#d99a2b',
+    image: brioche,
+    description:
+      'Brioche pur beurre cuite dans son moule : mie filante, croûte dorée et parfum gourmand. Parfaite au petit déjeuner ou au goûter.',
+    ingredients: ['Farine de blé', 'Œufs', 'Beurre', 'Sucre', 'Levure', 'Sel'],
+    allergenes: ['Gluten', 'Œufs', 'Lait'],
+    delaiPreparation: 10,
+    stock: 8,
+    populaire: false,
+    nouveau: true,
+  },
+  // --- Boissons fraîches (aucune préparation nécessaire) ---
+  {
+    id: 12,
+    nom: 'Coca-Cola 33 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 1.5,
+    emoji: '🥤',
+    from: '#e05252',
+    to: '#a32222',
+    image: cocaCanette,
+    description: 'La canette classique, bien fraîche — le goût original.',
+    allergenes: [],
+    stock: 24,
+    populaire: true,
+    nouveau: false,
+  },
+  {
+    id: 13,
+    nom: 'Coca-Cola Zéro 33 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 1.5,
+    emoji: '🥤',
+    from: '#3a3a3a',
+    to: '#111111',
+    image: cocaZeroCanette,
+    description: 'Le goût Coca-Cola, zéro sucres — en canette fraîche.',
+    allergenes: [],
+    stock: 24,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 14,
+    nom: 'Coca-Cola 50 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 2,
+    emoji: '🥤',
+    from: '#e05252',
+    to: '#a32222',
+    image: cocaBouteille,
+    description: 'La bouteille 50 cl à emporter — goût original.',
+    allergenes: [],
+    stock: 18,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 15,
+    nom: 'Coca-Cola Zéro 50 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 2,
+    emoji: '🥤',
+    from: '#3a3a3a',
+    to: '#111111',
+    image: cocaZeroBouteille,
+    description: 'La bouteille 50 cl zéro sucres, sans calories.',
+    allergenes: [],
+    stock: 18,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 16,
+    nom: 'Orangina 50 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 2,
+    emoji: '🍊',
+    from: '#f2a444',
+    to: '#d97b16',
+    image: orangina,
+    description: 'La bulle à l’orange… et sa pulpe ! Bouteille 50 cl.',
+    allergenes: [],
+    stock: 15,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 17,
+    nom: 'Oasis Tropical 33 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Jus',
+    prix: 1.5,
+    emoji: '🌴',
+    from: '#f2a444',
+    to: '#2f7fbf',
+    image: oasisTropical,
+    description: 'À l’eau de source et aux fruits, saveur tropicale. 33 cl.',
+    allergenes: [],
+    stock: 15,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 18,
+    nom: 'Lipton Ice Tea Pêche 50 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Sodas',
+    prix: 2,
+    emoji: '🍑',
+    from: '#f2b05e',
+    to: '#c96a1a',
+    image: liptonPeche,
+    description: 'Thé glacé saveur pêche, faible en calories. Bouteille 50 cl.',
+    allergenes: [],
+    stock: 15,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 19,
+    nom: 'Minute Maid Orange 33 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Jus',
+    prix: 1.5,
+    emoji: '🍊',
+    from: '#f2a444',
+    to: '#d97b16',
+    image: minuteMaid,
+    description: 'Jus à teneur en fruits, riche en vitamine C. Canette 33 cl.',
+    allergenes: [],
+    stock: 15,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 20,
+    nom: 'Cristaline 50 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Eaux',
+    prix: 1,
+    emoji: '💧',
+    from: '#7fb8e0',
+    to: '#2f6fa8',
+    image: cristaline,
+    description: 'Eau de source à l’état naturel, fabriquée en France. 50 cl.',
+    allergenes: [],
+    stock: 30,
+    populaire: false,
+    nouveau: false,
+  },
+  {
+    id: 21,
+    nom: 'San Pellegrino 33 cl',
+    categorie: 'boissons',
+    sousCategorie: 'Eaux',
+    prix: 1.5,
+    emoji: '🫧',
+    from: '#7fd0a0',
+    to: '#2f8a5a',
+    image: sanPellegrino,
+    description: 'Eau minérale naturelle finement pétillante. Bouteille 33 cl.',
+    allergenes: [],
+    stock: 20,
+    populaire: false,
+    nouveau: false,
+  },
 ]
 
 // --- Commandes de démonstration (côté boulanger) ---
@@ -259,6 +453,8 @@ export const commandesInitiales = [
   {
     id: 1,
     numero: 'A12',
+    client: 'Julie',
+    date: Date.now(),
     creneau: '11:30',
     statut: 'a-preparer',
     articles: [
@@ -271,6 +467,8 @@ export const commandesInitiales = [
   {
     id: 2,
     numero: 'A13',
+    client: 'Marc',
+    date: Date.now(),
     creneau: '11:30',
     statut: 'a-preparer',
     articles: [{ nom: 'La Pétrisane Fibres', quantite: 2, remarque: 'Pas trop cuites' }],
@@ -280,6 +478,8 @@ export const commandesInitiales = [
   {
     id: 3,
     numero: 'A14',
+    client: 'Nadia',
+    date: Date.now(),
     creneau: '11:45',
     statut: 'a-preparer',
     articles: [
@@ -292,6 +492,8 @@ export const commandesInitiales = [
   {
     id: 4,
     numero: 'A15',
+    client: 'Paul',
+    date: Date.now(),
     creneau: '12:00',
     statut: 'a-preparer',
     articles: [
@@ -303,6 +505,8 @@ export const commandesInitiales = [
   {
     id: 5,
     numero: 'A11',
+    client: 'Sophie',
+    date: Date.now(),
     creneau: '11:15',
     statut: 'prete',
     articles: [{ nom: 'Pain Noir', quantite: 1 }],

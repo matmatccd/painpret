@@ -34,7 +34,7 @@ function messagePourStatut(statut, numero) {
 }
 
 export default function App() {
-  const { produits, commandes, categories } = useShop()
+  const { produits, commandes, categories, boutiqueFermee } = useShop()
   const { ajouterNotification } = useNotifications()
 
   // 'client' | 'login' (code pro) | 'boulanger'
@@ -151,9 +151,10 @@ export default function App() {
   }, [commandes, mesCommandesIds, ajouterNotification])
 
   const produitOuvert = produits.find((p) => p.id === produitOuvertId) ?? null
-  // Deux groupes clairs pour l'accueil : Pains et Pains spéciaux
+  // Trois groupes clairs pour l'accueil : Pains, Pains spéciaux et Boissons
   const produitsPains = produits.filter((p) => p.categorie === 'pains')
   const produitsSpeciaux = produits.filter((p) => p.categorie === 'pains-speciaux')
+  const produitsBoissons = produits.filter((p) => p.categorie === 'boissons')
   const produitsFavoris = produits.filter((p) => favoris.includes(p.id))
 
   function ouvrirProduit(produit) {
@@ -221,6 +222,13 @@ export default function App() {
           window.scrollTo({ top: 0 })
         }}
       />
+
+      {/* Fermeture exceptionnelle décidée par le boulanger */}
+      {boutiqueFermee && (
+        <div className="bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
+          ⛔ La boutique est exceptionnellement fermée — les commandes en ligne sont suspendues.
+        </div>
+      )}
 
       <main className="flex-1">
         {vue === 'confirmation' && commandeConfirmee ? (
@@ -302,6 +310,9 @@ export default function App() {
             )}
             <ProductRow surtitre="La gamme Pétrisane" titre="Baguettes" produits={produitsPains} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
             <ProductRow surtitre="Le fournil" titre="Pains spéciaux" produits={produitsSpeciaux} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+            {produitsBoissons.length > 0 && (
+              <ProductRow surtitre="Fraîcheur" titre="Boissons" produits={produitsBoissons} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+            )}
             <AvisClients />
             <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
           </>

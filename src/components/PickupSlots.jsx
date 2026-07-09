@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, Clock, CreditCard, Check } from 'lucide-react'
+import { ArrowLeft, Clock, CreditCard, Check, User, Ban } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
@@ -14,7 +14,10 @@ const MOYENS_PAIEMENT = [
 // Étape de retrait : récap + choix du créneau + paiement (simulé).
 export default function PickupSlots({ onRetour, onConfirme }) {
   const { lignes, total, viderPanier } = useCart()
-  const { ajouterCommande } = useShop()
+  const { ajouterCommande, boutiqueFermee } = useShop()
+
+  // Le prénom du client — mémorisé pour les prochaines commandes
+  const [prenom, setPrenom] = useState(() => localStorage.getItem('painpret_prenom') || '')
 
   // Le délai de prépa = le plus long parmi les produits du panier
   const delaiMax = useMemo(
@@ -27,7 +30,8 @@ export default function PickupSlots({ onRetour, onConfirme }) {
   const [paiement, setPaiement] = useState('cb')
 
   function confirmer() {
-    if (!creneauChoisi) return
+    if (!creneauChoisi || boutiqueFermee) return
+    localStorage.setItem('painpret_prenom', prenom.trim())
 
     // On transforme les lignes du panier en articles lisibles pour le boulanger.
     // "produitId" permet de décompter le stock au moment de la commande.
@@ -42,6 +46,7 @@ export default function PickupSlots({ onRetour, onConfirme }) {
     const commande = ajouterCommande({
       articles,
       total,
+      client: prenom.trim(),
       creneau: creneauChoisi.label === 'Dès que possible'
         ? formatHeure(creneauChoisi.date)
         : creneauChoisi.label,
@@ -64,6 +69,38 @@ export default function PickupSlots({ onRetour, onConfirme }) {
 
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Retrait — mode Drive</p>
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Finaliser ma commande</h1>
+
+      {/* Boutique fermée exceptionnellement : on ne prend plus de commandes */}
+      {boutiqueFermee && (
+        <div className="mt-5 flex items-start gap-3 rounded-2xl bg-rose-50 p-4 ring-1 ring-rose-200">
+          <Ban size={20} className="mt-0.5 shrink-0 text-rose-600" />
+          <div>
+            <p className="font-semibold text-rose-700">La boutique est exceptionnellement fermée</p>
+            <p className="mt-0.5 text-sm text-rose-600">
+              Les commandes en ligne sont suspendues pour le moment. Revenez un peu plus tard — merci de votre compréhension !
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Prénom : le boulanger appelle "Commande pour Julie !" */}
+      <section className="mt-6">
+        <label htmlFor="prenom" className="flex items-center gap-2 text-lg text-ink">
+          <User size={18} className="text-crust" /> Votre prénom
+        </label>
+        <input
+          id="prenom"
+          type="text"
+          value={prenom}
+          onChange={(e) => setPrenom(e.target.value)}
+          placeholder="Ex : Julie"
+          autoComplete="given-name"
+          className="mt-3 w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
+        />
+        <p className="mt-1.5 text-xs text-stone-warm">
+          Il sera affiché au boulanger pour vous appeler quand c'est prêt.
+        </p>
+      </section>
 
       {/* Récapitulatif */}
       <section className="mt-6 rounded-2xl border border-sand bg-paper p-5">
@@ -93,6 +130,12 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         <h2 className="flex items-center gap-2 text-lg text-ink">
           <Clock size={18} className="text-crust" /> Choisissez votre heure de retrait
         </h2>
+        {/* Plus de créneaux = la boutique est fermée pour aujourd'hui */}
+        {creneaux.length === 0 && (
+          <p className="mt-3 rounded-xl border border-dashed border-sand bg-paper px-4 py-5 text-center text-sm text-stone-warm">
+            La boutique est fermée pour aujourd'hui — les commandes reprennent demain dès l'ouverture.
+          </p>
+        )}
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {creneaux.map((c) => {
             const choisi = creneauChoisi?.id === c.id
@@ -149,10 +192,14 @@ export default function PickupSlots({ onRetour, onConfirme }) {
       <button
         type="button"
         onClick={confirmer}
-        disabled={!creneauChoisi}
+        disabled={!creneauChoisi || boutiqueFermee}
         className="mt-7 w-full rounded-xl bg-crust py-4 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-sand disabled:text-stone-warm"
       >
-        {creneauChoisi ? `Payer et confirmer · ${formatPrix(total)}` : 'Choisissez un créneau'}
+        {boutiqueFermee
+          ? 'Boutique fermée — commandes suspendues'
+          : creneauChoisi
+            ? `Payer et confirmer · ${formatPrix(total)}`
+            : 'Choisissez un créneau'}
       </button>
       <p className="mt-3 text-center text-xs text-stone-warm">
         Démonstration — aucun paiement réel n'est effectué.

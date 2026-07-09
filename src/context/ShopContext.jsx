@@ -28,6 +28,20 @@ export function ShopProvider({ children }) {
     categoriesInitiales.map((c) => ({ ...c, sousCategories: [...c.sousCategories] })),
   )
 
+  // --- Fermeture exceptionnelle (congés, jour férié) ---
+  // Quand c'est fermé, les clients ne peuvent plus commander.
+  // Mémorisé sur l'appareil pour survivre à un rafraîchissement.
+  const [boutiqueFermee, setBoutiqueFermee] = useState(
+    () => localStorage.getItem('painpret_fermee') === '1',
+  )
+  function basculerFermeture() {
+    setBoutiqueFermee((etat) => {
+      const suivant = !etat
+      localStorage.setItem('painpret_fermee', suivant ? '1' : '0')
+      return suivant
+    })
+  }
+
   // Les produits "vivants" : on ajoute "disponible" = il reste au moins 1 en stock.
   const produits = useMemo(
     () => produitsBase.map((p) => ({ ...p, disponible: p.stock > 0 })),
@@ -115,11 +129,13 @@ export function ShopProvider({ children }) {
   // Crée une commande "à préparer" qui apparaît aussitôt côté boulanger,
   // et DÉCOMPTE le stock des produits commandés (épuisé automatique à 0).
   // Renvoie la commande créée (pour afficher le numéro + QR Code).
-  function ajouterCommande({ articles, total, creneau, heureRetrait }) {
+  function ajouterCommande({ articles, total, creneau, heureRetrait, client = '' }) {
     const nouvelle = {
       id: Date.now(),
       // Numéro lisible : lettre + 2 chiffres (ex : "B47")
       numero: 'B' + Math.floor(10 + Math.random() * 89),
+      client, // le prénom du client ("Commande pour Julie !")
+      date: Date.now(), // pour les statistiques de la semaine
       creneau,
       heureRetrait,
       statut: 'a-preparer',
@@ -204,6 +220,8 @@ export function ShopProvider({ children }) {
     changerStatut,
     avancerCommande,
     validerRetrait,
+    boutiqueFermee,
+    basculerFermeture,
   }
 
   return <ShopContext.Provider value={valeur}>{children}</ShopContext.Provider>

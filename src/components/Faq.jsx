@@ -22,7 +22,11 @@ const QUESTIONS = [
   },
   {
     q: 'Puis-je modifier ou annuler ma commande ?',
-    r: 'Pour l’instant, contactez directement la boutique ou passez au comptoir : l’équipe trouvera toujours une solution.',
+    r: `Pour l’instant, appelez directement la boutique au ${bakery.telephone} ou passez au comptoir : l’équipe trouvera toujours une solution.`,
+  },
+  {
+    q: 'Comment contacter la boutique ?',
+    r: `Par téléphone au ${bakery.telephone}, ou directement en boutique au ${bakery.adresse} à ${bakery.ville.replace(/^\d+\s*/, '')}.`,
   },
   {
     q: 'Et si un produit est épuisé ?',

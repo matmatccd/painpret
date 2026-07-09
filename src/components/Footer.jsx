@@ -1,4 +1,4 @@
-import { MapPin, Clock, Navigation, HelpCircle } from 'lucide-react'
+import { MapPin, Clock, Navigation, HelpCircle, Phone } from 'lucide-react'
 import { bakery, lienItineraire } from '../data/bakery'
 import Logo from './Logo'
 
@@ -27,6 +27,12 @@ export default function Footer({ onFAQ }) {
           <p className="flex items-center gap-1.5">
             <Clock size={16} className="shrink-0" />
             <span>Aujourd'hui ({aujourdHui.jour.toLowerCase()}) : {aujourdHui.heures}</span>
+          </p>
+          <p className="flex items-center gap-1.5">
+            <Phone size={16} className="shrink-0" />
+            <a href={`tel:${bakery.telephone.replace(/\s/g, '')}`} className="hover:underline">
+              {bakery.telephone}
+            </a>
           </p>
 
           {/* Liens utiles */}

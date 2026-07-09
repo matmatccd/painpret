@@ -27,6 +27,8 @@ import {
   XCircle,
   RotateCcw,
   MessageSquare,
+  Ban,
+  TrendingUp,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
@@ -58,6 +60,7 @@ function imprimerTicket(commande) {
     <h1>La Pétrie — PainPrêt</h1>
     <p>${bakery.adresse}, ${bakery.ville}</p>
     <div class="numero">#${commande.numero}</div>
+    ${commande.client ? `<p>Pour : <strong>${commande.client}</strong></p>` : ''}
     <p>Retrait : <strong>${commande.creneau}</strong></p>
     <hr><table>${lignes}</table><hr>
     <div class="total"><span>TOTAL</span><span>${commande.total.toFixed(2).replace('.', ',')} €</span></div>
@@ -96,6 +99,8 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
     supprimerCategorie,
     ajouterSousCategorie,
     supprimerSousCategorie,
+    boutiqueFermee,
+    basculerFermeture,
   } = useShop()
 
   // L'onglet "Aujourd'hui" est l'écran d'accueil du boulanger : l'essentiel en un coup d'œil.
@@ -198,6 +203,8 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
             ajusterStock={ajusterStock}
             remettreEnStock={remettreEnStock}
             allerVoir={setOnglet}
+            boutiqueFermee={boutiqueFermee}
+            basculerFermeture={basculerFermeture}
           />
         )}
 
@@ -306,11 +313,30 @@ function BoutonOnglet({ actif, onClick, icone, children }) {
 }
 
 // --- "Aujourd'hui" : l'essentiel de la journée en un coup d'œil ---
-function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreEnStock, allerVoir }) {
+function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreEnStock, allerVoir, boutiqueFermee, basculerFermeture }) {
   const actives = commandes.filter((c) => c.statut !== 'livree')
   // Chiffre d'affaires du jour : toutes les commandes sont payées en ligne
   const caJour = commandes.reduce((somme, c) => somme + c.total, 0)
   const nbLivrees = commandes.filter((c) => c.statut === 'livree').length
+
+  // --- Cette semaine (depuis lundi) ---
+  const debutSemaine = new Date()
+  debutSemaine.setHours(0, 0, 0, 0)
+  const jourJS = debutSemaine.getDay() // 0 = dimanche
+  debutSemaine.setDate(debutSemaine.getDate() - (jourJS === 0 ? 6 : jourJS - 1))
+  const commandesSemaine = commandes.filter((c) => (c.date ?? Date.now()) >= debutSemaine.getTime())
+  const caSemaine = commandesSemaine.reduce((somme, c) => somme + c.total, 0)
+
+  // --- Produits les plus vendus (toutes commandes confondues) ---
+  const compteur = {}
+  commandesSemaine.forEach((c) => {
+    c.articles.forEach((a) => {
+      compteur[a.nom] = (compteur[a.nom] || 0) + a.quantite
+    })
+  })
+  const topProduits = Object.entries(compteur)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
   // Clients qui ont signalé leur arrivée : à servir en priorité
   const surPlace = actives.filter((c) => c.arrive)
   // Prochain créneau à préparer
@@ -321,25 +347,88 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 
   return (
     <div className="space-y-8">
-      {/* 0. Chiffre d'affaires du jour */}
-      <section className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
-        <div>
+      {/* Fermeture exceptionnelle : congés, jour férié, imprévu */}
+      {boutiqueFermee ? (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-rose-50 p-4 ring-1 ring-rose-200">
+          <p className="flex items-center gap-2 font-semibold text-rose-700">
+            <Ban size={18} /> Boutique fermée — les clients ne peuvent plus commander
+          </p>
+          <button
+            type="button"
+            onClick={basculerFermeture}
+            className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+          >
+            Rouvrir les commandes
+          </button>
+        </section>
+      ) : (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
+          <div>
+            <p className="text-sm font-semibold text-ink">Fermeture exceptionnelle</p>
+            <p className="text-xs text-stone-warm">
+              Congés, jour férié, imprévu : suspend les commandes en ligne côté client.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={basculerFermeture}
+            className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-rose-700"
+          >
+            Fermer la boutique aujourd'hui
+          </button>
+        </section>
+      )}
+
+      {/* 0. Chiffre d'affaires : aujourd'hui + cette semaine */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <section className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
+          <div>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
+              <Euro size={13} /> Chiffre d'affaires du jour
+            </p>
+            <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caJour)}</p>
+          </div>
+          <div className="text-right text-sm text-stone-warm">
+            <p>
+              <span className="font-semibold text-ink">{commandes.length}</span> commande
+              {commandes.length > 1 ? 's' : ''}
+            </p>
+            <p>
+              <span className="font-semibold text-emerald-700">{nbLivrees}</span> livrée
+              {nbLivrees > 1 ? 's' : ''}
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-sand bg-paper p-4">
           <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
-            <Euro size={13} /> Chiffre d'affaires du jour
+            <TrendingUp size={13} /> Cette semaine (depuis lundi)
           </p>
-          <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caJour)}</p>
-        </div>
-        <div className="text-right text-sm text-stone-warm">
-          <p>
-            <span className="font-semibold text-ink">{commandes.length}</span> commande
-            {commandes.length > 1 ? 's' : ''}
+          <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caSemaine)}</p>
+          <p className="text-xs text-stone-warm">
+            {commandesSemaine.length} commande{commandesSemaine.length > 1 ? 's' : ''}
           </p>
-          <p>
-            <span className="font-semibold text-emerald-700">{nbLivrees}</span> livrée
-            {nbLivrees > 1 ? 's' : ''}
+        </section>
+      </div>
+
+      {/* 0 bis. Les produits les plus vendus de la semaine */}
+      {topProduits.length > 0 && (
+        <section className="rounded-xl border border-sand bg-paper p-4">
+          <p className="mb-2.5 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
+            🏆 Les plus vendus cette semaine
           </p>
-        </div>
-      </section>
+          <ol className="space-y-1.5">
+            {topProduits.map(([nom, quantite], i) => (
+              <li key={nom} className="flex items-center justify-between gap-2 text-sm">
+                <span className="text-ink">
+                  {['🥇', '🥈', '🥉'][i]} {nom}
+                </span>
+                <span className="tnum font-semibold text-stone-warm">×{quantite}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* 1. Clients sur place : priorité absolue */}
       {surPlace.length > 0 && (
@@ -447,6 +536,9 @@ function CarteCommande({ commande, onStatut }) {
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-2">
           <span className="font-display text-lg text-ink">#{commande.numero}</span>
+          {commande.client && (
+            <span className="text-sm font-semibold text-crust">pour {commande.client}</span>
+          )}
           {commande.nouvelle && commande.statut === 'a-preparer' && (
             <span className="rounded-full bg-ember px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
               Nouvelle
@@ -705,7 +797,8 @@ function Retrait({ validerRetrait }) {
         {resultat?.ok && (
           <div className="mt-5 animate-pop-in rounded-xl bg-emerald-50 p-4 text-left ring-1 ring-emerald-200">
             <p className="flex items-center gap-2 font-semibold text-emerald-700">
-              <CheckCircle2 size={18} /> Commande #{resultat.commande.numero} remise au client
+              <CheckCircle2 size={18} /> Commande #{resultat.commande.numero}
+              {resultat.commande.client ? ` de ${resultat.commande.client}` : ''} remise au client
             </p>
             <ul className="mt-2 space-y-0.5 text-sm text-emerald-800">
               {resultat.commande.articles.map((a, i) => (
