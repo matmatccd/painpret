@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  MessageSquare,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
@@ -36,7 +37,12 @@ import { jouerCarillon } from '../lib/son'
 // Imprime un ticket de commande simple (ouvre la fenêtre d'impression).
 function imprimerTicket(commande) {
   const lignes = commande.articles
-    .map((a) => `<tr><td>${a.quantite} ×</td><td>${a.nom}</td></tr>`)
+    .map(
+      (a) =>
+        `<tr><td>${a.quantite} ×</td><td>${a.nom}${
+          a.remarque ? `<br><em>→ ${a.remarque}</em>` : ''
+        }</td></tr>`,
+    )
     .join('')
   const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Ticket #${commande.numero}</title>
     <style>
@@ -474,9 +480,17 @@ function CarteCommande({ commande, onStatut }) {
 
       <ul className="mt-3 space-y-1 text-sm text-stone-warm">
         {commande.articles.map((a, i) => (
-          <li key={i} className="flex justify-between gap-2">
-            <span className="text-ink">{a.nom}</span>
-            <span className="tnum font-semibold">×{a.quantite}</span>
+          <li key={i}>
+            <span className="flex justify-between gap-2">
+              <span className="text-ink">{a.nom}</span>
+              <span className="tnum font-semibold">×{a.quantite}</span>
+            </span>
+            {/* Demande du client : bien visible pour ne pas la rater */}
+            {a.remarque && (
+              <span className="mt-0.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                <MessageSquare size={12} /> {a.remarque}
+              </span>
+            )}
           </li>
         ))}
       </ul>
@@ -695,7 +709,10 @@ function Retrait({ validerRetrait }) {
             </p>
             <ul className="mt-2 space-y-0.5 text-sm text-emerald-800">
               {resultat.commande.articles.map((a, i) => (
-                <li key={i}>{a.quantite}× {a.nom}</li>
+                <li key={i}>
+                  {a.quantite}× {a.nom}
+                  {a.remarque && <em className="ml-1 font-semibold">→ {a.remarque}</em>}
+                </li>
               ))}
             </ul>
           </div>

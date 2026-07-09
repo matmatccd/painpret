@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { CheckCircle2, Clock, Store, Navigation } from 'lucide-react'
+import { CheckCircle2, Clock, Store, Navigation, Star } from 'lucide-react'
 import { formatPrix } from '../lib/format'
-import { lienItineraire } from '../data/bakery'
+import { lienItineraire, lienAvisGoogle } from '../data/bakery'
 import { useShop } from '../context/ShopContext'
 import { useNotifications } from '../context/NotificationsContext'
 
@@ -139,6 +139,17 @@ export default function Confirmation({ commande, onTermine }) {
         >
           Revenir à la boutique
         </button>
+
+        {/* Après la vente : inviter le client à laisser un avis Google */}
+        <a
+          href={lienAvisGoogle}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-gilt hover:underline"
+        >
+          <Star size={15} className="fill-gilt" />
+          Contents ? Laissez-nous un avis Google
+        </a>
       </div>
     </div>
   )

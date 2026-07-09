@@ -31,10 +31,12 @@ export default function PickupSlots({ onRetour, onConfirme }) {
 
     // On transforme les lignes du panier en articles lisibles pour le boulanger.
     // "produitId" permet de décompter le stock au moment de la commande.
+    // "remarque" = la demande du client (ex : bien cuit) que le boulanger verra.
     const articles = lignes.map((l) => ({
       produitId: l.produit.id,
       nom: l.varianteNom ? `${l.produit.nom} (${l.varianteNom})` : l.produit.nom,
       quantite: l.quantite,
+      remarque: l.remarque || '',
     }))
 
     const commande = ajouterCommande({

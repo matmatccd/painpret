@@ -81,6 +81,12 @@ export const lienItineraire =
   'https://www.google.com/maps/dir/?api=1&destination=' +
   encodeURIComponent(`Boulangerie La Pétrie Johnatan et Sandra, ${bakery.adresse}, ${bakery.ville}`)
 
+// Lien "Laisser un avis" : ouvre la fiche Google de la boutique,
+// où le client peut noter et écrire son avis.
+export const lienAvisGoogle =
+  'https://www.google.com/maps/search/?api=1&query=' +
+  encodeURIComponent(`Boulangerie La Pétrie Johnatan et Sandra, ${bakery.adresse}, ${bakery.ville}`)
+
 // --- Catégories (issues du cahier des charges) ---
 // Chaque catégorie a un emoji, un dégradé de couleurs, et une liste de
 // sous-catégories. Le boulanger peut ajouter/supprimer catégories et sous-catégories.
@@ -256,7 +262,7 @@ export const commandesInitiales = [
     creneau: '11:30',
     statut: 'a-preparer',
     articles: [
-      { nom: 'La Pétrisane', quantite: 2 },
+      { nom: 'La Pétrisane', quantite: 2, remarque: 'Bien cuites s’il vous plaît' },
       { nom: 'La Pétrisane Graines', quantite: 1 },
     ],
     total: 4.05,
@@ -267,7 +273,7 @@ export const commandesInitiales = [
     numero: 'A13',
     creneau: '11:30',
     statut: 'a-preparer',
-    articles: [{ nom: 'La Pétrisane Fibres', quantite: 2 }],
+    articles: [{ nom: 'La Pétrisane Fibres', quantite: 2, remarque: 'Pas trop cuites' }],
     total: 2.7,
     arrive: false,
   },
@@ -277,7 +283,7 @@ export const commandesInitiales = [
     creneau: '11:45',
     statut: 'a-preparer',
     articles: [
-      { nom: 'Pain Complet', quantite: 1 },
+      { nom: 'Pain Complet', quantite: 1, remarque: 'Tranché, merci !' },
       { nom: 'Pétrisane Bio', quantite: 2 },
     ],
     total: 5.4,
