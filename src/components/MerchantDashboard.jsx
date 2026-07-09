@@ -5,7 +5,6 @@ import {
   Euro,
   Package,
   ClipboardList,
-  CalendarClock,
   QrCode,
   ScanLine,
   Camera,
@@ -15,7 +14,6 @@ import {
   LayoutDashboard,
   LogOut,
   Wheat,
-  FolderTree,
   Minus,
   Plus,
   PlusCircle,
@@ -121,10 +119,14 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
     idsConnus.current = new Set(ids)
   }, [commandes])
 
-  // Créneaux présents dans les commandes, triés par heure
-  const creneaux = [...new Set(commandes.map((c) => c.creneau))].sort()
+  // Commandes en cours et livrées, séparées pour ne pas encombrer l'écran
+  const commandesEnCours = commandes.filter((c) => c.statut !== 'livree')
+  const commandesLivrees = commandes.filter((c) => c.statut === 'livree')
+  // Créneaux des commandes EN COURS, triés par heure
+  const creneaux = [...new Set(commandesEnCours.map((c) => c.creneau))].sort()
 
-  const commandesActives = commandes.filter((c) => c.statut !== 'livree').length
+  const commandesActives = commandesEnCours.length
+  const clientsSurPlace = commandesEnCours.filter((c) => c.arrive).length
   const produitsEpuises = produits.filter((p) => !p.disponible).length
 
   return (
@@ -166,29 +168,23 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
         {/* Indicateurs */}
         <div className="mb-6 grid grid-cols-3 gap-3">
           <Indicateur valeur={commandesActives} label="Commandes en cours" />
-          <Indicateur valeur={`~${bakery.tempsPreparation} min`} label="Temps de prépa" />
+          <Indicateur valeur={clientsSurPlace} label="Clients sur place" />
           <Indicateur valeur={produitsEpuises} label="Produits épuisés" />
         </div>
 
-        {/* Onglets — défilent horizontalement sur mobile plutôt que de s'empiler */}
+        {/* 4 onglets simples — gros et faciles à taper sur tablette */}
         <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-sand bg-paper p-1 no-scrollbar">
-          <BoutonOnglet actif={onglet === 'jour'} onClick={() => setOnglet('jour')} icone={<LayoutDashboard size={16} />}>
+          <BoutonOnglet actif={onglet === 'jour'} onClick={() => setOnglet('jour')} icone={<LayoutDashboard size={17} />}>
             Aujourd'hui
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'commandes'} onClick={() => setOnglet('commandes')} icone={<ClipboardList size={16} />}>
+          <BoutonOnglet actif={onglet === 'commandes'} onClick={() => setOnglet('commandes')} icone={<ClipboardList size={17} />} badge={commandesActives}>
             Commandes
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'planning'} onClick={() => setOnglet('planning')} icone={<CalendarClock size={16} />}>
-            Emploi du temps
-          </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'retrait'} onClick={() => setOnglet('retrait')} icone={<QrCode size={16} />}>
+          <BoutonOnglet actif={onglet === 'retrait'} onClick={() => setOnglet('retrait')} icone={<QrCode size={17} />}>
             Scanner un retrait
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'produits'} onClick={() => setOnglet('produits')} icone={<Package size={16} />}>
+          <BoutonOnglet actif={onglet === 'produits'} onClick={() => setOnglet('produits')} icone={<Package size={17} />}>
             Mes produits
-          </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'categories'} onClick={() => setOnglet('categories')} icone={<FolderTree size={16} />}>
-            Catégories
           </BoutonOnglet>
         </div>
 
@@ -208,65 +204,68 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
           />
         )}
 
-        {/* ---------- COMMANDES ---------- */}
+        {/* ---------- COMMANDES (la journée, créneau par créneau) ---------- */}
         {onglet === 'commandes' && (
-          creneaux.length === 0 ? (
-            <EtatVide emoji="📋" titre="Aucune commande" texte="Les nouvelles commandes des clients apparaîtront ici." />
-          ) : (
           <div className="space-y-6">
-            {creneaux.map((creneau) => {
-              const cmdsDuCreneau = commandes.filter((c) => c.creneau === creneau)
-              return (
-                <section key={creneau}>
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1 text-sm font-semibold text-white">
-                      <Clock size={14} /> {creneau}
-                    </span>
-                    <span className="text-sm text-stone-warm">
-                      {cmdsDuCreneau.length} commande{cmdsDuCreneau.length > 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {cmdsDuCreneau.map((cmd) => (
-                      <CarteCommande key={cmd.id} commande={cmd} onStatut={(st) => changerStatut(cmd.id, st)} />
-                    ))}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-          )
-        )}
+            {creneaux.length === 0 ? (
+              <EtatVide emoji="📋" titre="Aucune commande en cours" texte="Les nouvelles commandes des clients apparaîtront ici." />
+            ) : (
+              creneaux.map((creneau) => {
+                const cmdsDuCreneau = commandesEnCours.filter((c) => c.creneau === creneau)
+                return (
+                  <section key={creneau}>
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1 text-sm font-semibold text-white">
+                        <Clock size={14} /> {creneau}
+                      </span>
+                      <span className="text-sm text-stone-warm">
+                        {cmdsDuCreneau.length} commande{cmdsDuCreneau.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {cmdsDuCreneau.map((cmd) => (
+                        <CarteCommande key={cmd.id} commande={cmd} onStatut={(st) => changerStatut(cmd.id, st)} />
+                      ))}
+                    </div>
+                  </section>
+                )
+              })
+            )}
 
-        {/* ---------- EMPLOI DU TEMPS ---------- */}
-        {onglet === 'planning' && <Planning commandes={commandes} creneaux={creneaux} />}
+            {/* Les commandes livrées, repliées pour ne pas encombrer */}
+            {commandesLivrees.length > 0 && (
+              <details className="rounded-xl border border-sand bg-paper">
+                <summary className="cursor-pointer list-none px-4 py-3.5 font-semibold text-stone-warm [&::-webkit-details-marker]:hidden">
+                  ✓ Commandes livrées ({commandesLivrees.length}) — toucher pour afficher
+                </summary>
+                <div className="grid gap-3 border-t border-sand-soft p-4 sm:grid-cols-2">
+                  {commandesLivrees.map((cmd) => (
+                    <CarteCommande key={cmd.id} commande={cmd} onStatut={(st) => changerStatut(cmd.id, st)} />
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
 
         {/* ---------- RETRAIT (scan QR) ---------- */}
         {onglet === 'retrait' && <Retrait validerRetrait={validerRetrait} />}
 
-        {/* ---------- PRODUITS ---------- */}
+        {/* ---------- MES PRODUITS (rangés par catégorie) ---------- */}
         {onglet === 'produits' && (
           <GestionProduits
             produits={produits}
+            categories={categories}
             ajusterStock={ajusterStock}
             marquerEpuise={marquerEpuise}
             remettreEnStock={remettreEnStock}
             ajouterProduit={ajouterProduit}
             mettreAJourProduit={mettreAJourProduit}
             supprimerProduit={supprimerProduit}
-          />
-        )}
-
-        {/* ---------- CATÉGORIES ---------- */}
-        {onglet === 'categories' && (
-          <GestionCategories
-            categories={categories}
-            produits={produits}
             ajouterCategorie={ajouterCategorie}
             supprimerCategorie={supprimerCategorie}
             ajouterSousCategorie={ajouterSousCategorie}
             supprimerSousCategorie={supprimerSousCategorie}
-            ajouterProduit={ajouterProduit}
           />
         )}
         </div>
@@ -296,18 +295,27 @@ function Indicateur({ valeur, label }) {
   )
 }
 
-// --- Onglet ---
-function BoutonOnglet({ actif, onClick, icone, children }) {
+// --- Onglet (avec pastille de compteur facultative) ---
+function BoutonOnglet({ actif, onClick, icone, badge, children }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
         actif ? 'bg-ink text-white' : 'text-stone-warm hover:text-ink'
       }`}
     >
       {icone}
       {children}
+      {badge > 0 && (
+        <span
+          className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+            actif ? 'bg-white text-ink' : 'bg-ember text-white'
+          }`}
+        >
+          {badge}
+        </span>
+      )}
     </button>
   )
 }
@@ -617,81 +625,6 @@ function CarteCommande({ commande, onStatut }) {
   )
 }
 
-// --- Emploi du temps : la journée par créneau, avec la charge de travail ---
-function Planning({ commandes, creneaux }) {
-  // Pour chaque créneau, on agrège ce qu'il y a à préparer
-  const lignes = creneaux.map((creneau) => {
-    const cmds = commandes.filter((c) => c.creneau === creneau && c.statut !== 'livree')
-    const items = {}
-    cmds.forEach((c) =>
-      c.articles.forEach((a) => {
-        items[a.nom] = (items[a.nom] || 0) + a.quantite
-      }),
-    )
-    const totalItems = Object.values(items).reduce((n, v) => n + v, 0)
-    let charge = 'Calme'
-    let classeCharge = 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-    if (totalItems >= 6) {
-      charge = 'Chargé'
-      classeCharge = 'bg-rose-50 text-rose-600 ring-rose-200'
-    } else if (totalItems >= 3) {
-      charge = 'Modéré'
-      classeCharge = 'bg-amber-50 text-ember ring-amber-200'
-    }
-    return { creneau, cmds, items, totalItems, charge, classeCharge }
-  })
-
-  return (
-    <div>
-      {/* Rappel des horaires d'ouverture */}
-      <div className="mb-5 rounded-xl border border-sand bg-paper p-4">
-        <p className="mb-2 text-sm font-semibold text-ink">Horaires d’aujourd’hui</p>
-        <p className="text-sm text-stone-warm">La Pétrie · 07:00 – 20:00</p>
-      </div>
-
-      {/* Frise verticale des créneaux */}
-      <div className="relative space-y-4 border-l-2 border-sand pl-5">
-        {lignes.map((l) => (
-          <div key={l.creneau} className="relative">
-            {/* Point sur la frise */}
-            <span className="absolute -left-[27px] top-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-crust ring-4 ring-cream" />
-
-            <div className="rounded-xl border border-sand bg-paper p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-display text-lg text-ink">{l.creneau}</span>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${l.classeCharge}`}>
-                  {l.charge}
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-stone-warm">
-                {l.cmds.length} commande{l.cmds.length > 1 ? 's' : ''} · {l.totalItems} article
-                {l.totalItems > 1 ? 's' : ''} à préparer
-              </p>
-
-              {/* À préparer (agrégé) */}
-              {l.totalItems > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {Object.entries(l.items).map(([nom, q]) => (
-                    <span
-                      key={nom}
-                      className="rounded-lg bg-cream px-2.5 py-1 text-xs text-ink ring-1 ring-sand"
-                    >
-                      <span className="tnum font-semibold text-crust">{q}×</span> {nom}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        {lignes.length === 0 && (
-          <p className="text-sm text-stone-warm">Aucune commande planifiée pour le moment.</p>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // --- Retrait : valider une commande en scannant le QR (caméra) ou en saisissant le numéro ---
 function Retrait({ validerRetrait }) {
   const [code, setCode] = useState('')
@@ -827,18 +760,125 @@ function Retrait({ validerRetrait }) {
   )
 }
 
-// --- Gestion des produits : liste + création + modification + suppression ---
+// --- Mes produits : TOUT au même endroit, rangé par catégorie ---
+// Chaque catégorie montre ses produits (stock, épuisé, modifier, supprimer),
+// un bouton pour ajouter un produit directement dedans, et ses sous-catégories.
 function GestionProduits({
   produits,
+  categories,
   ajusterStock,
   marquerEpuise,
   remettreEnStock,
   ajouterProduit,
   mettreAJourProduit,
   supprimerProduit,
+  ajouterCategorie,
+  supprimerCategorie,
+  ajouterSousCategorie,
+  supprimerSousCategorie,
+}) {
+  const [formCategorie, setFormCategorie] = useState(false)
+  // Produits dont la catégorie a été supprimée : on les garde visibles
+  const orphelins = produits.filter((p) => !categories.some((c) => c.id === p.categorie))
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <p className="text-sm text-stone-warm">
+          {produits.length} produit{produits.length > 1 ? 's' : ''} ·{' '}
+          {categories.length} catégorie{categories.length > 1 ? 's' : ''}
+        </p>
+        <button
+          type="button"
+          onClick={() => setFormCategorie((o) => !o)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-crust px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-crust-dark"
+        >
+          {formCategorie ? <X size={16} /> : <PlusCircle size={16} />}
+          {formCategorie ? 'Fermer' : 'Nouvelle catégorie'}
+        </button>
+      </div>
+
+      {formCategorie && (
+        <CategorieForm
+          onAjouter={(data) => {
+            ajouterCategorie(data)
+            setFormCategorie(false)
+          }}
+        />
+      )}
+
+      <div className="space-y-5">
+        {categories.map((c) => (
+          <SectionCategorie
+            key={c.id}
+            categorie={c}
+            produitsCategorie={produits.filter((p) => p.categorie === c.id)}
+            ajusterStock={ajusterStock}
+            marquerEpuise={marquerEpuise}
+            remettreEnStock={remettreEnStock}
+            ajouterProduit={ajouterProduit}
+            mettreAJourProduit={mettreAJourProduit}
+            supprimerProduit={supprimerProduit}
+            onSupprimerCategorie={() => {
+              const n = produits.filter((p) => p.categorie === c.id).length
+              const msg = n > 0
+                ? `Supprimer « ${c.nom} » ? ${n} produit(s) y sont rattachés (ils resteront mais sans catégorie).`
+                : `Supprimer la catégorie « ${c.nom} » ?`
+              if (window.confirm(msg)) supprimerCategorie(c.id)
+            }}
+            onAjouterSous={(nom) => ajouterSousCategorie(c.id, nom)}
+            onSupprimerSous={(nom) => supprimerSousCategorie(c.id, nom)}
+          />
+        ))}
+
+        {/* Produits sans catégorie (après suppression d'une catégorie) */}
+        {orphelins.length > 0 && (
+          <section className="overflow-hidden rounded-xl border border-sand bg-paper">
+            <p className="border-b border-sand-soft p-4 font-display text-lg text-ink">
+              Sans catégorie
+            </p>
+            <div className="space-y-3 p-4">
+              {orphelins.map((p) => (
+                <LigneProduit
+                  key={p.id}
+                  produit={p}
+                  onMoins={() => ajusterStock(p.id, -1)}
+                  onPlus={() => ajusterStock(p.id, 1)}
+                  onEpuise={() => marquerEpuise(p.id)}
+                  onRemettre={() => remettreEnStock(p.id)}
+                  onSupprimer={() => {
+                    if (window.confirm(`Supprimer « ${p.nom} » ? Cette action est définitive.`)) {
+                      supprimerProduit(p.id)
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Une catégorie et ses produits : en-tête illustré, lignes produit,
+// ajout direct dans la catégorie, sous-catégories repliées en bas.
+function SectionCategorie({
+  categorie,
+  produitsCategorie,
+  ajusterStock,
+  marquerEpuise,
+  remettreEnStock,
+  ajouterProduit,
+  mettreAJourProduit,
+  supprimerProduit,
+  onSupprimerCategorie,
+  onAjouterSous,
+  onSupprimerSous,
 }) {
   // edition : null (fermé) | 'nouveau' | l'objet produit à modifier
   const [edition, setEdition] = useState(null)
+  const [nouvelleSous, setNouvelleSous] = useState('')
 
   function valider(data) {
     if (edition === 'nouveau') ajouterProduit(data)
@@ -846,33 +886,47 @@ function GestionProduits({
     setEdition(null)
   }
 
+  function ajouterSous(e) {
+    e.preventDefault()
+    if (!nouvelleSous.trim()) return
+    onAjouterSous(nouvelleSous)
+    setNouvelleSous('')
+  }
+
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <p className="text-sm text-stone-warm">
-          {produits.length} produit{produits.length > 1 ? 's' : ''}
-        </p>
+    <section className="overflow-hidden rounded-xl border border-sand bg-paper">
+      {/* En-tête : illustration + nom + suppression de la catégorie */}
+      <div className="flex items-center gap-3 border-b border-sand-soft p-4">
+        <span
+          className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-2xl text-white ring-1 ring-sand"
+          style={categorie.image ? undefined : { background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
+        >
+          {categorie.image ? (
+            <img src={categorie.image} alt="" className="h-full w-full object-contain p-1" />
+          ) : (
+            categorie.emoji
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display text-lg text-ink">{categorie.nom}</p>
+          <p className="text-xs text-stone-warm">
+            {produitsCategorie.length} produit{produitsCategorie.length > 1 ? 's' : ''}
+          </p>
+        </div>
         <button
           type="button"
-          onClick={() => setEdition(edition ? null : 'nouveau')}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-crust px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-crust-dark"
+          onClick={onSupprimerCategorie}
+          aria-label={`Supprimer ${categorie.nom}`}
+          title="Supprimer la catégorie"
+          className="shrink-0 text-stone-warm transition-colors hover:text-rose-600"
         >
-          {edition ? <X size={16} /> : <PlusCircle size={16} />}
-          {edition ? 'Fermer' : 'Ajouter un produit'}
+          <Trash2 size={17} />
         </button>
       </div>
 
-      {edition && (
-        <ProductForm
-          key={edition === 'nouveau' ? 'nouveau' : edition.id}
-          produit={edition === 'nouveau' ? null : edition}
-          onValider={valider}
-          onAnnuler={() => setEdition(null)}
-        />
-      )}
-
-      <div className="space-y-3">
-        {produits.map((p) => (
+      {/* Les produits de la catégorie */}
+      <div className="space-y-3 p-4">
+        {produitsCategorie.map((p) => (
           <LigneProduit
             key={p.id}
             produit={p}
@@ -888,8 +942,67 @@ function GestionProduits({
             }}
           />
         ))}
+
+        {/* Ajouter un produit directement dans CETTE catégorie */}
+        <button
+          type="button"
+          onClick={() => setEdition(edition === 'nouveau' ? null : 'nouveau')}
+          className={`flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed py-3 text-sm font-semibold transition-colors ${
+            edition === 'nouveau'
+              ? 'border-crust text-crust'
+              : 'border-sand text-stone-warm hover:border-crust/50 hover:text-crust'
+          }`}
+        >
+          {edition === 'nouveau' ? <X size={16} /> : <PlusCircle size={16} />}
+          {edition === 'nouveau' ? 'Fermer' : `Ajouter un produit dans « ${categorie.nom} »`}
+        </button>
+
+        {/* Formulaire : nouveau produit (pré-rempli sur la catégorie) ou modification */}
+        {edition && (
+          <ProductForm
+            key={edition === 'nouveau' ? 'nouveau' : edition.id}
+            produit={edition === 'nouveau' ? null : edition}
+            categorieParDefaut={categorie.id}
+            onValider={valider}
+            onAnnuler={() => setEdition(null)}
+          />
+        )}
       </div>
-    </div>
+
+      {/* Sous-catégories, repliées pour ne pas surcharger */}
+      <details className="border-t border-sand-soft">
+        <summary className="cursor-pointer list-none px-4 py-3 text-xs font-semibold uppercase tracking-wide text-stone-warm [&::-webkit-details-marker]:hidden">
+          Sous-catégories ({categorie.sousCategories.length}) — toucher pour gérer
+        </summary>
+        <div className="px-4 pb-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {categorie.sousCategories.length === 0 ? (
+              <span className="text-xs text-stone-warm">Aucune sous-catégorie</span>
+            ) : (
+              categorie.sousCategories.map((s) => (
+                <span key={s} className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-ink ring-1 ring-sand">
+                  {s}
+                  <button type="button" onClick={() => onSupprimerSous(s)} aria-label={`Retirer ${s}`} className="text-stone-warm hover:text-rose-600">
+                    <X size={12} />
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
+          <form onSubmit={ajouterSous} className="mt-3 flex gap-2">
+            <input
+              value={nouvelleSous}
+              onChange={(e) => setNouvelleSous(e.target.value)}
+              placeholder="Nouvelle sous-catégorie…"
+              className="flex-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
+            />
+            <button type="submit" className="inline-flex items-center gap-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-crust/40">
+              <Plus size={15} /> Ajouter
+            </button>
+          </form>
+        </div>
+      </details>
+    </section>
   )
 }
 
@@ -1128,66 +1241,6 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
   )
 }
 
-// --- Gestion des catégories et sous-catégories ---
-function GestionCategories({
-  categories,
-  produits,
-  ajouterCategorie,
-  supprimerCategorie,
-  ajouterSousCategorie,
-  supprimerSousCategorie,
-  ajouterProduit,
-}) {
-  const [formOuvert, setFormOuvert] = useState(false)
-
-  return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <p className="text-sm text-stone-warm">
-          {categories.length} catégorie{categories.length > 1 ? 's' : ''}
-        </p>
-        <button
-          type="button"
-          onClick={() => setFormOuvert((o) => !o)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-crust px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-crust-dark"
-        >
-          {formOuvert ? <X size={16} /> : <PlusCircle size={16} />}
-          {formOuvert ? 'Fermer' : 'Ajouter une catégorie'}
-        </button>
-      </div>
-
-      {formOuvert && (
-        <CategorieForm
-          onAjouter={(data) => {
-            ajouterCategorie(data)
-            setFormOuvert(false)
-          }}
-        />
-      )}
-
-      <div className="space-y-4">
-        {categories.map((c) => (
-          <CategorieCard
-            key={c.id}
-            categorie={c}
-            produitsCategorie={produits.filter((p) => p.categorie === c.id)}
-            onAjouterProduit={ajouterProduit}
-            onSupprimer={() => {
-              const n = produits.filter((p) => p.categorie === c.id).length
-              const msg = n > 0
-                ? `Supprimer « ${c.nom} » ? ${n} produit(s) y sont rattachés (ils resteront mais sans catégorie).`
-                : `Supprimer la catégorie « ${c.nom} » ?`
-              if (window.confirm(msg)) supprimerCategorie(c.id)
-            }}
-            onAjouterSous={(nom) => ajouterSousCategorie(c.id, nom)}
-            onSupprimerSous={(nom) => supprimerSousCategorie(c.id, nom)}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // Formulaire de création d'une catégorie (avec photo facultative)
 function CategorieForm({ onAjouter }) {
   const [nom, setNom] = useState('')
@@ -1267,140 +1320,6 @@ function CategorieForm({ onAjouter }) {
         Créer la catégorie
       </button>
     </form>
-  )
-}
-
-// Carte d'une catégorie : son illustration, ses produits en images,
-// un bouton pour ajouter un produit directement dedans, et ses sous-catégories.
-function CategorieCard({
-  categorie,
-  produitsCategorie,
-  onAjouterProduit,
-  onSupprimer,
-  onAjouterSous,
-  onSupprimerSous,
-}) {
-  const [nouvelleSous, setNouvelleSous] = useState('')
-  const [formProduit, setFormProduit] = useState(false)
-
-  function ajouterSous(e) {
-    e.preventDefault()
-    if (!nouvelleSous.trim()) return
-    onAjouterSous(nouvelleSous)
-    setNouvelleSous('')
-  }
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-sand bg-paper">
-      {/* En-tête : illustration + nom */}
-      <div className="flex items-center gap-3 border-b border-sand-soft p-4">
-        <span
-          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-2xl text-white ring-1 ring-sand"
-          style={categorie.image ? undefined : { background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
-        >
-          {categorie.image ? (
-            <img src={categorie.image} alt="" className="h-full w-full object-contain p-1" />
-          ) : (
-            categorie.emoji
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-lg text-ink">{categorie.nom}</p>
-          <p className="text-xs text-stone-warm">
-            {produitsCategorie.length} produit{produitsCategorie.length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onSupprimer}
-          aria-label={`Supprimer ${categorie.nom}`}
-          className="shrink-0 text-stone-warm transition-colors hover:text-rose-600"
-        >
-          <Trash2 size={17} />
-        </button>
-      </div>
-
-      {/* Les produits de la catégorie, en images + bouton d'ajout direct */}
-      <div className="flex flex-wrap items-center gap-2 p-4">
-        {produitsCategorie.map((p) => (
-          <span
-            key={p.id}
-            title={`${p.nom} — ${formatPrix(p.prix)}`}
-            className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white text-2xl ring-1 ring-sand ${
-              p.disponible ? '' : 'opacity-40 grayscale'
-            }`}
-            style={p.image ? undefined : { background: `linear-gradient(150deg, ${p.from}, ${p.to})` }}
-          >
-            {p.image ? (
-              <img src={p.image} alt={p.nom} className="h-full w-full object-contain p-1" />
-            ) : (
-              p.emoji
-            )}
-          </span>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => setFormProduit((o) => !o)}
-          aria-label={`Ajouter un produit dans ${categorie.nom}`}
-          className={`flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-dashed text-[9px] font-bold uppercase transition-colors ${
-            formProduit
-              ? 'border-crust text-crust'
-              : 'border-sand text-stone-warm hover:border-crust/50 hover:text-crust'
-          }`}
-        >
-          {formProduit ? <X size={17} /> : <PlusCircle size={17} />}
-          Produit
-        </button>
-      </div>
-
-      {/* Formulaire produit, pré-rempli sur CETTE catégorie */}
-      {formProduit && (
-        <div className="border-t border-sand-soft p-4">
-          <ProductForm
-            categorieParDefaut={categorie.id}
-            onValider={(data) => {
-              onAjouterProduit(data)
-              setFormProduit(false)
-            }}
-            onAnnuler={() => setFormProduit(false)}
-          />
-        </div>
-      )}
-
-      {/* Sous-catégories */}
-      <div className="border-t border-sand-soft p-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-warm">
-          Sous-catégories
-        </p>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {categorie.sousCategories.length === 0 ? (
-            <span className="text-xs text-stone-warm">Aucune sous-catégorie</span>
-          ) : (
-            categorie.sousCategories.map((s) => (
-              <span key={s} className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-ink ring-1 ring-sand">
-                {s}
-                <button type="button" onClick={() => onSupprimerSous(s)} aria-label={`Retirer ${s}`} className="text-stone-warm hover:text-rose-600">
-                  <X size={12} />
-                </button>
-              </span>
-            ))
-          )}
-        </div>
-
-        <form onSubmit={ajouterSous} className="mt-3 flex gap-2">
-          <input
-            value={nouvelleSous}
-            onChange={(e) => setNouvelleSous(e.target.value)}
-            placeholder="Nouvelle sous-catégorie…"
-            className="flex-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
-          />
-          <button type="submit" className="inline-flex items-center gap-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-crust/40">
-            <Plus size={15} /> Ajouter
-          </button>
-        </form>
-      </div>
-    </div>
   )
 }
 
