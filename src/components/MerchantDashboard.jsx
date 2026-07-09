@@ -34,17 +34,22 @@ import { bakery } from '../data/bakery'
 import { formatPrix } from '../lib/format'
 import { jouerCarillon } from '../lib/son'
 
-// Imprime un ticket de commande simple (ouvre la fenêtre d'impression).
+// Imprime un REÇU de la commande : articles avec prix, total, date,
+// coordonnées de la boutique — la preuve d'achat du client.
 function imprimerTicket(commande) {
+  const euros = (n) => n.toFixed(2).replace('.', ',') + ' €'
   const lignes = commande.articles
     .map(
       (a) =>
         `<tr><td>${a.quantite} ×</td><td>${a.nom}${
           a.remarque ? `<br><em>→ ${a.remarque}</em>` : ''
-        }</td></tr>`,
+        }</td><td class="prix">${a.prix != null ? euros(a.prix * a.quantite) : ''}</td></tr>`,
     )
     .join('')
-  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Ticket #${commande.numero}</title>
+  const quand = new Date(commande.date ?? Date.now()).toLocaleString('fr-FR', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu #${commande.numero}</title>
     <style>
       body { font-family: -apple-system, sans-serif; width: 260px; margin: 0 auto; padding: 12px; color: #000; }
       h1 { font-size: 16px; text-align: center; margin: 0; }
@@ -52,20 +57,27 @@ function imprimerTicket(commande) {
       hr { border: none; border-top: 1px dashed #000; margin: 10px 0; }
       table { width: 100%; font-size: 13px; border-collapse: collapse; }
       td { padding: 3px 4px 3px 0; vertical-align: top; }
+      td.prix { text-align: right; white-space: nowrap; }
       .total { font-weight: bold; font-size: 15px; display: flex; justify-content: space-between; }
       .numero { font-size: 22px; font-weight: bold; text-align: center; margin: 8px 0; }
+      .titre { text-align: center; font-size: 11px; letter-spacing: 2px; margin-top: 8px; }
     </style></head><body>
-    <h1>La Pétrie — PainPrêt</h1>
+    <h1>La Pétrie</h1>
+    <p>${bakery.slogan} — ${bakery.equipe}</p>
     <p>${bakery.adresse}, ${bakery.ville}</p>
+    <p>Tél. ${bakery.telephone}</p>
+    <p class="titre">— REÇU DE PAIEMENT —</p>
     <div class="numero">#${commande.numero}</div>
-    ${commande.client ? `<p>Pour : <strong>${commande.client}</strong></p>` : ''}
+    <p>${quand}</p>
+    ${commande.client ? `<p>Client : <strong>${commande.client}</strong></p>` : ''}
     <p>Retrait : <strong>${commande.creneau}</strong></p>
     <hr><table>${lignes}</table><hr>
-    <div class="total"><span>TOTAL</span><span>${commande.total.toFixed(2).replace('.', ',')} €</span></div>
-    <hr><p>Payé en ligne — merci !</p>
+    <div class="total"><span>TOTAL</span><span>${euros(commande.total)}</span></div>
+    <p style="text-align:left;margin-top:6px">TVA incluse · Payé en ligne</p>
+    <hr><p>Merci de votre visite, à bientôt !</p>
     </body></html>`
 
-  const fenetre = window.open('', '_blank', 'width=320,height=480')
+  const fenetre = window.open('', '_blank', 'width=320,height=520')
   if (!fenetre) return // pop-up bloquée : on abandonne sans casser la page
   fenetre.document.write(html)
   fenetre.document.close()
@@ -1020,7 +1032,6 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
   const [delai, setDelai] = useState(String(produit?.delaiPreparation ?? 5))
   const [stock, setStock] = useState(String(produit?.stock ?? 10))
   const [image, setImage] = useState(produit?.image || '')
-  const [nouveau, setNouveau] = useState(produit?.nouveau || false)
   const [populaire, setPopulaire] = useState(produit?.populaire || false)
   const [gouts, setGouts] = useState(produit?.gouts?.length ? produit.gouts : [])
   // Ingrédients et allergènes : saisis en texte, séparés par des virgules
@@ -1067,7 +1078,6 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
       delaiPreparation: parseInt(delai) || 5,
       stock: parseInt(stock) || 0,
       populaire,
-      nouveau,
       gouts: gouts.filter((g) => g.nom.trim()).map((g) => ({ nom: g.nom.trim(), couleur: g.couleur })),
     })
   }
@@ -1211,12 +1221,9 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
         )}
       </div>
 
-      {/* Étiquettes choisies par le boulanger */}
+      {/* Étiquette choisie par le boulanger.
+          (Le badge "Nouveau" est automatique : 3 jours après la mise en ligne.) */}
       <div className="mt-4 flex flex-wrap gap-4">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
-          <input type="checkbox" checked={nouveau} onChange={(e) => setNouveau(e.target.checked)} className="h-4 w-4 accent-crust" />
-          Nouveauté
-        </label>
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
           <input type="checkbox" checked={populaire} onChange={(e) => setPopulaire(e.target.checked)} className="h-4 w-4 accent-crust" />
           Populaire

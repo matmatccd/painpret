@@ -40,6 +40,7 @@ export default function PickupSlots({ onRetour, onConfirme }) {
       produitId: l.produit.id,
       nom: l.varianteNom ? `${l.produit.nom} (${l.varianteNom})` : l.produit.nom,
       quantite: l.quantite,
+      prix: l.prixUnitaire, // prix unitaire, pour le reçu imprimé
       remarque: l.remarque || '',
     }))
 

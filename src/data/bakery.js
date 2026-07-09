@@ -109,11 +109,15 @@ export const categoriesInitiales = [
   { id: 'boissons', nom: 'Boissons', emoji: '🥤', from: '#e05252', to: '#a32222', image: cocaBouteille, sousCategories: ['Sodas', 'Jus', 'Eaux'] },
 ]
 
-// --- Produits (100% pain) ---
+// Un jour en millisecondes (pour les dates de mise en ligne)
+const JOUR = 24 * 60 * 60 * 1000
+
+// --- Produits ---
 // "stock" = quantité restante. Un produit est "disponible" tant que stock > 0.
 export const productsInitiaux = [
   {
     id: 1,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'La Pétrisane',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
@@ -129,10 +133,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 40,
     populaire: true,
-    nouveau: false,
   },
   {
     id: 2,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'Pétrisane Bio',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
@@ -148,10 +152,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 25,
     populaire: false,
-    nouveau: true,
   },
   {
     id: 3,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'La Pétrisane Graines',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
@@ -167,10 +171,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 20,
     populaire: true,
-    nouveau: false,
   },
   {
     id: 4,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'La Pétrisane Fibres',
     categorie: 'pains',
     sousCategorie: 'Pétrisane',
@@ -186,10 +190,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 18,
     populaire: false,
-    nouveau: true,
   },
   {
     id: 7,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'Baguette ordinaire',
     categorie: 'pains',
     sousCategorie: 'Baguettes',
@@ -205,10 +209,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 50,
     populaire: true,
-    nouveau: false,
   },
   {
     id: 8,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'Pain Complet',
     categorie: 'pains-speciaux',
     sousCategorie: 'Pains ronds',
@@ -224,10 +228,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 14,
     populaire: false,
-    nouveau: true,
   },
   {
     id: 9,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'Pain Noir',
     categorie: 'pains-speciaux',
     sousCategorie: 'Pains ronds',
@@ -243,10 +247,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 10,
     populaire: false,
-    nouveau: true,
   },
   {
     id: 10,
+    creeLe: Date.now() - 30 * JOUR,
     nom: 'Pavé Fibres',
     categorie: 'pains-speciaux',
     sousCategorie: 'Pains ronds',
@@ -262,10 +266,10 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 12,
     populaire: false,
-    nouveau: true,
   },
   {
     id: 11,
+    creeLe: Date.now() - 1 * JOUR,
     nom: 'Brioche',
     categorie: 'pains-speciaux',
     sousCategorie: 'Brioches',
@@ -281,11 +285,11 @@ export const productsInitiaux = [
     delaiPreparation: 10,
     stock: 8,
     populaire: false,
-    nouveau: true,
   },
   // --- Boissons fraîches (aucune préparation nécessaire) ---
   {
     id: 12,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Coca-Cola 33 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -298,10 +302,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 24,
     populaire: true,
-    nouveau: false,
   },
   {
     id: 13,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Coca-Cola Zéro 33 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -314,10 +318,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 24,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 14,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Coca-Cola 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -330,10 +334,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 18,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 15,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Coca-Cola Zéro 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -346,10 +350,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 18,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 16,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Orangina 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -362,10 +366,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 15,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 17,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Oasis Tropical 33 cl',
     categorie: 'boissons',
     sousCategorie: 'Jus',
@@ -378,10 +382,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 15,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 18,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Lipton Ice Tea Pêche 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Sodas',
@@ -394,10 +398,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 15,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 19,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Minute Maid Orange 33 cl',
     categorie: 'boissons',
     sousCategorie: 'Jus',
@@ -410,10 +414,10 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 15,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 20,
+    creeLe: Date.now() - 5 * JOUR,
     nom: 'Cristaline 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Eaux',
@@ -426,11 +430,11 @@ export const productsInitiaux = [
     allergenes: [],
     stock: 30,
     populaire: false,
-    nouveau: false,
   },
   {
     id: 21,
-    nom: 'San Pellegrino 33 cl',
+    creeLe: Date.now() - 5 * JOUR,
+    nom: 'San Pellegrino 50 cl',
     categorie: 'boissons',
     sousCategorie: 'Eaux',
     prix: 1.5,
@@ -438,11 +442,10 @@ export const productsInitiaux = [
     from: '#7fd0a0',
     to: '#2f8a5a',
     image: sanPellegrino,
-    description: 'Eau minérale naturelle finement pétillante. Bouteille 33 cl.',
+    description: 'Eau minérale naturelle finement pétillante. Bouteille 50 cl.',
     allergenes: [],
     stock: 20,
     populaire: false,
-    nouveau: false,
   },
 ]
 
@@ -458,8 +461,8 @@ export const commandesInitiales = [
     creneau: '11:30',
     statut: 'a-preparer',
     articles: [
-      { nom: 'La Pétrisane', quantite: 2, remarque: 'Bien cuites s’il vous plaît' },
-      { nom: 'La Pétrisane Graines', quantite: 1 },
+      { nom: 'La Pétrisane', quantite: 2, prix: 1.35, remarque: 'Bien cuites s’il vous plaît' },
+      { nom: 'La Pétrisane Graines', quantite: 1, prix: 1.35 },
     ],
     total: 4.05,
     arrive: false,
@@ -471,7 +474,7 @@ export const commandesInitiales = [
     date: Date.now(),
     creneau: '11:30',
     statut: 'a-preparer',
-    articles: [{ nom: 'La Pétrisane Fibres', quantite: 2, remarque: 'Pas trop cuites' }],
+    articles: [{ nom: 'La Pétrisane Fibres', quantite: 2, prix: 1.35, remarque: 'Pas trop cuites' }],
     total: 2.7,
     arrive: false,
   },
@@ -483,8 +486,8 @@ export const commandesInitiales = [
     creneau: '11:45',
     statut: 'a-preparer',
     articles: [
-      { nom: 'Pain Complet', quantite: 1, remarque: 'Tranché, merci !' },
-      { nom: 'Pétrisane Bio', quantite: 2 },
+      { nom: 'Pain Complet', quantite: 1, prix: 2.7, remarque: 'Tranché, merci !' },
+      { nom: 'Pétrisane Bio', quantite: 2, prix: 1.35 },
     ],
     total: 5.4,
     arrive: false,
@@ -497,7 +500,7 @@ export const commandesInitiales = [
     creneau: '12:00',
     statut: 'a-preparer',
     articles: [
-      { nom: 'La Pétrisane', quantite: 3 },
+      { nom: 'La Pétrisane', quantite: 3, prix: 1.35 },
     ],
     total: 4.05,
     arrive: false,
@@ -509,7 +512,7 @@ export const commandesInitiales = [
     date: Date.now(),
     creneau: '11:15',
     statut: 'prete',
-    articles: [{ nom: 'Pain Noir', quantite: 1 }],
+    articles: [{ nom: 'Pain Noir', quantite: 1, prix: 2.5 }],
     total: 2.5,
     arrive: true, // ce client a signalé son arrivée en boutique
   },

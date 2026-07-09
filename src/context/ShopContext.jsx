@@ -42,9 +42,18 @@ export function ShopProvider({ children }) {
     })
   }
 
-  // Les produits "vivants" : on ajoute "disponible" = il reste au moins 1 en stock.
+  // Le badge "Nouveau" est automatique : 3 jours après la mise en ligne, il disparaît.
+  const DUREE_NOUVEAU = 3 * 24 * 60 * 60 * 1000
+
+  // Les produits "vivants" : "disponible" = il reste au moins 1 en stock,
+  // "nouveau" = mis en ligne il y a moins de 3 jours.
   const produits = useMemo(
-    () => produitsBase.map((p) => ({ ...p, disponible: p.stock > 0 })),
+    () =>
+      produitsBase.map((p) => ({
+        ...p,
+        disponible: p.stock > 0,
+        nouveau: Boolean(p.creeLe) && Date.now() - p.creeLe < DUREE_NOUVEAU,
+      })),
     [produitsBase],
   )
 
@@ -69,10 +78,11 @@ export function ShopProvider({ children }) {
   }
 
   // --- Côté boulanger : créer un nouveau produit ---
+  // "creeLe" = date de mise en ligne (pour le badge "Nouveau" automatique)
   function ajouterProduit(donnees) {
     setProduitsBase((arr) => {
       const nouvelId = arr.reduce((max, p) => Math.max(max, p.id), 0) + 1
-      return [...arr, { id: nouvelId, ...donnees }]
+      return [...arr, { id: nouvelId, creeLe: Date.now(), ...donnees }]
     })
   }
 
