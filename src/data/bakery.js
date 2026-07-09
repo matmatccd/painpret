@@ -25,25 +25,61 @@ export const bakery = {
   ville: '51100 Reims',
   // Temps moyen de préparation affiché en accueil (en minutes)
   tempsPreparation: 15,
-  note: 4.8,
-  nombreAvis: 326,
+  // Note réelle relevée sur boulangerie.contact (fiche "La Pétrie Johnatan et Sandra")
+  note: 4.5,
+  nombreAvis: 172,
+  // Présentation de la boulangerie (inspirée du site officiel lapetrie.fr)
+  description:
+    'Le pain est pétri et cuit sur place, toute la journée. Notre mission : redonner au pain toute sa place à table, avec des recettes originales et un fondant incomparable.',
   // Horaires d'ouverture par jour
   horaires: [
-    { jour: 'Lundi', heures: '07:00 – 20:00' },
-    { jour: 'Mardi', heures: '07:00 – 20:00' },
-    { jour: 'Mercredi', heures: '07:00 – 20:00' },
-    { jour: 'Jeudi', heures: '07:00 – 20:00' },
-    { jour: 'Vendredi', heures: '07:00 – 20:00' },
-    { jour: 'Samedi', heures: '07:00 – 20:00' },
+    { jour: 'Lundi', heures: '07:00 – 19:30' },
+    { jour: 'Mardi', heures: '07:00 – 19:30' },
+    { jour: 'Mercredi', heures: '07:00 – 19:30' },
+    { jour: 'Jeudi', heures: '07:00 – 19:30' },
+    { jour: 'Vendredi', heures: '07:00 – 19:30' },
+    { jour: 'Samedi', heures: '07:00 – 19:30' },
     { jour: 'Dimanche', heures: '07:30 – 14:00' },
   ],
-  ouvertMaintenant: true,
 }
 
-// Lien "Itinéraire" vers Google Maps (s'ouvre dans l'app Plans sur mobile)
+// Ouvert en ce moment ? Calculé avec les vrais horaires du jour.
+export function estOuvertMaintenant(maintenant = new Date()) {
+  const jourJS = maintenant.getDay() // 0 = dimanche, notre tableau commence lundi
+  const { heures } = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
+  const bornes = heures.match(/(\d{1,2}):(\d{2})\s*–\s*(\d{1,2}):(\d{2})/)
+  if (!bornes) return false
+  const minutes = maintenant.getHours() * 60 + maintenant.getMinutes()
+  const ouverture = Number(bornes[1]) * 60 + Number(bornes[2])
+  const fermeture = Number(bornes[3]) * 60 + Number(bornes[4])
+  return minutes >= ouverture && minutes < fermeture
+}
+
+// --- Vrais avis clients (relevés sur la fiche publique boulangerie.contact) ---
+export const avisClients = [
+  {
+    auteur: 'Bruno',
+    note: 5,
+    texte: 'Le pain y est absolument excellent. Je recommande à 100 % !',
+  },
+  {
+    auteur: 'Karine',
+    note: 5,
+    texte: 'Pains excellents et les boulangers et vendeuses sont au top !',
+  },
+  {
+    auteur: 'Rose',
+    note: 4,
+    texte: 'J’aime bien cette petite boulangerie, le personnel est très agréable.',
+  },
+]
+
+// Lien "Itinéraire" vers Google Maps (s'ouvre dans l'app Plans sur mobile).
+// On précise "Boulangerie ... Johnatan et Sandra" pour ne pas être confondu
+// avec La Pétrisane, l'autre boulangerie de l'avenue Jean Jaurès.
 export const lienItineraire =
   'https://www.google.com/maps/dir/?api=1&destination=' +
-  encodeURIComponent(`${bakery.nom}, ${bakery.adresse}, ${bakery.ville}`)
+  encodeURIComponent(`Boulangerie La Pétrie Johnatan et Sandra, ${bakery.adresse}, ${bakery.ville}`)
 
 // --- Catégories (issues du cahier des charges) ---
 // Chaque catégorie a un emoji, un dégradé de couleurs, et une liste de
@@ -67,7 +103,7 @@ export const productsInitiaux = [
     to: '#c98a3a',
     image: baguetteTradition,
     description:
-      'Notre baguette signature : pétrissage lent, longue fermentation, croûte craquante et mie crème aux arômes de levain. 300 g.',
+      '300 g de plaisir à la saveur unique et au fondant incomparable. Elle accompagne tous vos repas, du petit déjeuner au dîner.',
     ingredients: ['Farine de blé T65', 'Eau', 'Levain naturel', 'Sel'],
     allergenes: ['Gluten'],
     delaiPreparation: 10,
@@ -86,7 +122,7 @@ export const productsInitiaux = [
     to: '#5f8a2c',
     image: baguetteBio,
     description:
-      'La Pétrisane en version bio : blé issu de l’agriculture biologique, fermentation douce, goût franc et authentique. 300 g.',
+      '300 g de plaisir confectionnés exclusivement à partir de blé biologique. La Pétrisane version bio, au goût franc et authentique.',
     ingredients: ['Farine de blé bio', 'Eau', 'Levain naturel', 'Sel'],
     allergenes: ['Gluten'],
     delaiPreparation: 10,
@@ -105,7 +141,7 @@ export const productsInitiaux = [
     to: '#a86a2c',
     image: baguetteGraines,
     description:
-      'Généreusement parée de graines torréfiées — lin, sésame, tournesol — pour un croquant et des notes de noisette uniques. 300 g.',
+      'La Pétrisane agrémentée de savoureuses graines de lin, de tournesol et de sésame, pour un croquant et des notes de noisette. 300 g.',
     ingredients: ['Farine de blé', 'Graines de lin', 'Sésame', 'Tournesol', 'Levain', 'Sel'],
     allergenes: ['Gluten', 'Sésame'],
     delaiPreparation: 10,
@@ -124,7 +160,7 @@ export const productsInitiaux = [
     to: '#b45309',
     image: baguetteFibres,
     description:
-      'Riche en fibres naturelles : plus rassasiante, plus digeste, tout aussi gourmande. La complice du quotidien. 300 g.',
+      'Moelleuse, aux enveloppes de blé biologique, elle allie goût et bien-être. Riche en fibres, la complice du quotidien. 300 g.',
     ingredients: ['Farine de blé', 'Son de blé', 'Eau', 'Levain', 'Sel'],
     allergenes: ['Gluten'],
     delaiPreparation: 10,

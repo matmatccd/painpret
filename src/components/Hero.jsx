@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MapPin, Star, Timer, Navigation } from 'lucide-react'
-import { bakery, lienItineraire } from '../data/bakery'
+import { bakery, lienItineraire, estOuvertMaintenant } from '../data/bakery'
 import boutique from '../assets/photos/boutique.jpg'
 import fournil from '../assets/photos/fournil.jpg'
 
@@ -47,10 +47,15 @@ export default function Hero() {
 
           {/* Badges d'état */}
           <div className="relative mb-5 flex flex-wrap items-center gap-2">
-            {bakery.ouvertMaintenant && (
+            {estOuvertMaintenant() ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Ouvert maintenant
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                Fermé — réouvre bientôt
               </span>
             )}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
@@ -64,9 +69,8 @@ export default function Hero() {
               Artisan boulanger · Click & Collect
             </p>
             <h1 className="text-4xl leading-none text-white sm:text-6xl">{bakery.nom}</h1>
-            <p className="mt-3 max-w-md text-sm text-white/85 sm:text-base">
-              {bakery.slogan} — {bakery.equipe}. Commandez ce qui est encore chaud,
-              choisissez votre heure, et passez le récupérer sans faire la queue.
+            <p className="mt-3 max-w-lg text-sm text-white/85 sm:text-base">
+              {bakery.slogan} — {bakery.equipe}. {bakery.description}
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/90">
