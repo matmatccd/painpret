@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Search, ShoppingBag, Store, History } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import Logo from './Logo'
@@ -5,11 +6,37 @@ import NotificationBell from './NotificationBell'
 
 // En-tête aux couleurs de la devanture La Pétrie : bandeau prune,
 // lettrage clair — comme l'enseigne de la boutique.
+// Il se range quand on descend dans la page et revient dès qu'on remonte.
 export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPanier, onEspacePro, onHistorique }) {
   const { nombreArticles } = useCart()
+  const [cache, setCache] = useState(false)
+
+  useEffect(() => {
+    let dernierY = window.scrollY
+    function surDefilement() {
+      const y = window.scrollY
+      if (y < 80) {
+        // Tout en haut de la page : toujours visible
+        setCache(false)
+      } else if (y > dernierY + 6) {
+        // On descend : on range le bandeau
+        setCache(true)
+      } else if (y < dernierY - 6) {
+        // On remonte : on le fait revenir
+        setCache(false)
+      }
+      dernierY = y
+    }
+    window.addEventListener('scroll', surDefilement, { passive: true })
+    return () => window.removeEventListener('scroll', surDefilement)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-[#e9cd90]/60 bg-crust">
+    <header
+      className={`sticky top-0 z-40 border-b-2 border-[#e9cd90]/60 bg-crust transition-transform duration-300 ${
+        cache ? '-translate-y-full' : 'translate-y-0'
+      }`}
+    >
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-5">
         {/* Logo */}
         <button type="button" onClick={onAccueil} className="shrink-0">
