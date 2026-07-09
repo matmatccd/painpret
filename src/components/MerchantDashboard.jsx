@@ -253,6 +253,7 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
             supprimerCategorie={supprimerCategorie}
             ajouterSousCategorie={ajouterSousCategorie}
             supprimerSousCategorie={supprimerSousCategorie}
+            ajouterProduit={ajouterProduit}
           />
         )}
         </div>
@@ -783,11 +784,12 @@ function GestionProduits({
 }
 
 // --- Formulaire de création / modification d'un produit ---
-function ProductForm({ produit, onValider, onAnnuler }) {
+// "categorieParDefaut" permet de créer un produit directement dans une catégorie.
+function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
   const { categories } = useShop()
   const enEdition = !!produit
   const [nom, setNom] = useState(produit?.nom || '')
-  const [categorie, setCategorie] = useState(produit?.categorie || categories[0].id)
+  const [categorie, setCategorie] = useState(produit?.categorie || categorieParDefaut || categories[0].id)
   const [sousCategorie, setSousCategorie] = useState(produit?.sousCategorie || '')
   const [prix, setPrix] = useState(produit ? String(produit.prix) : '')
   const [emoji, setEmoji] = useState(produit?.emoji || '')
@@ -999,7 +1001,7 @@ function ProductForm({ produit, onValider, onAnnuler }) {
       </div>
 
       <div className="mt-4 flex gap-2">
-        {enEdition && (
+        {onAnnuler && (
           <button type="button" onClick={onAnnuler} className="rounded-lg border border-sand bg-cream px-4 py-3 text-sm font-semibold text-ink transition-colors hover:border-crust/40">
             Annuler
           </button>
@@ -1024,6 +1026,7 @@ function GestionCategories({
   supprimerCategorie,
   ajouterSousCategorie,
   supprimerSousCategorie,
+  ajouterProduit,
 }) {
   const [formOuvert, setFormOuvert] = useState(false)
 
@@ -1052,12 +1055,13 @@ function GestionCategories({
         />
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {categories.map((c) => (
           <CategorieCard
             key={c.id}
             categorie={c}
-            nbProduits={produits.filter((p) => p.categorie === c.id).length}
+            produitsCategorie={produits.filter((p) => p.categorie === c.id)}
+            onAjouterProduit={ajouterProduit}
             onSupprimer={() => {
               const n = produits.filter((p) => p.categorie === c.id).length
               const msg = n > 0
@@ -1156,11 +1160,20 @@ function CategorieForm({ onAjouter }) {
   )
 }
 
-// Carte d'une catégorie avec ses sous-catégories
-function CategorieCard({ categorie, nbProduits, onSupprimer, onAjouterSous, onSupprimerSous }) {
+// Carte d'une catégorie : son illustration, ses produits en images,
+// un bouton pour ajouter un produit directement dedans, et ses sous-catégories.
+function CategorieCard({
+  categorie,
+  produitsCategorie,
+  onAjouterProduit,
+  onSupprimer,
+  onAjouterSous,
+  onSupprimerSous,
+}) {
   const [nouvelleSous, setNouvelleSous] = useState('')
+  const [formProduit, setFormProduit] = useState(false)
 
-  function ajouter(e) {
+  function ajouterSous(e) {
     e.preventDefault()
     if (!nouvelleSous.trim()) return
     onAjouterSous(nouvelleSous)
@@ -1168,21 +1181,24 @@ function CategorieCard({ categorie, nbProduits, onSupprimer, onAjouterSous, onSu
   }
 
   return (
-    <div className="rounded-xl border border-sand bg-paper p-4">
-      <div className="flex items-center gap-3">
+    <div className="overflow-hidden rounded-xl border border-sand bg-paper">
+      {/* En-tête : illustration + nom */}
+      <div className="flex items-center gap-3 border-b border-sand-soft p-4">
         <span
-          className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-xl text-white"
+          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-2xl text-white ring-1 ring-sand"
           style={categorie.image ? undefined : { background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
         >
           {categorie.image ? (
-            <img src={categorie.image} alt="" className="h-full w-full object-contain" />
+            <img src={categorie.image} alt="" className="h-full w-full object-contain p-1" />
           ) : (
             categorie.emoji
           )}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-ink">{categorie.nom}</p>
-          <p className="text-xs text-stone-warm">{nbProduits} produit{nbProduits > 1 ? 's' : ''}</p>
+          <p className="truncate font-display text-lg text-ink">{categorie.nom}</p>
+          <p className="text-xs text-stone-warm">
+            {produitsCategorie.length} produit{produitsCategorie.length > 1 ? 's' : ''}
+          </p>
         </div>
         <button
           type="button"
@@ -1194,34 +1210,86 @@ function CategorieCard({ categorie, nbProduits, onSupprimer, onAjouterSous, onSu
         </button>
       </div>
 
-      {/* Sous-catégories */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        {categorie.sousCategories.length === 0 ? (
-          <span className="text-xs text-stone-warm">Aucune sous-catégorie</span>
-        ) : (
-          categorie.sousCategories.map((s) => (
-            <span key={s} className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-ink ring-1 ring-sand">
-              {s}
-              <button type="button" onClick={() => onSupprimerSous(s)} aria-label={`Retirer ${s}`} className="text-stone-warm hover:text-rose-600">
-                <X size={12} />
-              </button>
-            </span>
-          ))
-        )}
+      {/* Les produits de la catégorie, en images + bouton d'ajout direct */}
+      <div className="flex flex-wrap items-center gap-2 p-4">
+        {produitsCategorie.map((p) => (
+          <span
+            key={p.id}
+            title={`${p.nom} — ${formatPrix(p.prix)}`}
+            className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white text-2xl ring-1 ring-sand ${
+              p.disponible ? '' : 'opacity-40 grayscale'
+            }`}
+            style={p.image ? undefined : { background: `linear-gradient(150deg, ${p.from}, ${p.to})` }}
+          >
+            {p.image ? (
+              <img src={p.image} alt={p.nom} className="h-full w-full object-contain p-1" />
+            ) : (
+              p.emoji
+            )}
+          </span>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => setFormProduit((o) => !o)}
+          aria-label={`Ajouter un produit dans ${categorie.nom}`}
+          className={`flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-dashed text-[9px] font-bold uppercase transition-colors ${
+            formProduit
+              ? 'border-crust text-crust'
+              : 'border-sand text-stone-warm hover:border-crust/50 hover:text-crust'
+          }`}
+        >
+          {formProduit ? <X size={17} /> : <PlusCircle size={17} />}
+          Produit
+        </button>
       </div>
 
-      {/* Ajouter une sous-catégorie */}
-      <form onSubmit={ajouter} className="mt-3 flex gap-2">
-        <input
-          value={nouvelleSous}
-          onChange={(e) => setNouvelleSous(e.target.value)}
-          placeholder="Nouvelle sous-catégorie…"
-          className="flex-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
-        />
-        <button type="submit" className="inline-flex items-center gap-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-crust/40">
-          <Plus size={15} /> Ajouter
-        </button>
-      </form>
+      {/* Formulaire produit, pré-rempli sur CETTE catégorie */}
+      {formProduit && (
+        <div className="border-t border-sand-soft p-4">
+          <ProductForm
+            categorieParDefaut={categorie.id}
+            onValider={(data) => {
+              onAjouterProduit(data)
+              setFormProduit(false)
+            }}
+            onAnnuler={() => setFormProduit(false)}
+          />
+        </div>
+      )}
+
+      {/* Sous-catégories */}
+      <div className="border-t border-sand-soft p-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-warm">
+          Sous-catégories
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {categorie.sousCategories.length === 0 ? (
+            <span className="text-xs text-stone-warm">Aucune sous-catégorie</span>
+          ) : (
+            categorie.sousCategories.map((s) => (
+              <span key={s} className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-ink ring-1 ring-sand">
+                {s}
+                <button type="button" onClick={() => onSupprimerSous(s)} aria-label={`Retirer ${s}`} className="text-stone-warm hover:text-rose-600">
+                  <X size={12} />
+                </button>
+              </span>
+            ))
+          )}
+        </div>
+
+        <form onSubmit={ajouterSous} className="mt-3 flex gap-2">
+          <input
+            value={nouvelleSous}
+            onChange={(e) => setNouvelleSous(e.target.value)}
+            placeholder="Nouvelle sous-catégorie…"
+            className="flex-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
+          />
+          <button type="submit" className="inline-flex items-center gap-1 rounded-lg border border-sand bg-cream px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-crust/40">
+            <Plus size={15} /> Ajouter
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
