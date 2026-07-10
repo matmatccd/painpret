@@ -20,9 +20,9 @@ export default function NotificationBell({ clair = false }) {
         type="button"
         onClick={basculer}
         aria-label="Notifications"
-        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
+        className={`anim-cloche relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
           clair
-            ? 'bg-white/10 text-white/85 ring-1 ring-white/20 hover:bg-white/20 hover:text-white'
+            ? 'bg-white/10 text-white/85 ring-1 ring-white/20 hover:bg-white/15 hover:text-[#e9cd90] hover:ring-[#e9cd90]/60'
             : 'border border-sand bg-paper text-ink hover:border-crust/40'
         }`}
       >

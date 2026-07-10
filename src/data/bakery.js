@@ -20,9 +20,8 @@ export const bakery = {
   // Note réelle relevée sur boulangerie.contact (fiche "La Pétrie Johnatan et Sandra")
   note: 4.5,
   nombreAvis: 172,
-  // Présentation de la boulangerie (inspirée du site officiel lapetrie.fr)
-  description:
-    'Le pain est pétri et cuit sur place, toute la journée. Notre mission : redonner au pain toute sa place à table, avec des recettes originales et un fondant incomparable.',
+  // Courte présentation (le détail est sur la page, pas dans le bandeau)
+  description: 'Le pain est pétri et cuit sur place, toute la journée.',
   // Accroches qui défilent sous le nom, dans le bandeau d'accueil
   accroches: [
     'Artisan boulanger depuis 2012',
@@ -35,14 +34,31 @@ export const bakery = {
     { jour: 'Mardi', heures: '07:00 – 19:30' },
     { jour: 'Mercredi', heures: '07:00 – 19:30' },
     { jour: 'Jeudi', heures: '07:00 – 19:30' },
-    { jour: 'Vendredi', heures: '07:00 – 19:30' },
+    { jour: 'Vendredi', heures: 'Fermé' },
     { jour: 'Samedi', heures: '07:00 – 19:30' },
     { jour: 'Dimanche', heures: '07:30 – 14:00' },
   ],
+  // Fermeture mensuelle en plus du vendredi
+  noteFermeture: 'Fermé le vendredi et le dernier jeudi de chaque mois',
+}
+
+// Jour de fermeture hebdo/mensuel ?
+// - le vendredi (toutes les semaines)
+// - le DERNIER jeudi de chaque mois
+export function estJourFerme(d = new Date()) {
+  const jour = d.getDay() // 0 = dimanche ... 5 = vendredi
+  if (jour === 5) return true
+  if (jour === 4) {
+    const dansUneSemaine = new Date(d)
+    dansUneSemaine.setDate(d.getDate() + 7)
+    return dansUneSemaine.getMonth() !== d.getMonth() // plus de jeudi ce mois-ci
+  }
+  return false
 }
 
 // Ouvert en ce moment ? Calculé avec les vrais horaires du jour.
 export function estOuvertMaintenant(maintenant = new Date()) {
+  if (estJourFerme(maintenant)) return false
   const jourJS = maintenant.getDay() // 0 = dimanche, notre tableau commence lundi
   const { heures } = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
   const bornes = heures.match(/(\d{1,2}):(\d{2})\s*–\s*(\d{1,2}):(\d{2})/)

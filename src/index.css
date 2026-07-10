@@ -126,6 +126,48 @@
   animation: flux 14s ease-in-out infinite;
 }
 
+/* "La Pétrie" : un reflet doré balaie le titre en continu
+   (dégradé attaché aux lettres — technique background-clip). */
+@keyframes titre-brillance {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.titre-petrie {
+  background: linear-gradient(
+    105deg,
+    #ffffff 0%, #ffffff 38%,
+    #e9cd90 48%, #f7e8c4 52%,
+    #ffffff 62%, #ffffff 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: titre-brillance 4.5s ease-in-out infinite;
+}
+
+/* L'épi du logo ondule doucement, comme au vent */
+@keyframes ondule {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+.logo-ble {
+  transform-origin: 50% 95%;
+  animation: ondule 4s ease-in-out infinite;
+}
+
+/* Micro-animations des icônes de l'en-tête (au survol) */
+.icone-vive svg { transition: transform 0.25s var(--ease-out-soft); }
+.icone-vive:hover svg { transform: scale(1.15); }
+@keyframes cloche {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-14deg); }
+  60% { transform: rotate(10deg); }
+}
+.anim-cloche:hover svg { animation: cloche 0.5s var(--ease-out-soft); }
+.anim-remonte:hover svg { transform: rotate(-30deg) scale(1.1); }
+.anim-saute:hover svg { transform: translateY(-2px) scale(1.12); }
+
 /* Bandeau qui défile en continu (marquee) — le contenu est doublé,
    on translate de -50% pour une boucle parfaite. */
 @keyframes defile {

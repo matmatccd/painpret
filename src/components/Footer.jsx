@@ -1,5 +1,5 @@
 import { MapPin, Clock, Navigation, HelpCircle, Phone } from 'lucide-react'
-import { bakery, lienItineraire } from '../data/bakery'
+import { bakery, lienItineraire, estJourFerme } from '../data/bakery'
 import Logo from './Logo'
 
 // Pied de page aux couleurs de la devanture : fond prune, filet doré,
@@ -23,8 +23,12 @@ export default function Footer({ onFAQ }) {
           </p>
           <p className="flex items-center gap-1.5">
             <Clock size={16} className="shrink-0" />
-            <span>Aujourd'hui ({aujourdHui.jour.toLowerCase()}) : {aujourdHui.heures}</span>
+            <span>
+              Aujourd'hui ({aujourdHui.jour.toLowerCase()}) :{' '}
+              {estJourFerme() ? 'Fermé' : aujourdHui.heures}
+            </span>
           </p>
+          <p className="text-xs text-white/60">{bakery.noteFermeture}</p>
           <p className="flex items-center gap-1.5">
             <Phone size={16} className="shrink-0" />
             <a href={`tel:${bakery.telephone.replace(/\s/g, '')}`} className="hover:underline">

@@ -1,11 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <!-- Icône d'application PainPrêt (fond plein : les téléphones arrondissent) -->
-  <rect width="64" height="64" fill="#6f2f43"/>
-  <rect x="4" y="4" width="56" height="56" rx="10" fill="none" stroke="#b98a2f" stroke-width="1.8"/>
-  <ellipse cx="32" cy="32" rx="10.5" ry="21" transform="rotate(45 32 32)" fill="#f0c674"/>
-  <g stroke="#6f2f43" stroke-width="3" stroke-linecap="round">
-    <line x1="24" y1="29" x2="31" y2="22"/>
-    <line x1="29" y1="34" x2="36" y2="27"/>
-    <line x1="34" y1="39" x2="41" y2="32"/>
-  </g>
+  <rect width="48" height="48" fill="#6f2f43"/>
+  <rect x="3" y="3" width="42" height="42" rx="8" fill="none" stroke="#e9cd90" stroke-opacity="0.55" stroke-width="1.4"/>
+  <path d="M24 43 C24 35 24 26 24 14" fill="none" stroke="#e9cd90" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M24 39.5 C17.6 40 13.5 36.8 12 31.8 C18 32.3 22.2 35 24 39.5Z" fill="#e9cd90" opacity="0.55"/>
+  <path d="M24 34 C18.8 33.1 15.6 29.8 15.1 24.8 C20.4 25.7 23.5 29 24 34Z" fill="#e9cd90"/>
+  <path d="M24 34 C29.2 33.1 32.4 29.8 32.9 24.8 C27.6 25.7 24.5 29 24 34Z" fill="#e9cd90"/>
+  <path d="M24 26.2 C19.2 25.3 16.3 22.1 15.8 17.5 C20.8 18.4 23.6 21.5 24 26.2Z" fill="#e9cd90"/>
+  <path d="M24 26.2 C28.8 25.3 31.7 22.1 32.2 17.5 C27.2 18.4 24.4 21.5 24 26.2Z" fill="#e9cd90"/>
+  <path d="M24 19 C20.7 17.2 19.2 14 19.7 10.2 C22.8 12 24.3 15.2 24 19Z" fill="#e9cd90"/>
+  <path d="M24 19 C27.3 17.2 28.8 14 28.3 10.2 C25.2 12 23.7 15.2 24 19Z" fill="#e9cd90"/>
+  <path d="M24 12.2 C22.4 10 22.4 7.2 24 5 C25.6 7.2 25.6 10 24 12.2Z" fill="#f7e8c4"/>
 </svg>

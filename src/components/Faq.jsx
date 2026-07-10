@@ -73,14 +73,19 @@ export default function Faq({ onRetour }) {
             <div className="border-t border-sand-soft px-4 py-3.5 text-sm leading-relaxed text-stone-warm">
               {item.r ?? (
                 // Cas spécial : les horaires, générés depuis les données
-                <ul className="space-y-1">
-                  {bakery.horaires.map((h) => (
-                    <li key={h.jour} className="flex justify-between gap-4">
-                      <span className="font-medium text-ink">{h.jour}</span>
-                      <span className="tnum">{h.heures}</span>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="space-y-1">
+                    {bakery.horaires.map((h) => (
+                      <li key={h.jour} className="flex justify-between gap-4">
+                        <span className="font-medium text-ink">{h.jour}</span>
+                        <span className="tnum">{h.heures}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 rounded-lg bg-cream px-3 py-2 text-xs font-medium text-crust ring-1 ring-sand">
+                    {bakery.noteFermeture}.
+                  </p>
+                </>
               )}
               {item.itineraire && (
                 <a

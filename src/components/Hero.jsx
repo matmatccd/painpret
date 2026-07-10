@@ -79,7 +79,7 @@ export default function Hero() {
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#e9cd90]">
               Click &amp; Collect · {bakery.ville.replace(/^\d+\s*/, '')}
             </p>
-            <h1 className="text-4xl leading-none text-white sm:text-6xl">{bakery.nom}</h1>
+            <h1 className="titre-petrie text-4xl leading-none sm:text-6xl">{bakery.nom}</h1>
             {/* Accroche qui défile (change toute seule, en fondu) */}
             <p className="mt-3 min-h-7">
               <span key={accroche} className="animate-avis inline-block font-display text-lg text-[#f2d3d8] sm:text-xl">

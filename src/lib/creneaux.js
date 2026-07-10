@@ -6,7 +6,7 @@
 //  jusqu'à la FERMETURE RÉELLE du jour (ex : 13h00 le dimanche).
 // ============================================================
 
-import { bakery } from '../data/bakery'
+import { bakery, estJourFerme } from '../data/bakery'
 
 // Affiche une date en "HH:MM"
 export function formatHeure(date) {
@@ -34,6 +34,9 @@ function arrondir5min(date) {
 // Génère la liste des créneaux disponibles à partir d'un délai de prépa (minutes)
 export function genererCreneaux(delaiPrepMin = 15) {
   const maintenant = new Date()
+
+  // Jour de fermeture (vendredi / dernier jeudi du mois) : aucun créneau
+  if (estJourFerme(maintenant)) return []
 
   // Heure limite du jour = la fermeture réelle de la boutique
   const { h, m } = fermetureDuJour()

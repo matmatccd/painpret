@@ -64,7 +64,7 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
           onClick={onHistorique}
           aria-label="Mes commandes"
           title="Mes commandes"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/20 hover:text-white"
+          className="icone-vive anim-remonte flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/15 hover:text-[#e9cd90] hover:ring-[#e9cd90]/60"
         >
           <History size={18} />
         </button>
@@ -75,7 +75,7 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
           onClick={onEspacePro}
           aria-label="Espace boulanger"
           title="Espace boulanger"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/20 hover:text-white"
+          className="icone-vive flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/15 hover:text-[#e9cd90] hover:ring-[#e9cd90]/60"
         >
           <Store size={18} />
         </button>
@@ -83,16 +83,16 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
         {/* Notifications */}
         <NotificationBell clair />
 
-        {/* Panier */}
+        {/* Panier — bouton doré, bien visible */}
         <button
           type="button"
           onClick={onOuvrirPanier}
           aria-label="Voir le panier"
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-crust transition-colors hover:bg-[#f2d3d8]"
+          className="icone-vive anim-saute relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e9cd90] text-crust-dark transition-colors hover:bg-[#f7e8c4]"
         >
           <ShoppingBag size={18} />
           {nombreArticles > 0 && (
-            <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ember px-1 text-[11px] font-bold text-white">
+            <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ember px-1 text-[11px] font-bold text-white ring-2 ring-crust">
               {nombreArticles}
             </span>
           )}
