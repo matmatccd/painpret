@@ -126,6 +126,19 @@
   animation: flux 14s ease-in-out infinite;
 }
 
+/* Bandeau qui défile en continu (marquee) — le contenu est doublé,
+   on translate de -50% pour une boucle parfaite. */
+@keyframes defile {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-petrie {
+  display: flex;
+  width: max-content;
+  animation: defile 26s linear infinite;
+}
+.marquee-petrie:hover { animation-play-state: paused; }
+
 /* Fondu doux pour les avis qui défilent */
 @keyframes avis-in {
   from { opacity: 0; transform: translateY(6px); }

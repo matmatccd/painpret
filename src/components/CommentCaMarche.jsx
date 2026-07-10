@@ -31,12 +31,15 @@ export default function CommentCaMarche({ onFAQ }) {
         {ETAPES.map((etape, i) => {
           const Icone = etape.icone
           return (
-            <div key={etape.titre} className="rounded-xl border border-sand bg-paper p-5">
+            <div
+              key={etape.titre}
+              className="group rounded-xl border border-sand bg-paper p-5 transition-[border-color,box-shadow] duration-200 hover:border-crust/40 hover:shadow-[0_10px_28px_-14px_rgba(111,47,67,0.35)]"
+            >
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-crust text-white">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-crust text-white transition-colors duration-200 group-hover:bg-ember">
                   <Icone size={20} />
                 </span>
-                <span className="font-display text-2xl text-sand">0{i + 1}</span>
+                <span className="font-display text-2xl text-sand transition-colors duration-200 group-hover:text-ember/60">0{i + 1}</span>
               </div>
               <h3 className="mt-3 font-sans text-[15px] font-semibold text-ink">{etape.titre}</h3>
               <p className="mt-1 text-sm leading-relaxed text-stone-warm">{etape.texte}</p>

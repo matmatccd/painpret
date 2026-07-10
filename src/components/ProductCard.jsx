@@ -39,7 +39,7 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
       aria-label={`Voir ${produit.nom}, ${formatPrix(produit.prix)}`}
       // Entrée en cascade discrète (30–50 ms par carte), plafonnée
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-      className="group flex animate-fade-up cursor-pointer flex-col overflow-hidden rounded-xl border border-sand bg-paper transition-colors duration-200 hover:border-crust/40"
+      className="group flex animate-fade-up cursor-pointer flex-col overflow-hidden rounded-xl border border-sand bg-paper transition-[border-color,box-shadow] duration-200 hover:border-crust/40 hover:shadow-[0_10px_28px_-14px_rgba(111,47,67,0.35)]"
     >
       {/* Vignette produit : photo si disponible, sinon dégradé + emoji */}
       <div
@@ -51,7 +51,7 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
             src={produit.image}
             alt={produit.nom}
             loading="lazy"
-            className={`h-full w-full object-contain p-3 ${epuise ? 'opacity-40 grayscale' : ''}`}
+            className={`h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.06] ${epuise ? 'opacity-40 grayscale' : ''}`}
           />
         ) : (
           <span className={`text-5xl ${epuise ? 'opacity-40 grayscale' : ''}`}>{produit.emoji}</span>

@@ -12,6 +12,8 @@ import Historique from './components/Historique'
 import Faq from './components/Faq'
 import CommentCaMarche from './components/CommentCaMarche'
 import AvisClients from './components/AvisClients'
+import Bandeau from './components/Bandeau'
+import Reveal from './components/Reveal'
 import Footer from './components/Footer'
 import MerchantLogin from './components/MerchantLogin'
 import MerchantDashboard from './components/MerchantDashboard'
@@ -321,16 +323,25 @@ export default function App() {
         ) : (
           <>
             <Hero />
+            <Bandeau />
             {produitsFavoris.length > 0 && (
               <ProductRow surtitre="Vos préférés" titre="Mes favoris" produits={produitsFavoris} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
             )}
             <ProductRow surtitre="La gamme Pétrisane" titre="Baguettes" produits={produitsPains} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
-            <ProductRow surtitre="Le fournil" titre="Pains spéciaux" produits={produitsSpeciaux} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+            <Reveal>
+              <ProductRow surtitre="Le fournil" titre="Pains spéciaux" produits={produitsSpeciaux} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+            </Reveal>
             {produitsBoissons.length > 0 && (
-              <ProductRow surtitre="Fraîcheur" titre="Boissons" produits={produitsBoissons} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+              <Reveal>
+                <ProductRow surtitre="Fraîcheur" titre="Boissons" produits={produitsBoissons} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+              </Reveal>
             )}
-            <AvisClients />
-            <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
+            <Reveal>
+              <AvisClients />
+            </Reveal>
+            <Reveal>
+              <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
+            </Reveal>
           </>
         )}
       </main>
