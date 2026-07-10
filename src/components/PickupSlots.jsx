@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, Clock, CreditCard, Check, User, Ban } from 'lucide-react'
+import { ArrowLeft, Clock, CreditCard, Check, User, Ban, Mail } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
@@ -16,8 +16,11 @@ export default function PickupSlots({ onRetour, onConfirme }) {
   const { lignes, total, viderPanier } = useCart()
   const { ajouterCommande, boutiqueFermee } = useShop()
 
-  // Le prénom du client — mémorisé pour les prochaines commandes
+  // Le prénom et l'email du client — mémorisés pour les prochaines commandes
   const [prenom, setPrenom] = useState(() => localStorage.getItem('painpret_prenom') || '')
+  const [email, setEmail] = useState(() => localStorage.getItem('painpret_email') || '')
+  const [envoiEnCours, setEnvoiEnCours] = useState(false)
+  const [erreur, setErreur] = useState('')
 
   // Le délai de prépa = le plus long parmi les produits du panier
   const delaiMax = useMemo(
@@ -29,9 +32,11 @@ export default function PickupSlots({ onRetour, onConfirme }) {
   const [creneauChoisi, setCreneauChoisi] = useState(null)
   const [paiement, setPaiement] = useState('cb')
 
-  function confirmer() {
-    if (!creneauChoisi || boutiqueFermee) return
+  async function confirmer() {
+    if (!creneauChoisi || boutiqueFermee || envoiEnCours) return
+    setErreur('')
     localStorage.setItem('painpret_prenom', prenom.trim())
+    localStorage.setItem('painpret_email', email.trim())
 
     // On transforme les lignes du panier en articles lisibles pour le boulanger.
     // "produitId" permet de décompter le stock au moment de la commande.
@@ -44,18 +49,32 @@ export default function PickupSlots({ onRetour, onConfirme }) {
       remarque: l.remarque || '',
     }))
 
-    const commande = ajouterCommande({
-      articles,
-      total,
-      client: prenom.trim(),
-      creneau: creneauChoisi.label === 'Dès que possible'
-        ? formatHeure(creneauChoisi.date)
-        : creneauChoisi.label,
-      heureRetrait: creneauChoisi.date.toISOString(),
-    })
-
-    viderPanier()
-    onConfirme(commande)
+    setEnvoiEnCours(true)
+    try {
+      const commande = await ajouterCommande({
+        articles,
+        total,
+        client: prenom.trim(),
+        email: email.trim(),
+        creneau: creneauChoisi.label === 'Dès que possible'
+          ? formatHeure(creneauChoisi.date)
+          : creneauChoisi.label,
+        heureRetrait: creneauChoisi.date.toISOString(),
+      })
+      viderPanier()
+      onConfirme(commande)
+    } catch (e) {
+      // Messages clairs pour le client selon la raison
+      if (/boutique_fermee/.test(e.message)) {
+        setErreur('La boutique vient de fermer : commande impossible pour le moment.')
+      } else if (/stock_insuffisant/.test(e.message)) {
+        const nom = e.message.split(':')[1]?.trim()
+        setErreur(`Désolé, « ${nom || 'un produit'} » vient d'être épuisé. Ajustez votre panier.`)
+      } else {
+        setErreur('Un souci est survenu. Réessayez dans un instant.')
+      }
+      setEnvoiEnCours(false)
+    }
   }
 
   return (
@@ -100,6 +119,24 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         />
         <p className="mt-1.5 text-xs text-stone-warm">
           Il sera affiché au boulanger pour vous appeler quand c'est prêt.
+        </p>
+
+        {/* Email : pour recevoir la confirmation et retrouver son QR Code */}
+        <label htmlFor="email" className="mt-4 flex items-center gap-2 text-lg text-ink">
+          <Mail size={18} className="text-crust" /> Votre email
+          <span className="text-sm font-normal text-stone-warm">(facultatif)</span>
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Ex : julie@email.com"
+          autoComplete="email"
+          className="mt-3 w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
+        />
+        <p className="mt-1.5 text-xs text-stone-warm">
+          Pour recevoir votre confirmation et retrouver votre QR Code si vous l'oubliez.
         </p>
       </section>
 
@@ -189,21 +226,30 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         </div>
       </section>
 
+      {/* Message d'erreur éventuel (stock épuisé, boutique fermée…) */}
+      {erreur && (
+        <p className="mt-6 rounded-xl bg-rose-50 px-4 py-3 text-center text-sm font-medium text-rose-700 ring-1 ring-rose-200">
+          {erreur}
+        </p>
+      )}
+
       {/* Validation */}
       <button
         type="button"
         onClick={confirmer}
-        disabled={!creneauChoisi || boutiqueFermee}
+        disabled={!creneauChoisi || boutiqueFermee || envoiEnCours}
         className="mt-7 w-full rounded-xl bg-crust py-4 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-sand disabled:text-stone-warm"
       >
         {boutiqueFermee
           ? 'Boutique fermée — commandes suspendues'
-          : creneauChoisi
-            ? `Payer et confirmer · ${formatPrix(total)}`
-            : 'Choisissez un créneau'}
+          : envoiEnCours
+            ? 'Validation en cours…'
+            : creneauChoisi
+              ? `Payer et confirmer · ${formatPrix(total)}`
+              : 'Choisissez un créneau'}
       </button>
       <p className="mt-3 text-center text-xs text-stone-warm">
-        Démonstration — aucun paiement réel n'est effectué.
+        Démonstration — aucun paiement réel n'est encore encaissé.
       </p>
     </div>
   )

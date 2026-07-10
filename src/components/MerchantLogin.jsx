@@ -1,25 +1,48 @@
 import { useState } from 'react'
-import { ArrowLeft, Lock } from 'lucide-react'
+import { ArrowLeft, Lock, Mail } from 'lucide-react'
 import Logo from './Logo'
+import { supabase, modeReel } from '../lib/supabase'
 
-// Code d'accès réservé au boulanger (protection simple, côté front).
-// Pour le MVP, le code est en dur. Avec un vrai back-end, ce sera
-// un vrai compte (identifiant + mot de passe sécurisés).
-const CODE_PRO = '1987'
+// Code d'accès de secours en mode démo (pas de base configurée).
+const CODE_DEMO = '1987'
 
 export default function MerchantLogin({ onSucces, onRetour }) {
+  const [email, setEmail] = useState('')
+  const [motDePasse, setMotDePasse] = useState('')
   const [code, setCode] = useState('')
-  const [erreur, setErreur] = useState(false)
+  const [erreur, setErreur] = useState('')
+  const [enCours, setEnCours] = useState(false)
 
-  function valider(e) {
+  async function valider(e) {
     e.preventDefault()
-    if (code === CODE_PRO) {
-      onSucces()
+    setErreur('')
+
+    // --- Mode démo : simple code d'accès ---
+    if (!modeReel) {
+      if (code === CODE_DEMO) onSucces()
+      else {
+        setErreur('Code incorrect. Réessayez.')
+        setCode('')
+      }
+      return
+    }
+
+    // --- Mode réel : vrai compte (email + mot de passe Supabase) ---
+    setEnCours(true)
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: motDePasse,
+    })
+    setEnCours(false)
+    if (error) {
+      setErreur('Email ou mot de passe incorrect.')
     } else {
-      setErreur(true)
-      setCode('')
+      onSucces()
     }
   }
+
+  const champ =
+    'w-full rounded-lg border border-sand bg-cream py-3 pl-10 pr-4 text-sm outline-none transition focus:border-crust focus:ring-2 focus:ring-crust/15'
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-4">
@@ -29,43 +52,59 @@ export default function MerchantLogin({ onSucces, onRetour }) {
         </div>
         <h1 className="mt-4 text-2xl text-ink">Espace boulanger</h1>
         <p className="mt-1 text-sm text-stone-warm">
-          Accès réservé à l’équipe de La Pétrie. Saisissez votre code — il sera
-          mémorisé sur cet appareil.
+          Accès réservé à l’équipe de La Pétrie.
         </p>
 
-        <form onSubmit={valider} className="mt-6">
-          <div className="relative">
-            <Lock
-              size={17}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm"
-            />
-            <input
-              type="password"
-              inputMode="numeric"
-              autoFocus
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value)
-                setErreur(false)
-              }}
-              placeholder="Code d’accès"
-              className={`w-full rounded-lg border bg-cream py-3 pl-10 pr-4 text-center text-lg tracking-widest outline-none transition ${
-                erreur
-                  ? 'border-rose-300 focus:ring-2 focus:ring-rose-200'
-                  : 'border-sand focus:border-crust focus:ring-2 focus:ring-crust/15'
-              }`}
-            />
-          </div>
-
-          {erreur && (
-            <p className="mt-2 text-sm text-rose-600">Code incorrect. Réessayez.</p>
+        <form onSubmit={valider} className="mt-6 space-y-3 text-left">
+          {modeReel ? (
+            <>
+              <div className="relative">
+                <Mail size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
+                <input
+                  type="email"
+                  autoFocus
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setErreur('') }}
+                  placeholder="Email"
+                  autoComplete="email"
+                  className={champ}
+                />
+              </div>
+              <div className="relative">
+                <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
+                <input
+                  type="password"
+                  value={motDePasse}
+                  onChange={(e) => { setMotDePasse(e.target.value); setErreur('') }}
+                  placeholder="Mot de passe"
+                  autoComplete="current-password"
+                  className={champ}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="relative">
+              <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
+              <input
+                type="password"
+                inputMode="numeric"
+                autoFocus
+                value={code}
+                onChange={(e) => { setCode(e.target.value); setErreur('') }}
+                placeholder="Code d’accès"
+                className={`${champ} text-center tracking-widest`}
+              />
+            </div>
           )}
+
+          {erreur && <p className="text-sm text-rose-600">{erreur}</p>}
 
           <button
             type="submit"
-            className="mt-5 w-full rounded-lg bg-crust py-3.5 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99]"
+            disabled={enCours}
+            className="w-full rounded-lg bg-crust py-3.5 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:bg-sand disabled:text-stone-warm"
           >
-            Accéder à l’espace
+            {enCours ? 'Connexion…' : 'Accéder à l’espace'}
           </button>
         </form>
 
@@ -76,11 +115,6 @@ export default function MerchantLogin({ onSucces, onRetour }) {
         >
           <ArrowLeft size={15} /> Retour au site
         </button>
-
-        <p className="mt-4 border-t border-sand pt-4 text-xs text-stone-warm/80">
-          Astuce : ajoutez <span className="font-semibold text-crust">#pro</span> à l’adresse
-          du site pour arriver directement ici.
-        </p>
       </div>
     </div>
   )

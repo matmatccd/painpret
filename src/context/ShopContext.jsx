@@ -1,123 +1,219 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState, useEffect } from 'react'
 import { productsInitiaux, commandesInitiales, categoriesInitiales } from '../data/bakery'
+import { resolveImage } from '../data/images'
+import { supabase, modeReel } from '../lib/supabase'
 
 // ============================================================
 //  Le "magasin partagé"
 //  -----------------------------------------------------------
-//  Contient les produits (avec leur stock) et les commandes.
-//  Le côté CLIENT lit cet état (pour savoir ce qui est disponible).
-//  Le côté BOULANGER le modifie (stock, statut des commandes).
-//  Comme c'est partagé, une modification du boulanger est vue
-//  immédiatement par le client : c'est la "disponibilité en temps réel".
+//  MODE RÉEL (Supabase configuré) : produits, commandes et
+//  réglages viennent de la vraie base, partagée entre tous les
+//  appareils, et se mettent à jour en TEMPS RÉEL.
+//  MODE DÉMO (pas de clés) : tout est local, comme avant.
 // ============================================================
 
 const ShopContext = createContext(null)
 
-// L'ordre des statuts d'une commande, du début à la fin.
-// Trois étapes simples : à préparer -> prête -> livrée.
+// L'ordre des statuts d'une commande : à préparer -> prête -> livrée.
 export const STATUTS = ['a-preparer', 'prete', 'livree']
 
+// Le badge "Nouveau" est automatique : il disparaît 3 jours après la mise en ligne.
+const DUREE_NOUVEAU = 3 * 24 * 60 * 60 * 1000
+// Une commande est "nouvelle" (badge côté boulanger) pendant 5 minutes.
+const DUREE_COMMANDE_NEUVE = 5 * 60 * 1000
+
+// --- Conversions entre la base (colonnes en_minuscules) et l'appli ---
+function produitDepuisRow(r) {
+  return {
+    id: r.id,
+    nom: r.nom,
+    categorie: r.categorie,
+    sousCategorie: r.sous_categorie,
+    prix: Number(r.prix),
+    description: r.description || '',
+    image: r.image, // clé ou photo téléversée (résolue plus bas)
+    emoji: r.emoji || '🥖',
+    ingredients: r.ingredients || [],
+    allergenes: r.allergenes || [],
+    delaiPreparation: r.delai_preparation ?? 10,
+    stock: r.stock ?? 0,
+    populaire: r.populaire || false,
+    creeLe: r.cree_le ? new Date(r.cree_le).getTime() : null,
+  }
+}
+
+function rowDepuisProduit(p) {
+  return {
+    nom: p.nom,
+    categorie: p.categorie,
+    sous_categorie: p.sousCategorie ?? null,
+    prix: p.prix,
+    description: p.description ?? '',
+    image: p.image ?? null,
+    emoji: p.emoji ?? '🥖',
+    ingredients: p.ingredients ?? [],
+    allergenes: p.allergenes ?? [],
+    delai_preparation: p.delaiPreparation ?? 10,
+    stock: p.stock ?? 0,
+    populaire: p.populaire ?? false,
+  }
+}
+
+function commandeDepuisRow(r) {
+  const cree = r.cree_le ? new Date(r.cree_le).getTime() : Date.now()
+  return {
+    id: r.id,
+    numero: r.numero,
+    client: r.client || '',
+    email: r.email || '',
+    creneau: r.creneau,
+    heureRetrait: r.heure_retrait,
+    statut: r.statut,
+    articles: r.articles || [],
+    total: Number(r.total),
+    arrive: r.arrive || false,
+    date: cree,
+    nouvelle: Date.now() - cree < DUREE_COMMANDE_NEUVE,
+  }
+}
+
 export function ShopProvider({ children }) {
-  // La liste des produits est désormais entièrement modifiable
-  // (le boulanger peut ajuster le stock, ajouter ou supprimer un produit).
-  // On part d'une COPIE des données initiales.
-  const [produitsBase, setProduitsBase] = useState(() => productsInitiaux.map((p) => ({ ...p })))
-  const [commandes, setCommandes] = useState(commandesInitiales)
-  // Catégories modifiables par le boulanger (avec leurs sous-catégories)
-  const [categories, setCategories] = useState(() =>
+  // En mode réel on part de listes vides (remplies par la base) ; en démo, des données factices.
+  const [produitsBase, setProduitsBase] = useState(() =>
+    modeReel ? [] : productsInitiaux.map((p) => ({ ...p })),
+  )
+  const [commandes, setCommandes] = useState(() => (modeReel ? [] : commandesInitiales))
+  const [categoriesState, setCategoriesState] = useState(() =>
     categoriesInitiales.map((c) => ({ ...c, sousCategories: [...c.sousCategories] })),
   )
-
-  // --- Fermeture exceptionnelle (congés, jour férié) ---
-  // Quand c'est fermé, les clients ne peuvent plus commander.
-  // Mémorisé sur l'appareil pour survivre à un rafraîchissement.
   const [boutiqueFermee, setBoutiqueFermee] = useState(
-    () => localStorage.getItem('painpret_fermee') === '1',
+    () => !modeReel && localStorage.getItem('painpret_fermee') === '1',
   )
-  function basculerFermeture() {
-    setBoutiqueFermee((etat) => {
-      const suivant = !etat
-      localStorage.setItem('painpret_fermee', suivant ? '1' : '0')
-      return suivant
-    })
-  }
 
-  // Le badge "Nouveau" est automatique : 3 jours après la mise en ligne, il disparaît.
-  const DUREE_NOUVEAU = 3 * 24 * 60 * 60 * 1000
+  // ---- Chargement initial + temps réel (mode réel uniquement) ----
+  useEffect(() => {
+    if (!modeReel) return
+    let vivant = true
 
-  // Les produits "vivants" : "disponible" = il reste au moins 1 en stock,
-  // "nouveau" = mis en ligne il y a moins de 3 jours.
+    async function chargerProduits() {
+      const { data } = await supabase.from('produits').select('*').order('id')
+      if (vivant && data) setProduitsBase(data.map(produitDepuisRow))
+    }
+    async function chargerCommandes() {
+      const { data } = await supabase.from('commandes').select('*').order('cree_le')
+      if (vivant && data) setCommandes(data.map(commandeDepuisRow))
+    }
+    async function chargerReglages() {
+      const { data } = await supabase.from('reglages').select('*').eq('id', 1).maybeSingle()
+      if (vivant && data) setBoutiqueFermee(data.boutique_fermee)
+    }
+
+    chargerProduits()
+    chargerCommandes()
+    chargerReglages()
+
+    // Abonnement temps réel : toute modification recharge la table concernée.
+    const canal = supabase
+      .channel('painpret-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'produits' }, chargerProduits)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'commandes' }, chargerCommandes)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reglages' }, chargerReglages)
+      .subscribe()
+
+    return () => {
+      vivant = false
+      supabase.removeChannel(canal)
+    }
+  }, [])
+
+  // Les produits "vivants" : image résolue, disponibilité et badge "Nouveau" calculés.
   const produits = useMemo(
     () =>
-      produitsBase.map((p) => ({
-        ...p,
-        disponible: p.stock > 0,
-        nouveau: Boolean(p.creeLe) && Date.now() - p.creeLe < DUREE_NOUVEAU,
-      })),
-    [produitsBase],
+      produitsBase.map((p) => {
+        const cat = categoriesState.find((c) => c.id === p.categorie)
+        return {
+          ...p,
+          image: resolveImage(p.image),
+          imageRef: p.image, // valeur brute (clé ou photo), pour le formulaire
+          from: p.from || cat?.from || '#e9b872',
+          to: p.to || cat?.to || '#c98a3a',
+          disponible: p.stock > 0,
+          nouveau: Boolean(p.creeLe) && Date.now() - p.creeLe < DUREE_NOUVEAU,
+        }
+      }),
+    [produitsBase, categoriesState],
   )
 
-  // Petit utilitaire interne : modifier un produit par son id
-  function modifierProduit(id, modif) {
-    setProduitsBase((arr) => arr.map((p) => (p.id === id ? { ...p, ...modif(p) } : p)))
+  // Catégories avec image résolue
+  const categories = useMemo(
+    () => categoriesState.map((c) => ({ ...c, image: resolveImage(c.image), imageRef: c.image })),
+    [categoriesState],
+  )
+
+  // Applique un changement en local tout de suite (réactivité), la base suit.
+  function majLocaleProduit(id, champs) {
+    setProduitsBase((arr) => arr.map((p) => (p.id === id ? { ...p, ...champs } : p)))
   }
 
-  // --- Côté boulanger : ajuster le stock d'un produit (+ ou -) ---
-  function ajusterStock(id, delta) {
-    modifierProduit(id, (p) => ({ stock: Math.max(0, p.stock + delta) }))
+  // --- Stock : ajuster (+/-), épuiser, remettre ---
+  async function ajusterStock(id, delta) {
+    const p = produitsBase.find((x) => x.id === id)
+    if (!p) return
+    const nv = Math.max(0, p.stock + delta)
+    majLocaleProduit(id, { stock: nv })
+    if (modeReel) await supabase.from('produits').update({ stock: nv }).eq('id', id)
+  }
+  async function marquerEpuise(id) {
+    majLocaleProduit(id, { stock: 0 })
+    if (modeReel) await supabase.from('produits').update({ stock: 0 }).eq('id', id)
+  }
+  async function remettreEnStock(id, quantite = 10) {
+    majLocaleProduit(id, { stock: quantite })
+    if (modeReel) await supabase.from('produits').update({ stock: quantite }).eq('id', id)
   }
 
-  // --- Marquer un produit épuisé (stock = 0) ---
-  function marquerEpuise(id) {
-    modifierProduit(id, () => ({ stock: 0 }))
-  }
-
-  // --- Remettre un produit en stock (quantité par défaut) ---
-  function remettreEnStock(id, quantite = 10) {
-    modifierProduit(id, () => ({ stock: quantite }))
-  }
-
-  // --- Côté boulanger : créer un nouveau produit ---
-  // "creeLe" = date de mise en ligne (pour le badge "Nouveau" automatique)
-  function ajouterProduit(donnees) {
+  // --- Créer / modifier / supprimer un produit (boulanger connecté) ---
+  async function ajouterProduit(donnees) {
+    if (modeReel) {
+      const { data, error } = await supabase
+        .from('produits')
+        .insert(rowDepuisProduit(donnees))
+        .select()
+        .single()
+      if (!error && data) setProduitsBase((arr) => [...arr, produitDepuisRow(data)])
+      return
+    }
     setProduitsBase((arr) => {
       const nouvelId = arr.reduce((max, p) => Math.max(max, p.id), 0) + 1
       return [...arr, { id: nouvelId, creeLe: Date.now(), ...donnees }]
     })
   }
-
-  // --- Côté boulanger : modifier un produit existant ---
-  function mettreAJourProduit(id, donnees) {
-    setProduitsBase((arr) => arr.map((p) => (p.id === id ? { ...p, ...donnees } : p)))
+  async function mettreAJourProduit(id, donnees) {
+    majLocaleProduit(id, donnees)
+    if (modeReel) await supabase.from('produits').update(rowDepuisProduit(donnees)).eq('id', id)
   }
-
-  // --- Côté boulanger : supprimer un produit ---
-  function supprimerProduit(id) {
+  async function supprimerProduit(id) {
     setProduitsBase((arr) => arr.filter((p) => p.id !== id))
+    if (modeReel) await supabase.from('produits').delete().eq('id', id)
   }
 
-  // --- Catégories : ajouter une nouvelle catégorie (avec photo facultative) ---
+  // --- Catégories (locales : elles changent très rarement) ---
   function ajouterCategorie({ nom, emoji, from, to, image = null }) {
-    // id "slug" à partir du nom (ex : "Pains spéciaux" -> "pains-speciaux")
     const sansAccents = nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     const id =
       sansAccents.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `cat-${Date.now()}`
-    setCategories((arr) => {
-      if (arr.some((c) => c.id === id)) return arr // évite les doublons
+    setCategoriesState((arr) => {
+      if (arr.some((c) => c.id === id)) return arr
       return [...arr, { id, nom: nom.trim(), emoji: emoji || '🥐', from: from || '#e9b872', to: to || '#c98a3a', image, sousCategories: [] }]
     })
   }
-
-  // --- Catégories : supprimer une catégorie ---
   function supprimerCategorie(id) {
-    setCategories((arr) => arr.filter((c) => c.id !== id))
+    setCategoriesState((arr) => arr.filter((c) => c.id !== id))
   }
-
-  // --- Sous-catégories : ajouter dans une catégorie ---
   function ajouterSousCategorie(catId, nom) {
     const propre = nom.trim()
     if (!propre) return
-    setCategories((arr) =>
+    setCategoriesState((arr) =>
       arr.map((c) =>
         c.id === catId && !c.sousCategories.includes(propre)
           ? { ...c, sousCategories: [...c.sousCategories, propre] }
@@ -125,38 +221,60 @@ export function ShopProvider({ children }) {
       ),
     )
   }
-
-  // --- Sous-catégories : supprimer d'une catégorie ---
   function supprimerSousCategorie(catId, nom) {
-    setCategories((arr) =>
+    setCategoriesState((arr) =>
       arr.map((c) =>
         c.id === catId ? { ...c, sousCategories: c.sousCategories.filter((s) => s !== nom) } : c,
       ),
     )
   }
 
-  // --- Côté client : passer une commande (commande en ligne, retrait en boutique) ---
-  // Crée une commande "à préparer" qui apparaît aussitôt côté boulanger,
-  // et DÉCOMPTE le stock des produits commandés (épuisé automatique à 0).
-  // Renvoie la commande créée (pour afficher le numéro + QR Code).
-  function ajouterCommande({ articles, total, creneau, heureRetrait, client = '' }) {
+  // --- Fermeture exceptionnelle ---
+  async function basculerFermeture() {
+    const suivant = !boutiqueFermee
+    setBoutiqueFermee(suivant)
+    if (modeReel) {
+      await supabase.from('reglages').update({ boutique_fermee: suivant }).eq('id', 1)
+    } else {
+      localStorage.setItem('painpret_fermee', suivant ? '1' : '0')
+    }
+  }
+
+  // --- Client : passer une commande (paiement validé -> commande réelle) ---
+  // Renvoie la commande créée, ou lève une erreur ('boutique_fermee' / 'stock_insuffisant').
+  async function ajouterCommande({ articles, total, creneau, heureRetrait, client = '', email = '' }) {
+    if (modeReel) {
+      const { data, error } = await supabase.rpc('passer_commande', {
+        p_client: client,
+        p_email: email,
+        p_creneau: creneau,
+        p_heure_retrait: heureRetrait,
+        p_articles: articles,
+        p_total: total,
+      })
+      if (error) throw new Error(error.message)
+      const commande = commandeDepuisRow(Array.isArray(data) ? data[0] : data)
+      setCommandes((cmds) => (cmds.some((c) => c.id === commande.id) ? cmds : [...cmds, commande]))
+      return commande
+    }
+
+    // Mode démo : commande locale + décompte du stock local
+    if (boutiqueFermee) throw new Error('boutique_fermee')
     const nouvelle = {
       id: Date.now(),
-      // Numéro lisible : lettre + 2 chiffres (ex : "B47")
       numero: 'B' + Math.floor(10 + Math.random() * 89),
-      client, // le prénom du client ("Commande pour Julie !")
-      date: Date.now(), // pour les statistiques de la semaine
+      client,
+      email,
+      date: Date.now(),
       creneau,
       heureRetrait,
       statut: 'a-preparer',
       articles,
       total,
-      arrive: false, // le client a-t-il signalé son arrivée en boutique ?
-      nouvelle: true, // pour signaler une commande fraîche côté boulanger
+      arrive: false,
+      nouvelle: true,
     }
     setCommandes((cmds) => [...cmds, nouvelle])
-
-    // Le stock baisse immédiatement (les articles portent l'id du produit)
     setProduitsBase((arr) =>
       arr.map((p) => {
         const commande = articles
@@ -165,62 +283,52 @@ export function ShopProvider({ children }) {
         return commande > 0 ? { ...p, stock: Math.max(0, p.stock - commande) } : p
       }),
     )
-
     return nouvelle
   }
 
-  // --- Côté client : signaler son arrivée en boutique ---
-  // Le boulanger voit aussitôt un badge "Client sur place" sur la commande.
-  function signalerArrivee(id) {
+  // --- Client : signaler son arrivée en boutique ---
+  async function signalerArrivee(id) {
     setCommandes((cmds) => cmds.map((c) => (c.id === id ? { ...c, arrive: true } : c)))
+    if (modeReel) {
+      const c = commandes.find((x) => x.id === id)
+      if (c) await supabase.rpc('signaler_arrivee', { p_numero: c.numero })
+    }
   }
 
-  // --- Côté boulanger : valider un retrait via le numéro de commande (scan QR) ---
-  // Renvoie { ok, commande, raison } pour afficher un message clair.
-  function validerRetrait(saisie) {
+  // --- Boulanger : changer le statut d'une commande ---
+  async function changerStatut(id, statut) {
+    if (!STATUTS.includes(statut)) return
+    setCommandes((cmds) => cmds.map((c) => (c.id === id ? { ...c, statut } : c)))
+    if (modeReel) await supabase.from('commandes').update({ statut }).eq('id', id)
+  }
+  async function avancerCommande(id) {
+    const c = commandes.find((x) => x.id === id)
+    if (!c) return
+    const suivant = STATUTS[Math.min(STATUTS.indexOf(c.statut) + 1, STATUTS.length - 1)]
+    await changerStatut(id, suivant)
+  }
+
+  // --- Boulanger : valider un retrait (scan QR ou numéro saisi) ---
+  async function validerRetrait(saisie) {
     const texte = (saisie || '').trim().toUpperCase()
     if (!texte) return { ok: false, raison: 'vide' }
-
-    // On accepte le contenu brut du QR ("PAINPRET|B41|11:30") ou juste "B41"
     const commande = commandes.find((c) => texte.includes(c.numero.toUpperCase()))
     if (!commande) return { ok: false, raison: 'introuvable' }
     if (commande.statut === 'livree') return { ok: false, raison: 'deja', commande }
-
-    setCommandes((cmds) =>
-      cmds.map((c) => (c.id === commande.id ? { ...c, statut: 'livree' } : c)),
-    )
+    await changerStatut(commande.id, 'livree')
     return { ok: true, commande }
-  }
-
-  // --- Côté boulanger : choisir directement le statut d'une commande ---
-  // (on peut avancer OU revenir en arrière : simple et sans piège)
-  function changerStatut(id, statut) {
-    if (!STATUTS.includes(statut)) return
-    setCommandes((cmds) => cmds.map((c) => (c.id === id ? { ...c, statut } : c)))
-  }
-
-  // --- Faire avancer une commande au statut suivant (raccourci) ---
-  function avancerCommande(id) {
-    setCommandes((cmds) =>
-      cmds.map((c) => {
-        if (c.id !== id) return c
-        const indexActuel = STATUTS.indexOf(c.statut)
-        const suivant = STATUTS[Math.min(indexActuel + 1, STATUTS.length - 1)]
-        return { ...c, statut: suivant }
-      }),
-    )
   }
 
   const valeur = {
     produits,
     commandes,
+    categories,
     ajusterStock,
     marquerEpuise,
     remettreEnStock,
     ajouterProduit,
     mettreAJourProduit,
     supprimerProduit,
-    categories,
     ajouterCategorie,
     supprimerCategorie,
     ajouterSousCategorie,
@@ -237,7 +345,7 @@ export function ShopProvider({ children }) {
   return <ShopContext.Provider value={valeur}>{children}</ShopContext.Provider>
 }
 
-// Raccourci pour utiliser le magasin : const { produits } = useShop()
+// Raccourci : const { produits } = useShop()
 export function useShop() {
   const contexte = useContext(ShopContext)
   if (!contexte) {

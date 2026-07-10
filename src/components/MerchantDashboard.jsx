@@ -31,6 +31,7 @@ import {
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
 import { bakery } from '../data/bakery'
+import { resolveImage } from '../data/images'
 import { formatPrix } from '../lib/format'
 import { jouerCarillon } from '../lib/son'
 
@@ -644,8 +645,8 @@ function Retrait({ validerRetrait }) {
   const [cameraActive, setCameraActive] = useState(false)
   const [erreurCamera, setErreurCamera] = useState(null)
 
-  function traiter(valeur) {
-    const r = validerRetrait(valeur)
+  async function traiter(valeur) {
+    const r = await validerRetrait(valeur)
     setResultat(r)
     if (r.ok) {
       setCode('')
@@ -1031,7 +1032,9 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
   const [description, setDescription] = useState(produit?.description || '')
   const [delai, setDelai] = useState(String(produit?.delaiPreparation ?? 5))
   const [stock, setStock] = useState(String(produit?.stock ?? 10))
-  const [image, setImage] = useState(produit?.image || '')
+  // On édite la valeur BRUTE de l'image (clé ou photo téléversée), pas l'URL résolue.
+  const [image, setImage] = useState(produit?.imageRef ?? '')
+  const apercuImage = resolveImage(image)
   const [populaire, setPopulaire] = useState(produit?.populaire || false)
   const [gouts, setGouts] = useState(produit?.gouts?.length ? produit.gouts : [])
   // Ingrédients et allergènes : saisis en texte, séparés par des virgules
@@ -1096,10 +1099,10 @@ function ProductForm({ produit, onValider, onAnnuler, categorieParDefaut }) {
           <div className="flex items-center gap-3">
             <div
               className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand"
-              style={image ? undefined : { background: `linear-gradient(150deg, ${categories.find((c) => c.id === categorie)?.from}, ${categories.find((c) => c.id === categorie)?.to})` }}
+              style={apercuImage ? undefined : { background: `linear-gradient(150deg, ${categories.find((c) => c.id === categorie)?.from}, ${categories.find((c) => c.id === categorie)?.to})` }}
             >
-              {image ? (
-                <img src={image} alt="" className="h-full w-full object-cover" />
+              {apercuImage ? (
+                <img src={apercuImage} alt="" className="h-full w-full object-cover" />
               ) : (
                 <span className="text-3xl">{emoji || '🥖'}</span>
               )}

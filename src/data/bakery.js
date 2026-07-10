@@ -6,27 +6,6 @@
 //  Plus tard, elles viendront d'une vraie base de données (Supabase).
 // ============================================================
 
-// Vraies photos des pains La Pétrisane (fond blanc, studio)
-import baguetteOrdinaire from '../assets/photos/baguette-ordinaire.jpg'
-import baguetteTradition from '../assets/photos/baguette-tradition.jpg'
-import baguetteBio from '../assets/photos/baguette-bio.jpg'
-import baguetteGraines from '../assets/photos/baguette-graines.jpg'
-import baguetteFibres from '../assets/photos/baguette-fibres.jpg'
-import painComplet from '../assets/photos/pain-complet.jpg'
-import painNoir from '../assets/photos/pain-noir.jpg'
-import paveFibres from '../assets/photos/pave-fibres.jpg'
-// Brioche et boissons (photos fournies par Mathis)
-import brioche from '../assets/photos/brioche.jpg'
-import cocaCanette from '../assets/photos/coca-canette.jpg'
-import cocaZeroCanette from '../assets/photos/coca-zero-canette.jpg'
-import cocaBouteille from '../assets/photos/coca-bouteille.jpg'
-import cocaZeroBouteille from '../assets/photos/coca-zero-bouteille.jpg'
-import orangina from '../assets/photos/orangina.jpg'
-import oasisTropical from '../assets/photos/oasis-tropical.jpg'
-import liptonPeche from '../assets/photos/lipton-peche.jpg'
-import minuteMaid from '../assets/photos/minute-maid.jpg'
-import cristaline from '../assets/photos/cristaline.jpg'
-import sanPellegrino from '../assets/photos/san-pellegrino.jpg'
 
 // --- Infos de la boulangerie ---
 export const bakery = {
@@ -104,9 +83,9 @@ export const lienAvisGoogle =
 // Chaque catégorie a un emoji, un dégradé de couleurs, et une liste de
 // sous-catégories. Le boulanger peut ajouter/supprimer catégories et sous-catégories.
 export const categoriesInitiales = [
-  { id: 'pains', nom: 'Baguettes', emoji: '🥖', from: '#e9b872', to: '#c98a3a', image: baguetteTradition, sousCategories: ['Pétrisane', 'Baguettes'] },
-  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', image: painComplet, sousCategories: ['Pains ronds', 'Brioches'] },
-  { id: 'boissons', nom: 'Boissons', emoji: '🥤', from: '#e05252', to: '#a32222', image: cocaBouteille, sousCategories: ['Sodas', 'Jus', 'Eaux'] },
+  { id: 'pains', nom: 'Baguettes', emoji: '🥖', from: '#e9b872', to: '#c98a3a', image: 'baguette-tradition', sousCategories: ['Pétrisane', 'Baguettes'] },
+  { id: 'pains-speciaux', nom: 'Pains spéciaux', emoji: '🍞', from: '#d9a05b', to: '#a86a2c', image: 'pain-complet', sousCategories: ['Pains ronds', 'Brioches'] },
+  { id: 'boissons', nom: 'Boissons', emoji: '🥤', from: '#e05252', to: '#a32222', image: 'coca-bouteille', sousCategories: ['Sodas', 'Jus', 'Eaux'] },
 ]
 
 // Un jour en millisecondes (pour les dates de mise en ligne)
@@ -125,7 +104,7 @@ export const productsInitiaux = [
     emoji: '🥖',
     from: '#e9b872',
     to: '#c98a3a',
-    image: baguetteTradition,
+    image: 'baguette-tradition',
     description:
       '300 g de plaisir à la saveur unique et au fondant incomparable. Elle accompagne tous vos repas, du petit déjeuner au dîner.',
     ingredients: ['Farine de blé T65', 'Eau', 'Levain naturel', 'Sel'],
@@ -144,7 +123,7 @@ export const productsInitiaux = [
     emoji: '🥖',
     from: '#8fae4a',
     to: '#5f8a2c',
-    image: baguetteBio,
+    image: 'baguette-bio',
     description:
       '300 g de plaisir confectionnés exclusivement à partir de blé biologique. La Pétrisane version bio, au goût franc et authentique.',
     ingredients: ['Farine de blé bio', 'Eau', 'Levain naturel', 'Sel'],
@@ -163,7 +142,7 @@ export const productsInitiaux = [
     emoji: '🌾',
     from: '#d9a05b',
     to: '#a86a2c',
-    image: baguetteGraines,
+    image: 'baguette-graines',
     description:
       'La Pétrisane agrémentée de savoureuses graines de lin, de tournesol et de sésame, pour un croquant et des notes de noisette. 300 g.',
     ingredients: ['Farine de blé', 'Graines de lin', 'Sésame', 'Tournesol', 'Levain', 'Sel'],
@@ -182,7 +161,7 @@ export const productsInitiaux = [
     emoji: '🥖',
     from: '#e08a3c',
     to: '#b45309',
-    image: baguetteFibres,
+    image: 'baguette-fibres',
     description:
       'Moelleuse, aux enveloppes de blé biologique, elle allie goût et bien-être. Riche en fibres, la complice du quotidien. 300 g.',
     ingredients: ['Farine de blé', 'Son de blé', 'Eau', 'Levain', 'Sel'],
@@ -201,7 +180,7 @@ export const productsInitiaux = [
     emoji: '🥖',
     from: '#e9b872',
     to: '#c98a3a',
-    image: baguetteOrdinaire,
+    image: 'baguette-ordinaire',
     description:
       'La classique de tous les jours : croûte fine et dorée, mie souple et légère. Simple et bien faite. 250 g.',
     ingredients: ['Farine de blé', 'Eau', 'Levure', 'Sel'],
@@ -220,7 +199,7 @@ export const productsInitiaux = [
     emoji: '🍞',
     from: '#c9a06a',
     to: '#8a5a32',
-    image: painComplet,
+    image: 'pain-complet',
     description:
       'Farine complète, mie généreuse et goût rustique de céréale. Se garde plusieurs jours — parfait en tartines. 310 g.',
     ingredients: ['Farine de blé complète', 'Eau', 'Levain', 'Sel'],
@@ -239,7 +218,7 @@ export const productsInitiaux = [
     emoji: '🍞',
     from: '#8a5a32',
     to: '#5a3a1e',
-    image: painNoir,
+    image: 'pain-noir',
     description:
       'Seigle et graines torréfiées : une mie sombre, dense et parfumée, au caractère affirmé. L’allié des fromages et du saumon. 300 g.',
     ingredients: ['Farine de seigle', 'Farine de blé', 'Graines', 'Levain', 'Sel'],
@@ -258,7 +237,7 @@ export const productsInitiaux = [
     emoji: '🍞',
     from: '#e08a3c',
     to: '#b45309',
-    image: paveFibres,
+    image: 'pave-fibres',
     description:
       'Croûte épaisse bien cuite, mie moelleuse et riche en fibres. Le pavé qui accompagne tous les repas. 300 g.',
     ingredients: ['Farine de blé', 'Son de blé', 'Eau', 'Levain', 'Sel'],
@@ -277,7 +256,7 @@ export const productsInitiaux = [
     emoji: '🥮',
     from: '#f2c464',
     to: '#d99a2b',
-    image: brioche,
+    image: 'brioche',
     description:
       'Brioche pur beurre cuite dans son moule : mie filante, croûte dorée et parfum gourmand. Parfaite au petit déjeuner ou au goûter.',
     ingredients: ['Farine de blé', 'Œufs', 'Beurre', 'Sucre', 'Levure', 'Sel'],
@@ -297,7 +276,7 @@ export const productsInitiaux = [
     emoji: '🥤',
     from: '#e05252',
     to: '#a32222',
-    image: cocaCanette,
+    image: 'coca-canette',
     description: 'La canette classique, bien fraîche — le goût original.',
     allergenes: [],
     stock: 24,
@@ -313,7 +292,7 @@ export const productsInitiaux = [
     emoji: '🥤',
     from: '#3a3a3a',
     to: '#111111',
-    image: cocaZeroCanette,
+    image: 'coca-zero-canette',
     description: 'Le goût Coca-Cola, zéro sucres — en canette fraîche.',
     allergenes: [],
     stock: 24,
@@ -329,7 +308,7 @@ export const productsInitiaux = [
     emoji: '🥤',
     from: '#e05252',
     to: '#a32222',
-    image: cocaBouteille,
+    image: 'coca-bouteille',
     description: 'La bouteille 50 cl à emporter — goût original.',
     allergenes: [],
     stock: 18,
@@ -345,7 +324,7 @@ export const productsInitiaux = [
     emoji: '🥤',
     from: '#3a3a3a',
     to: '#111111',
-    image: cocaZeroBouteille,
+    image: 'coca-zero-bouteille',
     description: 'La bouteille 50 cl zéro sucres, sans calories.',
     allergenes: [],
     stock: 18,
@@ -361,7 +340,7 @@ export const productsInitiaux = [
     emoji: '🍊',
     from: '#f2a444',
     to: '#d97b16',
-    image: orangina,
+    image: 'orangina',
     description: 'La bulle à l’orange… et sa pulpe ! Bouteille 50 cl.',
     allergenes: [],
     stock: 15,
@@ -377,7 +356,7 @@ export const productsInitiaux = [
     emoji: '🌴',
     from: '#f2a444',
     to: '#2f7fbf',
-    image: oasisTropical,
+    image: 'oasis-tropical',
     description: 'À l’eau de source et aux fruits, saveur tropicale. 33 cl.',
     allergenes: [],
     stock: 15,
@@ -393,7 +372,7 @@ export const productsInitiaux = [
     emoji: '🍑',
     from: '#f2b05e',
     to: '#c96a1a',
-    image: liptonPeche,
+    image: 'lipton-peche',
     description: 'Thé glacé saveur pêche, faible en calories. Bouteille 50 cl.',
     allergenes: [],
     stock: 15,
@@ -409,7 +388,7 @@ export const productsInitiaux = [
     emoji: '🍊',
     from: '#f2a444',
     to: '#d97b16',
-    image: minuteMaid,
+    image: 'minute-maid',
     description: 'Jus à teneur en fruits, riche en vitamine C. Canette 33 cl.',
     allergenes: [],
     stock: 15,
@@ -425,7 +404,7 @@ export const productsInitiaux = [
     emoji: '💧',
     from: '#7fb8e0',
     to: '#2f6fa8',
-    image: cristaline,
+    image: 'cristaline',
     description: 'Eau de source à l’état naturel, fabriquée en France. 50 cl.',
     allergenes: [],
     stock: 30,
@@ -441,7 +420,7 @@ export const productsInitiaux = [
     emoji: '🫧',
     from: '#7fd0a0',
     to: '#2f8a5a',
-    image: sanPellegrino,
+    image: 'san-pellegrino',
     description: 'Eau minérale naturelle finement pétillante. Bouteille 50 cl.',
     allergenes: [],
     stock: 20,

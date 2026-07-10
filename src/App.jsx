@@ -20,6 +20,7 @@ import HomeSkeleton from './components/Skeleton'
 import MobileCartBar from './components/MobileCartBar'
 import { useShop } from './context/ShopContext'
 import { useNotifications } from './context/NotificationsContext'
+import { supabase, modeReel } from './lib/supabase'
 
 // Message de notification selon le nouveau statut d'une commande
 function messagePourStatut(statut, numero) {
@@ -42,20 +43,34 @@ export default function App() {
   // Si le boulanger s'est déjà connecté sur cet appareil, il entre directement.
   const [mode, setMode] = useState(() => {
     if (window.location.hash === '#pro') {
+      // Mode réel : la session Supabase décide (vérifiée juste après) -> 'login' par défaut
+      if (modeReel) return 'login'
       return localStorage.getItem('painpret_pro') === '1' ? 'boulanger' : 'login'
     }
     return 'client'
   })
 
+  // Mode réel : si le boulanger a déjà une session ouverte, on entre directement
+  useEffect(() => {
+    if (!modeReel) return
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session && window.location.hash === '#pro') setMode('boulanger')
+    })
+  }, [])
+
   // Ouvre l'espace pro (depuis l'en-tête ou le pied de page)
   function ouvrirEspacePro() {
     window.location.hash = 'pro'
-    setMode(localStorage.getItem('painpret_pro') === '1' ? 'boulanger' : 'login')
+    if (modeReel) {
+      supabase.auth.getSession().then(({ data }) => setMode(data.session ? 'boulanger' : 'login'))
+    } else {
+      setMode(localStorage.getItem('painpret_pro') === '1' ? 'boulanger' : 'login')
+    }
   }
 
-  // Connexion réussie : on mémorise sur l'appareil
+  // Connexion réussie (compte réel ou code démo)
   function connexionPro() {
-    localStorage.setItem('painpret_pro', '1')
+    if (!modeReel) localStorage.setItem('painpret_pro', '1')
     window.location.hash = 'pro'
     setMode('boulanger')
   }
@@ -67,8 +82,9 @@ export default function App() {
   }
 
   // Déconnexion de l'espace pro
-  function deconnexionPro() {
-    localStorage.removeItem('painpret_pro')
+  async function deconnexionPro() {
+    if (modeReel) await supabase.auth.signOut()
+    else localStorage.removeItem('painpret_pro')
     history.replaceState(null, '', window.location.pathname)
     setMode('client')
   }
