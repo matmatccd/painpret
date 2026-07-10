@@ -23,6 +23,12 @@ export const bakery = {
   // Présentation de la boulangerie (inspirée du site officiel lapetrie.fr)
   description:
     'Le pain est pétri et cuit sur place, toute la journée. Notre mission : redonner au pain toute sa place à table, avec des recettes originales et un fondant incomparable.',
+  // Accroches qui défilent sous le nom, dans le bandeau d'accueil
+  accroches: [
+    'Artisan boulanger depuis plus de 15 ans',
+    'Pain fait maison, cuit devant vous',
+    'Pétri et cuit sur place, chaque jour',
+  ],
   // Horaires d'ouverture par jour
   horaires: [
     { jour: 'Lundi', heures: '07:00 – 19:30' },

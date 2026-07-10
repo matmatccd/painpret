@@ -14,6 +14,8 @@ const PHOTOS = [
 // Bannière d'accueil : diaporama automatique des photos de la boulangerie.
 export default function Hero() {
   const [index, setIndex] = useState(0)
+  // Accroche affichée sous le nom (elle change toute seule)
+  const [accroche, setAccroche] = useState(0)
 
   // Défilement automatique toutes les 5 s — sauf si l'utilisateur
   // a demandé à réduire les animations (accessibilité).
@@ -24,6 +26,16 @@ export default function Hero() {
       setIndex((i) => (i + 1) % PHOTOS.length)
     }, 5000)
     return () => clearInterval(minuteur)
+  }, [])
+
+  // Les accroches défilent un peu plus vite (toutes les 3,5 s)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (bakery.accroches.length < 2) return
+    const t = setInterval(() => {
+      setAccroche((i) => (i + 1) % bakery.accroches.length)
+    }, 3500)
+    return () => clearInterval(t)
   }, [])
 
   return (
@@ -66,11 +78,17 @@ export default function Hero() {
 
           <div className="relative text-white">
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#e9cd90]">
-              Artisan boulanger · Click & Collect
+              Click &amp; Collect · {bakery.ville.replace(/^\d+\s*/, '')}
             </p>
             <h1 className="text-4xl leading-none text-white sm:text-6xl">{bakery.nom}</h1>
-            <p className="mt-3 max-w-lg text-sm text-white/85 sm:text-base">
-              {bakery.slogan} — {bakery.equipe}. {bakery.description}
+            {/* Accroche qui défile (change toute seule, en fondu) */}
+            <p className="mt-3 min-h-7">
+              <span key={accroche} className="animate-avis inline-block font-display text-lg text-[#f2d3d8] sm:text-xl">
+                {bakery.accroches[accroche]}
+              </span>
+            </p>
+            <p className="mt-2 max-w-lg text-sm text-white/85 sm:text-base">
+              {bakery.equipe}. {bakery.description}
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/90">
