@@ -17,10 +17,10 @@ export default function Hero() {
   // Accroche affichée sous le nom (elle change toute seule)
   const [accroche, setAccroche] = useState(0)
 
-  // Défilement automatique toutes les 5 s — sauf si l'utilisateur
-  // a demandé à réduire les animations (accessibilité).
+  // Défilement automatique toutes les 5 s.
+  // (Si l'utilisateur a réduit les animations, seul le fondu est coupé
+  //  par le CSS — le contenu continue de changer.)
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (PHOTOS.length < 2) return
     const minuteur = setInterval(() => {
       setIndex((i) => (i + 1) % PHOTOS.length)
@@ -30,7 +30,6 @@ export default function Hero() {
 
   // Les accroches défilent un peu plus vite (toutes les 3,5 s)
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (bakery.accroches.length < 2) return
     const t = setInterval(() => {
       setAccroche((i) => (i + 1) % bakery.accroches.length)

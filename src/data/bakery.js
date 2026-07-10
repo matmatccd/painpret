@@ -25,7 +25,7 @@ export const bakery = {
     'Le pain est pétri et cuit sur place, toute la journée. Notre mission : redonner au pain toute sa place à table, avec des recettes originales et un fondant incomparable.',
   // Accroches qui défilent sous le nom, dans le bandeau d'accueil
   accroches: [
-    'Artisan boulanger depuis plus de 15 ans',
+    'Artisan boulanger depuis 2012',
     'Pain fait maison, cuit devant vous',
     'Pétri et cuit sur place, chaque jour',
   ],

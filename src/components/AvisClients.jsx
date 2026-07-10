@@ -21,9 +21,9 @@ function Etoiles({ note, clair = false }) {
 export default function AvisClients() {
   const [index, setIndex] = useState(0)
 
-  // Défilement automatique (sauf si l'utilisateur a réduit les animations)
+  // Défilement automatique. (Le réglage "réduire les animations" coupe
+  // seulement le fondu via le CSS — les avis continuent de changer.)
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (avisClients.length < 2) return
     const t = setInterval(() => setIndex((i) => (i + 1) % avisClients.length), 5000)
     return () => clearInterval(t)
