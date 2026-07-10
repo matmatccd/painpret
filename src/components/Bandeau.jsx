@@ -1,6 +1,6 @@
 import { Wheat } from 'lucide-react'
 
-// Messages du bandeau (façade La Pétrie : prune + doré)
+// Messages du bandeau
 const MESSAGES = [
   'Pain frais du jour',
   'Fait maison',
@@ -9,7 +9,8 @@ const MESSAGES = [
   'Commandez, passez, repartez',
 ]
 
-// Bandeau défilant en continu entre le Hero et la boutique.
+// Ruban élégant entre le Hero et la boutique : flux bordeaux très lent,
+// petites capitales espacées, fins épis dorés en séparateurs.
 // Le contenu est affiché deux fois pour une boucle sans couture
 // (la seconde copie est masquée aux lecteurs d'écran).
 export default function Bandeau() {
@@ -17,20 +18,20 @@ export default function Bandeau() {
     <div className="flex items-center" aria-hidden={cache || undefined}>
       {MESSAGES.map((m) => (
         <span key={m} className="flex items-center">
-          <span className="whitespace-nowrap px-6 font-display text-sm tracking-wide text-[#e9cd90] sm:text-base">
+          <span className="whitespace-nowrap px-8 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2d3d8]/90 sm:text-xs">
             {m}
           </span>
-          <Wheat size={15} className="shrink-0 text-[#e9cd90]/60" />
+          <Wheat size={12} className="shrink-0 text-[#e9cd90]/45" />
         </span>
       ))}
     </div>
   )
 
   return (
-    <div className="relative mt-6 overflow-hidden border-y-2 border-[#e9cd90]/50 py-2.5">
-      {/* Flux de couleurs de La Pétrie en fond du bandeau */}
+    <div className="relative mt-6 overflow-hidden border-y border-[#e9cd90]/30 py-3">
+      {/* Flux bordeaux, très lent, légèrement assombri */}
       <div className="flux-petrie absolute inset-0" />
-      <div className="absolute inset-0 bg-[#2c1019]/20" />
+      <div className="absolute inset-0 bg-[#2c1019]/35" />
       <div className="marquee-petrie relative">
         <Serie />
         <Serie cache />

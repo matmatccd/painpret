@@ -120,14 +120,14 @@
 .flux-petrie {
   background: linear-gradient(
     115deg,
-    #521f30, #6f2f43, #a13352, #b98a2f, #6f2f43, #521f30
+    #3f1622, #521f30, #6f2f43, #8a3350, #a13352, #6f2f43, #521f30, #3f1622
   );
   background-size: 300% 300%;
-  animation: flux 14s ease-in-out infinite;
+  animation: flux 28s ease-in-out infinite;
 }
 
-/* "La Pétrie" : le flux des couleurs de la boutique coule DANS les lettres
-   (crème, doré, rose poudré, framboise clair — teintes de la façade). */
+/* "La Pétrie" : un flux bordeaux coule lentement DANS les lettres
+   (rosés et bordeaux de la façade — clair pour rester lisible). */
 @keyframes titre-flux {
   0% { background-position: 0% center; }
   50% { background-position: 100% center; }
@@ -136,13 +136,13 @@
 .titre-petrie {
   background: linear-gradient(
     100deg,
-    #fdf6ec, #e9cd90, #f2d3d8, #e08aa4, #f7e8c4, #e9cd90, #fdf6ec
+    #f6dde4, #e3a8ba, #c66a88, #a13352, #c66a88, #e3a8ba, #f6dde4
   );
   background-size: 320% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: titre-flux 9s ease-in-out infinite;
+  animation: titre-flux 18s ease-in-out infinite;
 }
 
 /* L'épi du logo ondule doucement, comme au vent */
@@ -176,7 +176,7 @@
 .marquee-petrie {
   display: flex;
   width: max-content;
-  animation: defile 26s linear infinite;
+  animation: defile 40s linear infinite;
 }
 .marquee-petrie:hover { animation-play-state: paused; }
 
@@ -197,8 +197,8 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .flux-petrie { animation: flux 14s ease-in-out infinite !important; }
-  .marquee-petrie { animation: defile 26s linear infinite !important; }
-  .titre-petrie { animation: titre-flux 9s ease-in-out infinite !important; }
+  .flux-petrie { animation: flux 28s ease-in-out infinite !important; }
+  .marquee-petrie { animation: defile 40s linear infinite !important; }
+  .titre-petrie { animation: titre-flux 18s ease-in-out infinite !important; }
   .logo-ble { animation: ondule 4s ease-in-out infinite !important; }
 }
