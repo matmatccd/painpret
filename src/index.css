@@ -110,6 +110,29 @@
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
+/* Flux de couleurs qui bouge — aux vraies teintes de la façade La Pétrie
+   (prune, framboise, doré). Un dégradé qui coule lentement en boucle. */
+@keyframes flux {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.flux-petrie {
+  background: linear-gradient(
+    115deg,
+    #521f30, #6f2f43, #a13352, #b98a2f, #6f2f43, #521f30
+  );
+  background-size: 300% 300%;
+  animation: flux 14s ease-in-out infinite;
+}
+
+/* Fondu doux pour les avis qui défilent */
+@keyframes avis-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-avis { animation: avis-in 0.6s var(--ease-out-soft) both; }
+
 /* Respect des préférences d'accessibilité : on coupe le mouvement */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -1,54 +1,98 @@
-import { Star } from 'lucide-react'
-import { bakery, avisClients } from '../data/bakery'
+import { useEffect, useState } from 'react'
+import { Star, Quote } from 'lucide-react'
+import { bakery, avisClients, lienAvisGoogle } from '../data/bakery'
 
 // Étoiles pleines/vides selon la note (sur 5)
-function Etoiles({ note }) {
+function Etoiles({ note, clair = false }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${note} sur 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          size={15}
-          className={n <= note ? 'fill-amber-400 text-amber-400' : 'text-sand'}
+          size={16}
+          className={n <= note ? 'fill-amber-300 text-amber-300' : clair ? 'text-white/30' : 'text-sand'}
         />
       ))}
     </span>
   )
 }
 
-// Vrais avis clients de La Pétrie (relevés sur sa fiche publique).
+// Avis clients de La Pétrie, en diaporama, posés sur un flux de couleurs animé.
 export default function AvisClients() {
+  const [index, setIndex] = useState(0)
+
+  // Défilement automatique (sauf si l'utilisateur a réduit les animations)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (avisClients.length < 2) return
+    const t = setInterval(() => setIndex((i) => (i + 1) % avisClients.length), 5000)
+    return () => clearInterval(t)
+  }, [])
+
+  const avis = avisClients[index]
+
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">
-            Ils en parlent mieux que nous
-          </p>
-          <h2 className="mt-1 text-2xl text-ink sm:text-3xl">Vos avis</h2>
-        </div>
-        <p className="inline-flex items-center gap-1.5 text-sm text-stone-warm">
-          <Star size={16} className="fill-amber-400 text-amber-400" />
-          <span className="font-semibold text-ink">{bakery.note.toFixed(1).replace('.', ',')}</span>
-          / 5 · {bakery.nombreAvis} avis
-        </p>
-      </header>
+      <div className="relative overflow-hidden rounded-3xl">
+        {/* Flux de couleurs qui bouge, aux teintes de la façade */}
+        <div className="flux-petrie absolute inset-0" />
+        {/* Léger voile pour la lisibilité du texte */}
+        <div className="absolute inset-0 bg-[#2c1019]/25" />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {avisClients.map((avis) => (
-          <figure
-            key={avis.auteur}
-            className="flex flex-col gap-3 rounded-2xl border border-sand bg-paper p-5"
-          >
-            <Etoiles note={avis.note} />
-            <blockquote className="flex-1 text-sm leading-relaxed text-ink">
+        <div className="relative px-6 py-10 sm:px-12 sm:py-14 text-white">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#e9cd90]">
+                Ils en parlent mieux que nous
+              </p>
+              <h2 className="mt-1 text-2xl text-white sm:text-3xl">Vos avis</h2>
+            </div>
+            <p className="inline-flex items-center gap-1.5 text-sm text-white/85">
+              <Star size={16} className="fill-amber-300 text-amber-300" />
+              <span className="font-semibold text-white">
+                {bakery.note.toFixed(1).replace('.', ',')}
+              </span>
+              / 5 · {bakery.nombreAvis} avis
+            </p>
+          </div>
+
+          {/* L'avis courant (change en fondu) */}
+          <figure key={index} className="animate-avis min-h-[7.5rem] max-w-2xl">
+            <Quote size={30} className="mb-2 text-[#e9cd90]" />
+            <Etoiles note={avis.note} clair />
+            <blockquote className="mt-3 font-display text-xl leading-snug text-white sm:text-2xl">
               « {avis.texte} »
             </blockquote>
-            <figcaption className="text-xs font-semibold uppercase tracking-wide text-stone-warm">
+            <figcaption className="mt-3 text-sm font-semibold uppercase tracking-wide text-white/75">
               — {avis.auteur}
             </figcaption>
           </figure>
-        ))}
+
+          {/* Points du diaporama (cliquables) + lien avis Google */}
+          <div className="mt-7 flex items-center justify-between gap-4">
+            <div className="flex gap-1.5">
+              {avisClients.map((a, i) => (
+                <button
+                  key={a.auteur}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={`Avis ${i + 1} sur ${avisClients.length}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === index ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/70'
+                  }`}
+                />
+              ))}
+            </div>
+            <a
+              href={lienAvisGoogle}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-sm transition-colors hover:bg-white/25"
+            >
+              Laisser un avis
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   )

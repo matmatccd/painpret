@@ -14,9 +14,6 @@ export default function Footer({ onFAQ }) {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Logo taille="sm" clair />
-          <p className="mt-2 font-display text-lg text-[#f2d3d8]">
-            Commandez. Passez. Repartez.
-          </p>
         </div>
 
         <div className="space-y-2 text-sm text-white/80">

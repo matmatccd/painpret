@@ -66,10 +66,14 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                 className="flex gap-3 rounded-xl border border-sand bg-paper p-3"
               >
                 <div
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg text-3xl"
-                  style={{ background: `linear-gradient(150deg, ${ligne.produit.from}, ${ligne.produit.to})` }}
+                  className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-3xl ring-1 ring-sand"
+                  style={ligne.produit.image ? undefined : { background: `linear-gradient(150deg, ${ligne.produit.from}, ${ligne.produit.to})` }}
                 >
-                  {ligne.produit.emoji}
+                  {ligne.produit.image ? (
+                    <img src={ligne.produit.image} alt={ligne.produit.nom} className="h-full w-full object-contain p-1.5" />
+                  ) : (
+                    ligne.produit.emoji
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col">
@@ -114,7 +118,7 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                         <Plus size={15} />
                       </button>
                     </div>
-                    <span className="price font-bold text-ink">
+                    <span className="price whitespace-nowrap font-bold text-ink">
                       {formatPrix(ligne.prixUnitaire * ligne.quantite)}
                     </span>
                   </div>

@@ -64,6 +64,21 @@ export const avisClients = [
     note: 4,
     texte: 'J’aime bien cette petite boulangerie, le personnel est très agréable.',
   },
+  {
+    auteur: 'Sébastien',
+    note: 5,
+    texte: 'Les meilleures baguettes de Reims, et le pain aux céréales est superbe.',
+  },
+  {
+    auteur: 'Amélie',
+    note: 5,
+    texte: 'Service toujours impeccable et des prix vraiment raisonnables.',
+  },
+  {
+    auteur: 'Thomas',
+    note: 5,
+    texte: 'Le pain au chocolat est parmi les meilleurs que j’ai mangés. Un régal.',
+  },
 ]
 
 // Lien "Itinéraire" vers Google Maps (s'ouvre dans l'app Plans sur mobile).
