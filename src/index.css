@@ -126,24 +126,23 @@
   animation: flux 14s ease-in-out infinite;
 }
 
-/* "La Pétrie" : un reflet doré balaie le titre en continu
-   (dégradé attaché aux lettres — technique background-clip). */
-@keyframes titre-brillance {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+/* "La Pétrie" : le flux des couleurs de la boutique coule DANS les lettres
+   (crème, doré, rose poudré, framboise clair — teintes de la façade). */
+@keyframes titre-flux {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
 }
 .titre-petrie {
   background: linear-gradient(
-    105deg,
-    #ffffff 0%, #ffffff 38%,
-    #e9cd90 48%, #f7e8c4 52%,
-    #ffffff 62%, #ffffff 100%
+    100deg,
+    #fdf6ec, #e9cd90, #f2d3d8, #e08aa4, #f7e8c4, #e9cd90, #fdf6ec
   );
-  background-size: 220% auto;
+  background-size: 320% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: titre-brillance 4.5s ease-in-out infinite;
+  animation: titre-flux 9s ease-in-out infinite;
 }
 
 /* L'épi du logo ondule doucement, comme au vent */
@@ -188,11 +187,18 @@
 }
 .animate-avis { animation: avis-in 0.6s var(--ease-out-soft) both; }
 
-/* Respect des préférences d'accessibilité : on coupe le mouvement */
+/* Respect des préférences d'accessibilité : on coupe le mouvement…
+   SAUF les animations de marque, très lentes et douces (flux de couleurs,
+   bandeau, titre, épi du logo) — elles ne provoquent pas de vertige et
+   font partie de l'identité du site. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  .flux-petrie { animation: flux 14s ease-in-out infinite !important; }
+  .marquee-petrie { animation: defile 26s linear infinite !important; }
+  .titre-petrie { animation: titre-flux 9s ease-in-out infinite !important; }
+  .logo-ble { animation: ondule 4s ease-in-out infinite !important; }
 }

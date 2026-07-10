@@ -27,8 +27,11 @@ export default function Bandeau() {
   )
 
   return (
-    <div className="mt-6 overflow-hidden border-y-2 border-[#e9cd90]/50 bg-crust py-2.5">
-      <div className="marquee-petrie">
+    <div className="relative mt-6 overflow-hidden border-y-2 border-[#e9cd90]/50 py-2.5">
+      {/* Flux de couleurs de La Pétrie en fond du bandeau */}
+      <div className="flux-petrie absolute inset-0" />
+      <div className="absolute inset-0 bg-[#2c1019]/20" />
+      <div className="marquee-petrie relative">
         <Serie />
         <Serie cache />
       </div>

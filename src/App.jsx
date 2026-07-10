@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Ban } from 'lucide-react'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import CategoryView from './components/CategoryView'
@@ -28,9 +29,9 @@ import { supabase, modeReel } from './lib/supabase'
 function messagePourStatut(statut, numero) {
   switch (statut) {
     case 'prete':
-      return `✅ Votre commande #${numero} est prête ! Présentez votre QR Code en boutique.`
+      return `Votre commande #${numero} est prête ! Présentez votre QR Code en boutique.`
     case 'livree':
-      return `🥖 Commande #${numero} récupérée. Merci et à bientôt chez La Pétrie !`
+      return `Commande #${numero} récupérée. Merci et à bientôt chez La Pétrie !`
     default:
       return null
   }
@@ -243,8 +244,9 @@ export default function App() {
 
       {/* Fermeture exceptionnelle décidée par le boulanger */}
       {boutiqueFermee && (
-        <div className="bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
-          ⛔ La boutique est exceptionnellement fermée — les commandes en ligne sont suspendues.
+        <div className="flex items-center justify-center gap-2 bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
+          <Ban size={15} className="shrink-0" />
+          La boutique est exceptionnellement fermée — les commandes en ligne sont suspendues.
         </div>
       )}
 

@@ -22,7 +22,7 @@ export default function Confirmation({ commande, onTermine }) {
 
   function jeSuisArrive() {
     signalerArrivee(commande.id)
-    ajouterNotification('👋 Le boulanger est prévenu de votre arrivée.')
+    ajouterNotification('Le boulanger est prévenu de votre arrivée.')
   }
 
   // Minuteur : on met à jour chaque seconde

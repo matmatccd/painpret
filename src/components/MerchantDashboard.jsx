@@ -27,6 +27,7 @@ import {
   MessageSquare,
   Ban,
   TrendingUp,
+  Trophy,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
@@ -221,7 +222,7 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
         {onglet === 'commandes' && (
           <div className="space-y-6">
             {creneaux.length === 0 ? (
-              <EtatVide emoji="📋" titre="Aucune commande en cours" texte="Les nouvelles commandes des clients apparaîtront ici." />
+              <EtatVide icone={ClipboardList} titre="Aucune commande en cours" texte="Les nouvelles commandes des clients apparaîtront ici." />
             ) : (
               creneaux.map((creneau) => {
                 const cmdsDuCreneau = commandesEnCours.filter((c) => c.creneau === creneau)
@@ -248,8 +249,9 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
             {/* Les commandes livrées, repliées pour ne pas encombrer */}
             {commandesLivrees.length > 0 && (
               <details className="rounded-xl border border-sand bg-paper">
-                <summary className="cursor-pointer list-none px-4 py-3.5 font-semibold text-stone-warm [&::-webkit-details-marker]:hidden">
-                  ✓ Commandes livrées ({commandesLivrees.length}) — toucher pour afficher
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3.5 font-semibold text-stone-warm [&::-webkit-details-marker]:hidden">
+                  <CheckCircle2 size={16} className="text-emerald-600" />
+                  Commandes livrées ({commandesLivrees.length}) — toucher pour afficher
                 </summary>
                 <div className="grid gap-3 border-t border-sand-soft p-4 sm:grid-cols-2">
                   {commandesLivrees.map((cmd) => (
@@ -287,11 +289,13 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
   )
 }
 
-// --- Petit état vide réutilisable ---
-function EtatVide({ emoji, titre, texte }) {
+// --- Petit état vide réutilisable (icône SVG, pas d'emoji) ---
+function EtatVide({ icone: Icone = ClipboardList, titre, texte }) {
   return (
     <div className="rounded-xl border border-dashed border-sand bg-paper px-6 py-12 text-center">
-      <span className="text-4xl">{emoji}</span>
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cream text-crust ring-1 ring-sand">
+        <Icone size={26} />
+      </span>
       <p className="mt-3 font-display text-lg text-ink">{titre}</p>
       <p className="mt-1 text-sm text-stone-warm">{texte}</p>
     </div>
@@ -436,13 +440,20 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
       {topProduits.length > 0 && (
         <section className="rounded-xl border border-sand bg-paper p-4">
           <p className="mb-2.5 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
-            🏆 Les plus vendus cette semaine
+            <Trophy size={13} className="text-gilt" /> Les plus vendus cette semaine
           </p>
           <ol className="space-y-1.5">
             {topProduits.map(([nom, quantite], i) => (
               <li key={nom} className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-ink">
-                  {['🥇', '🥈', '🥉'][i]} {nom}
+                <span className="flex items-center gap-2 text-ink">
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white ${
+                      ['bg-gilt', 'bg-stone-warm', 'bg-[#b0713e]'][i]
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  {nom}
                 </span>
                 <span className="tnum font-semibold text-stone-warm">×{quantite}</span>
               </li>
@@ -490,7 +501,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
             ))}
           </div>
         ) : (
-          <EtatVide emoji="✅" titre="Rien à préparer" texte="Les nouvelles commandes en ligne apparaîtront ici." />
+          <EtatVide icone={CheckCircle2} titre="Rien à préparer" texte="Les nouvelles commandes en ligne apparaîtront ici." />
         )}
       </section>
 
