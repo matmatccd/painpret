@@ -35,6 +35,8 @@ export default defineConfig({
       workbox: {
         // Les photos sont lourdes : on autorise leur mise en cache
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // On greffe notre gestionnaire de notifications push au service worker
+        importScripts: ['push-sw.js'],
       },
     }),
   ],

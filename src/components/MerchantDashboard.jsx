@@ -34,7 +34,7 @@ import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
 import { bakery } from '../data/bakery'
 import { resolveImage } from '../data/images'
-import { permissionNotif, demanderPermissionNotif, notifierCommande } from '../lib/notifPro'
+import { permissionNotif, demanderPermissionNotif, notifierCommande, activerPush } from '../lib/notifPro'
 import { formatPrix } from '../lib/format'
 import { jouerCarillon } from '../lib/son'
 
@@ -122,9 +122,18 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
 
   // État de l'autorisation des notifications système
   const [permNotif, setPermNotif] = useState(() => permissionNotif())
-  function activerAlertes() {
-    demanderPermissionNotif().then(setPermNotif)
+  async function activerAlertes() {
+    const p = await demanderPermissionNotif()
+    setPermNotif(p)
+    // Si accordé : on abonne aussi cet appareil aux notifications "appli fermée"
+    if (p === 'granted') activerPush()
   }
+
+  // Si déjà autorisé au chargement, on (ré)abonne l'appareil au push
+  useEffect(() => {
+    if (permNotif === 'granted') activerPush()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Carillon + notification système quand une NOUVELLE commande arrive
   // pendant que l'espace est ouvert (même onglet en arrière-plan).
