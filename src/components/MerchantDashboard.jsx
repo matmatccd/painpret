@@ -28,11 +28,13 @@ import {
   Ban,
   TrendingUp,
   Trophy,
+  BellRing,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
 import { bakery } from '../data/bakery'
 import { resolveImage } from '../data/images'
+import { permissionNotif, demanderPermissionNotif, notifierCommande } from '../lib/notifPro'
 import { formatPrix } from '../lib/format'
 import { jouerCarillon } from '../lib/son'
 
@@ -118,8 +120,14 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
   // L'onglet "Aujourd'hui" est l'écran d'accueil du boulanger : l'essentiel en un coup d'œil.
   const [onglet, setOnglet] = useState('jour')
 
-  // 🔔 Carillon quand une NOUVELLE commande arrive pendant que l'espace est ouvert.
-  // On mémorise les commandes déjà connues pour ne sonner que sur les nouvelles.
+  // État de l'autorisation des notifications système
+  const [permNotif, setPermNotif] = useState(() => permissionNotif())
+  function activerAlertes() {
+    demanderPermissionNotif().then(setPermNotif)
+  }
+
+  // Carillon + notification système quand une NOUVELLE commande arrive
+  // pendant que l'espace est ouvert (même onglet en arrière-plan).
   const idsConnus = useRef(null)
   useEffect(() => {
     const ids = commandes.map((c) => c.id)
@@ -128,8 +136,11 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
       idsConnus.current = new Set(ids)
       return
     }
-    const nouvelles = ids.filter((id) => !idsConnus.current.has(id))
-    if (nouvelles.length > 0) jouerCarillon()
+    const nouvelles = commandes.filter((c) => !idsConnus.current.has(c.id))
+    if (nouvelles.length > 0) {
+      jouerCarillon()
+      nouvelles.forEach((c) => notifierCommande(c))
+    }
     idsConnus.current = new Set(ids)
   }, [commandes])
 
@@ -158,6 +169,19 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {permNotif !== 'granted' && (
+              <button
+                type="button"
+                onClick={activerAlertes}
+                title={permNotif === 'denied'
+                  ? 'Notifications bloquées — autorisez-les dans les réglages du navigateur'
+                  : 'Recevoir une alerte à chaque nouvelle commande'}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#e9cd90] px-3 py-2 text-sm font-semibold text-crust-dark transition-colors hover:bg-[#f7e8c4]"
+              >
+                <BellRing size={16} />
+                <span className="hidden sm:inline">Activer les alertes</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={onRetourClient}
