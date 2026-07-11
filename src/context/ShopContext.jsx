@@ -77,6 +77,19 @@ function commandeDepuisRow(r) {
   }
 }
 
+function categorieDepuisRow(r) {
+  return {
+    id: r.id,
+    nom: r.nom,
+    emoji: r.emoji || '🥐',
+    from: r.couleur_from || '#e9b872',
+    to: r.couleur_to || '#c98a3a',
+    image: r.image,
+    sousCategories: r.sous_categories || [],
+    ordre: r.ordre ?? 0,
+  }
+}
+
 export function ShopProvider({ children }) {
   // En mode réel on part de listes vides (remplies par la base) ; en démo, des données factices.
   const [produitsBase, setProduitsBase] = useState(() =>
@@ -84,7 +97,7 @@ export function ShopProvider({ children }) {
   )
   const [commandes, setCommandes] = useState(() => (modeReel ? [] : commandesInitiales))
   const [categoriesState, setCategoriesState] = useState(() =>
-    categoriesInitiales.map((c) => ({ ...c, sousCategories: [...c.sousCategories] })),
+    modeReel ? [] : categoriesInitiales.map((c) => ({ ...c, sousCategories: [...c.sousCategories] })),
   )
   const [boutiqueFermee, setBoutiqueFermee] = useState(
     () => !modeReel && localStorage.getItem('painpret_fermee') === '1',
@@ -107,10 +120,21 @@ export function ShopProvider({ children }) {
       const { data } = await supabase.from('reglages').select('*').eq('id', 1).maybeSingle()
       if (vivant && data) setBoutiqueFermee(data.boutique_fermee)
     }
+    async function chargerCategories() {
+      const { data, error } = await supabase.from('categories').select('*').order('ordre')
+      if (!vivant) return
+      // Table pas encore créée (ou vide) -> on garde les catégories par défaut.
+      if (error || !data || data.length === 0) {
+        setCategoriesState(categoriesInitiales.map((c) => ({ ...c, sousCategories: [...c.sousCategories] })))
+      } else {
+        setCategoriesState(data.map(categorieDepuisRow))
+      }
+    }
 
     chargerProduits()
     chargerCommandes()
     chargerReglages()
+    chargerCategories()
 
     // Abonnement temps réel : toute modification recharge la table concernée.
     const canal = supabase
@@ -118,6 +142,7 @@ export function ShopProvider({ children }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'produits' }, chargerProduits)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'commandes' }, chargerCommandes)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reglages' }, chargerReglages)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, chargerCategories)
       .subscribe()
 
     return () => {
@@ -144,9 +169,12 @@ export function ShopProvider({ children }) {
     [produitsBase, categoriesState],
   )
 
-  // Catégories avec image résolue
+  // Catégories avec image résolue, triées par ordre
   const categories = useMemo(
-    () => categoriesState.map((c) => ({ ...c, image: resolveImage(c.image), imageRef: c.image })),
+    () =>
+      [...categoriesState]
+        .sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0))
+        .map((c) => ({ ...c, image: resolveImage(c.image), imageRef: c.image })),
     [categoriesState],
   )
 
@@ -197,36 +225,49 @@ export function ShopProvider({ children }) {
     if (modeReel) await supabase.from('produits').delete().eq('id', id)
   }
 
-  // --- Catégories (locales : elles changent très rarement) ---
-  function ajouterCategorie({ nom, emoji, from, to, image = null }) {
+  // --- Catégories (partagées : stockées dans la base, en temps réel) ---
+  async function ajouterCategorie({ nom, emoji, from, to, image = null }) {
     const sansAccents = nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     const id =
       sansAccents.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `cat-${Date.now()}`
-    setCategoriesState((arr) => {
-      if (arr.some((c) => c.id === id)) return arr
-      return [...arr, { id, nom: nom.trim(), emoji: emoji || '🥐', from: from || '#e9b872', to: to || '#c98a3a', image, sousCategories: [] }]
-    })
+    if (categoriesState.some((c) => c.id === id)) return // évite les doublons
+    const nouvelle = {
+      id,
+      nom: nom.trim(),
+      emoji: emoji || '🥐',
+      from: from || '#e9b872',
+      to: to || '#c98a3a',
+      image,
+      sousCategories: [],
+      ordre: categoriesState.reduce((max, c) => Math.max(max, c.ordre ?? 0), 0) + 1,
+    }
+    setCategoriesState((arr) => [...arr, nouvelle])
+    if (modeReel) {
+      await supabase.from('categories').insert({
+        id, nom: nouvelle.nom, emoji: nouvelle.emoji, couleur_from: nouvelle.from,
+        couleur_to: nouvelle.to, image, sous_categories: [], ordre: nouvelle.ordre,
+      })
+    }
   }
-  function supprimerCategorie(id) {
+  async function supprimerCategorie(id) {
     setCategoriesState((arr) => arr.filter((c) => c.id !== id))
+    if (modeReel) await supabase.from('categories').delete().eq('id', id)
   }
-  function ajouterSousCategorie(catId, nom) {
+  async function ajouterSousCategorie(catId, nom) {
     const propre = nom.trim()
     if (!propre) return
-    setCategoriesState((arr) =>
-      arr.map((c) =>
-        c.id === catId && !c.sousCategories.includes(propre)
-          ? { ...c, sousCategories: [...c.sousCategories, propre] }
-          : c,
-      ),
-    )
+    const cat = categoriesState.find((c) => c.id === catId)
+    if (!cat || cat.sousCategories.includes(propre)) return
+    const suivantes = [...cat.sousCategories, propre]
+    setCategoriesState((arr) => arr.map((c) => (c.id === catId ? { ...c, sousCategories: suivantes } : c)))
+    if (modeReel) await supabase.from('categories').update({ sous_categories: suivantes }).eq('id', catId)
   }
-  function supprimerSousCategorie(catId, nom) {
-    setCategoriesState((arr) =>
-      arr.map((c) =>
-        c.id === catId ? { ...c, sousCategories: c.sousCategories.filter((s) => s !== nom) } : c,
-      ),
-    )
+  async function supprimerSousCategorie(catId, nom) {
+    const cat = categoriesState.find((c) => c.id === catId)
+    if (!cat) return
+    const suivantes = cat.sousCategories.filter((s) => s !== nom)
+    setCategoriesState((arr) => arr.map((c) => (c.id === catId ? { ...c, sousCategories: suivantes } : c)))
+    if (modeReel) await supabase.from('categories').update({ sous_categories: suivantes }).eq('id', catId)
   }
 
   // --- Fermeture exceptionnelle ---

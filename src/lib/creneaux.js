@@ -72,8 +72,7 @@ export function genererCreneaux(delaiPrepMin = 15) {
       label: formatHeure(d),
       detail: null,
       date: d,
-      // Simulation : on marque le 3e créneau comme "complet" pour l'exemple
-      complet: i === 2,
+      complet: false,
     })
   }
 

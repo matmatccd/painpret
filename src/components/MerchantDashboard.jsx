@@ -75,7 +75,7 @@ function imprimerTicket(commande) {
     <p>Retrait : <strong>${commande.creneau}</strong></p>
     <hr><table>${lignes}</table><hr>
     <div class="total"><span>TOTAL</span><span>${euros(commande.total)}</span></div>
-    <p style="text-align:left;margin-top:6px">TVA incluse · Payé en ligne</p>
+    <p style="text-align:left;margin-top:6px">TVA incluse · Réglé en boutique</p>
     <hr><p>Merci de votre visite, à bientôt !</p>
     </body></html>`
 

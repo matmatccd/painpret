@@ -5,13 +5,8 @@ import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
 import { formatPrix } from '../lib/format'
 
-const MOYENS_PAIEMENT = [
-  { id: 'cb', label: 'Carte bancaire' },
-  { id: 'apple', label: 'Apple Pay' },
-  { id: 'google', label: 'Google Pay' },
-]
-
-// Étape de retrait : récap + choix du créneau + paiement (simulé).
+// Étape de retrait : récap + prénom/email + choix du créneau.
+// Paiement au retrait, en boutique (pas d'encaissement en ligne pour l'instant).
 export default function PickupSlots({ onRetour, onConfirme }) {
   const { lignes, total, viderPanier } = useCart()
   const { ajouterCommande, boutiqueFermee } = useShop()
@@ -30,7 +25,6 @@ export default function PickupSlots({ onRetour, onConfirme }) {
   const creneaux = useMemo(() => genererCreneaux(delaiMax), [delaiMax])
 
   const [creneauChoisi, setCreneauChoisi] = useState(null)
-  const [paiement, setPaiement] = useState('cb')
 
   async function confirmer() {
     if (!creneauChoisi || boutiqueFermee || envoiEnCours) return
@@ -87,7 +81,7 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         <ArrowLeft size={16} /> Retour à la boutique
       </button>
 
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Retrait — mode Drive</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Commande en ligne · Retrait en boutique</p>
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Finaliser ma commande</h1>
 
       {/* Boutique fermée exceptionnellement : on ne prend plus de commandes */}
@@ -201,28 +195,17 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         </div>
       </section>
 
-      {/* Paiement */}
+      {/* Paiement : au retrait, en boutique */}
       <section className="mt-6">
         <h2 className="flex items-center gap-2 text-lg text-ink">
-          <CreditCard size={18} className="text-crust" /> Mode de paiement
+          <CreditCard size={18} className="text-crust" /> Paiement
         </h2>
-        <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          {MOYENS_PAIEMENT.map((m) => {
-            const choisi = paiement === m.id
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setPaiement(m.id)}
-                className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
-                  choisi ? 'border-crust bg-cream text-ink' : 'border-sand bg-paper text-stone-warm hover:border-crust/40'
-                }`}
-              >
-                {m.label}
-                {choisi && <Check size={16} className="text-crust" />}
-              </button>
-            )
-          })}
+        <div className="mt-3 flex items-start gap-3 rounded-xl border border-sand bg-paper p-4">
+          <Check size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+          <p className="text-sm text-stone-warm">
+            Vous réglez <span className="font-semibold text-ink">au retrait, en boutique</span>{' '}
+            (carte bancaire ou espèces). Rien à payer maintenant.
+          </p>
         </div>
       </section>
 
@@ -245,11 +228,11 @@ export default function PickupSlots({ onRetour, onConfirme }) {
           : envoiEnCours
             ? 'Validation en cours…'
             : creneauChoisi
-              ? `Payer et confirmer · ${formatPrix(total)}`
+              ? `Confirmer ma commande · ${formatPrix(total)}`
               : 'Choisissez un créneau'}
       </button>
       <p className="mt-3 text-center text-xs text-stone-warm">
-        Démonstration — aucun paiement réel n'est encore encaissé.
+        En confirmant, votre commande part en préparation. Vous réglez au retrait.
       </p>
     </div>
   )

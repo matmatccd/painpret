@@ -5,11 +5,11 @@ import { bakery, lienItineraire } from '../data/bakery'
 const QUESTIONS = [
   {
     q: 'Comment passer commande ?',
-    r: 'Choisissez vos pains dans la boutique en ligne, ajoutez-les au panier, sélectionnez votre heure de retrait et payez en ligne. Votre QR Code de retrait s’affiche immédiatement.',
+    r: 'Choisissez vos pains dans la boutique en ligne, ajoutez-les au panier et sélectionnez votre heure de retrait. Votre QR Code de retrait s’affiche immédiatement.',
   },
   {
-    q: 'Quand est-ce que je paie ?',
-    r: 'Le paiement se fait en ligne au moment de la commande (carte bancaire, Apple Pay ou Google Pay). Rien à régler en boutique : vous montrez votre QR Code et vous repartez.',
+    q: 'Quand et comment est-ce que je paie ?',
+    r: 'Vous réglez directement en boutique au moment du retrait, par carte bancaire ou en espèces. Rien à payer en ligne : vous commandez, vous passez, vous réglez et vous repartez.',
   },
   {
     q: 'Où et comment récupérer ma commande ?',

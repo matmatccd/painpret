@@ -133,16 +133,22 @@
   50% { background-position: 100% center; }
   100% { background-position: 0% center; }
 }
-.titre-petrie {
-  background: linear-gradient(
-    100deg,
-    #f6dde4, #e3a8ba, #c66a88, #a13352, #c66a88, #e3a8ba, #f6dde4
-  );
-  background-size: 320% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: titre-flux 18s ease-in-out infinite;
+/* Repli : si le navigateur ne sait pas "peindre le texte", on garde
+   un rosé lisible plutôt qu'un titre invisible. */
+.titre-petrie { color: #f2d3d8; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .titre-petrie {
+    background: linear-gradient(
+      100deg,
+      #f6dde4, #e3a8ba, #c66a88, #a13352, #c66a88, #e3a8ba, #f6dde4
+    );
+    background-size: 320% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: titre-flux 18s ease-in-out infinite;
+  }
 }
 
 /* L'épi du logo ondule doucement, comme au vent */

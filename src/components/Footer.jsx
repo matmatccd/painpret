@@ -59,7 +59,7 @@ export default function Footer({ onFAQ }) {
 
       <div className="border-t border-white/15">
         <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-white/55">
-          © {new Date().getFullYear()} PainPrêt. Démonstration — aucune commande réelle.
+          © {new Date().getFullYear()} {bakery.nom} · {bakery.adresse}, {bakery.ville} — Commande en ligne, retrait en boutique.
         </p>
       </div>
     </footer>
