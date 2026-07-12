@@ -415,9 +415,7 @@ export default function App() {
             <Reveal>
               <AvisClients />
             </Reveal>
-            <Reveal>
-              <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
-            </Reveal>
+            <CommentCaMarche onFAQ={() => { setVue('faq'); window.scrollTo({ top: 0 }) }} />
           </>
         )}
       </main>

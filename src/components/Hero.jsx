@@ -53,8 +53,9 @@ export default function Hero() {
             />
           ))}
 
-          {/* Voile prune (couleurs de la devanture) pour la lisibilité */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/85 via-[#2c1019]/35 to-[#2c1019]/15" />
+          {/* Voile prune (couleurs de la devanture) pour la lisibilité du texte */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/92 via-[#2c1019]/62 to-[#2c1019]/28" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2c1019]/45 to-transparent" />
 
           {/* Badges d'état */}
           <div className="relative mb-5 flex flex-wrap items-center gap-2">
@@ -79,14 +80,14 @@ export default function Hero() {
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#e9cd90]">
               Click &amp; Collect · {bakery.ville.replace(/^\d+\s*/, '')}
             </p>
-            <h1 className="titre-petrie text-4xl leading-none sm:text-6xl">{bakery.nom}</h1>
+            <h1 className="text-4xl leading-none text-white [text-shadow:0_2px_20px_rgba(20,8,12,0.6)] sm:text-6xl">{bakery.nom}</h1>
             {/* Accroche qui défile (change toute seule, en fondu) */}
             <p className="mt-3 min-h-7">
-              <span key={accroche} className="animate-avis inline-block font-display text-lg text-[#f2d3d8] sm:text-xl">
+              <span key={accroche} className="animate-avis inline-block font-display text-lg text-[#f4dfc0] [text-shadow:0_1px_10px_rgba(20,8,12,0.55)] sm:text-xl">
                 {bakery.accroches[accroche]}
               </span>
             </p>
-            <p className="mt-2 max-w-lg text-sm text-white/85 sm:text-base">
+            <p className="mt-2 max-w-lg text-sm text-white/90 [text-shadow:0_1px_10px_rgba(20,8,12,0.5)] sm:text-base">
               {bakery.equipe}. {bakery.description}
             </p>
 

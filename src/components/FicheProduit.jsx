@@ -105,7 +105,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
                 Épuisé
               </span>
             )}
-            {produit.delaiPreparation && (
+            {produit.delaiPreparation > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-cream px-3 py-1 text-xs font-medium text-crust ring-1 ring-sand">
                 <Timer size={14} /> Prêt en ~{produit.delaiPreparation} min
               </span>

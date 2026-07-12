@@ -118,7 +118,7 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
           <span className="price text-[15px] font-bold text-ember">
             {formatPrix(produit.prix)}
           </span>
-          {produit.delaiPreparation && !epuise && (
+          {produit.delaiPreparation > 0 && !epuise && (
             <span className="flex items-center gap-1 text-[11px] font-medium text-stone-warm">
               <Timer size={12} /> ~{produit.delaiPreparation} min
             </span>

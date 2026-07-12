@@ -28,10 +28,20 @@ export default function Bandeau() {
   )
 
   return (
-    <div className="relative mt-6 overflow-hidden border-y border-[#e9cd90]/30 py-3">
+    <div
+      className="relative mt-6 overflow-hidden border-y border-[#e9cd90]/30 py-3.5"
+      // Les bords s'estompent en fondu : plus élégant qu'une coupure nette.
+      style={{
+        maskImage: 'linear-gradient(to right, transparent, #000 9%, #000 91%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, #000 9%, #000 91%, transparent)',
+      }}
+    >
       {/* Flux bordeaux, très lent, légèrement assombri */}
       <div className="flux-petrie absolute inset-0" />
-      <div className="absolute inset-0 bg-[#2c1019]/35" />
+      <div className="absolute inset-0 bg-[#2c1019]/40" />
+      {/* Filets dorés fins en haut et en bas pour un rendu "enseigne" */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e9cd90]/60 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#e9cd90]/60 to-transparent" />
       <div className="marquee-petrie relative">
         <Serie />
         <Serie cache />
