@@ -1,14 +1,18 @@
 import { useState } from 'react'
-import { ArrowLeft, Lock, Mail } from 'lucide-react'
+import { ArrowLeft, Lock } from 'lucide-react'
 import Logo from './Logo'
 import { supabase, modeReel } from '../lib/supabase'
 
 // Code d'accès de secours en mode démo (pas de base configurée).
 const CODE_DEMO = '1987'
+// Email du compte boulanger (identifiant fixe, caché au boulanger).
+// L'email seul ne donne aucun accès : c'est le CODE (= mot de passe) qui protège.
+const PRO_EMAIL = import.meta.env.VITE_PRO_EMAIL || ''
 
+// Accès à l'espace boulanger par un simple CODE.
+// En mode réel, le code saisi est utilisé comme mot de passe Supabase
+// (avec l'email du compte, caché) : simple pour le boulanger, sûr.
 export default function MerchantLogin({ onSucces, onRetour }) {
-  const [email, setEmail] = useState('')
-  const [motDePasse, setMotDePasse] = useState('')
   const [code, setCode] = useState('')
   const [erreur, setErreur] = useState('')
   const [enCours, setEnCours] = useState(false)
@@ -17,7 +21,7 @@ export default function MerchantLogin({ onSucces, onRetour }) {
     e.preventDefault()
     setErreur('')
 
-    // --- Mode démo : simple code d'accès ---
+    // --- Mode démo : simple code d'accès local ---
     if (!modeReel) {
       if (code === CODE_DEMO) onSucces()
       else {
@@ -27,15 +31,16 @@ export default function MerchantLogin({ onSucces, onRetour }) {
       return
     }
 
-    // --- Mode réel : vrai compte (email + mot de passe Supabase) ---
+    // --- Mode réel : le code EST le mot de passe du compte boulanger ---
     setEnCours(true)
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: motDePasse,
+      email: PRO_EMAIL,
+      password: code,
     })
     setEnCours(false)
     if (error) {
-      setErreur('Email ou mot de passe incorrect.')
+      setErreur('Code incorrect. Réessayez.')
+      setCode('')
     } else {
       onSucces()
     }
@@ -56,46 +61,18 @@ export default function MerchantLogin({ onSucces, onRetour }) {
         </p>
 
         <form onSubmit={valider} className="mt-6 space-y-3 text-left">
-          {modeReel ? (
-            <>
-              <div className="relative">
-                <Mail size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
-                <input
-                  type="email"
-                  autoFocus
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setErreur('') }}
-                  placeholder="Email"
-                  autoComplete="email"
-                  className={champ}
-                />
-              </div>
-              <div className="relative">
-                <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
-                <input
-                  type="password"
-                  value={motDePasse}
-                  onChange={(e) => { setMotDePasse(e.target.value); setErreur('') }}
-                  placeholder="Mot de passe"
-                  autoComplete="current-password"
-                  className={champ}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="relative">
-              <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
-              <input
-                type="password"
-                inputMode="numeric"
-                autoFocus
-                value={code}
-                onChange={(e) => { setCode(e.target.value); setErreur('') }}
-                placeholder="Code d’accès"
-                className={`${champ} text-center tracking-widest`}
-              />
-            </div>
-          )}
+          <div className="relative">
+            <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
+            <input
+              type="password"
+              autoFocus
+              value={code}
+              onChange={(e) => { setCode(e.target.value); setErreur('') }}
+              placeholder="Code d’accès"
+              autoComplete="off"
+              className={`${champ} text-center tracking-widest`}
+            />
+          </div>
 
           {erreur && <p className="text-sm text-rose-600">{erreur}</p>}
 

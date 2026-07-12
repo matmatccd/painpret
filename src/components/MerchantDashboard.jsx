@@ -1391,8 +1391,18 @@ function CategorieForm({ onAjouter }) {
 }
 
 // --- Ligne produit (disponibilité + modification + suppression) ---
+// Détecte un produit vendu en lot d'après son nom "(×N)" -> { n, mot }.
+// Pétrie = plaque, chouquettes = sachet.
+function lotDe(nom) {
+  const m = /\(×(\d+)\)/.exec(nom || '')
+  if (!m) return null
+  return { n: Number(m[1]), mot: /chouquette/i.test(nom) ? 'sachet' : 'plaque' }
+}
+
 function LigneProduit({ produit, onMoins, onPlus, onEpuise, onRemettre, onModifier, onSupprimer }) {
   const epuise = !produit.disponible
+  const lot = lotDe(produit.nom)
+  const uniteStock = lot ? ` ${lot.mot}${produit.stock > 1 ? 's' : ''} de ${lot.n}` : ''
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-sand bg-paper p-3">
@@ -1417,7 +1427,7 @@ function LigneProduit({ produit, onMoins, onPlus, onEpuise, onRemettre, onModifi
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
-            <CheckCircle2 size={13} /> En stock : {produit.stock}
+            <CheckCircle2 size={13} /> En stock : {produit.stock}{uniteStock}
           </span>
         )}
       </div>

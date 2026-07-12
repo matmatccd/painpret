@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Search, ShoppingBag, Store, History } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Search, ShoppingBag, History } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import Logo from './Logo'
 import NotificationBell from './NotificationBell'
@@ -10,6 +10,28 @@ import NotificationBell from './NotificationBell'
 export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPanier, onEspacePro, onHistorique }) {
   const { nombreArticles } = useCart()
   const [cache, setCache] = useState(false)
+
+  // Accès boulanger DISCRET : appui long (0,7 s) sur le logo -> espace pro.
+  // Invisible pour les clients, pratique pour le boulanger.
+  const minuteurAppui = useRef(null)
+  const appuiLong = useRef(false)
+  function debutAppuiLogo() {
+    appuiLong.current = false
+    minuteurAppui.current = setTimeout(() => {
+      appuiLong.current = true
+      onEspacePro?.()
+    }, 700)
+  }
+  function finAppuiLogo() {
+    clearTimeout(minuteurAppui.current)
+  }
+  function clicLogo() {
+    if (appuiLong.current) {
+      appuiLong.current = false
+      return // c'était un appui long -> déjà géré (espace pro)
+    }
+    onAccueil()
+  }
 
   useEffect(() => {
     let dernierY = window.scrollY
@@ -56,8 +78,16 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-3">
        <div className="flex items-center gap-2.5 sm:gap-5">
-        {/* Logo */}
-        <button type="button" onClick={onAccueil} className="shrink-0">
+        {/* Logo (appui long = accès boulanger discret) */}
+        <button
+          type="button"
+          onClick={clicLogo}
+          onPointerDown={debutAppuiLogo}
+          onPointerUp={finAppuiLogo}
+          onPointerLeave={finAppuiLogo}
+          onContextMenu={(e) => e.preventDefault()}
+          className="shrink-0 select-none"
+        >
           <Logo taille="sm" clair />
         </button>
 
@@ -76,17 +106,6 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
           className="icone-vive anim-remonte flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/15 hover:text-[#e9cd90] hover:ring-[#e9cd90]/60"
         >
           <History size={18} />
-        </button>
-
-        {/* Accès direct à l'espace boulanger (pro) */}
-        <button
-          type="button"
-          onClick={onEspacePro}
-          aria-label="Espace boulanger"
-          title="Espace boulanger"
-          className="icone-vive flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/85 ring-1 ring-white/20 transition-colors hover:bg-white/15 hover:text-[#e9cd90] hover:ring-[#e9cd90]/60"
-        >
-          <Store size={18} />
         </button>
 
         {/* Notifications */}
