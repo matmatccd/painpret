@@ -218,6 +218,8 @@ export default function App() {
   // Trois groupes clairs pour l'accueil : Pains, Pains spéciaux et Boissons
   const produitsPains = produits.filter((p) => p.categorie === 'pains')
   const produitsSpeciaux = produits.filter((p) => p.categorie === 'pains-speciaux')
+  const produitsViennoiseries = produits.filter((p) => p.categorie === 'viennoiseries')
+  const produitsGourmandises = produits.filter((p) => p.categorie === 'gourmandises')
   const produitsBoissons = produits.filter((p) => p.categorie === 'boissons')
   const produitsFavoris = produits.filter((p) => favoris.includes(p.id))
 
@@ -395,6 +397,16 @@ export default function App() {
             <Reveal>
               <ProductRow surtitre="Le fournil" titre="Pains spéciaux" produits={produitsSpeciaux} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
             </Reveal>
+            {produitsViennoiseries.length > 0 && (
+              <Reveal>
+                <ProductRow surtitre="Tout juste sorties du four" titre="Viennoiseries" produits={produitsViennoiseries} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+              </Reveal>
+            )}
+            {produitsGourmandises.length > 0 && (
+              <Reveal>
+                <ProductRow surtitre="À partager" titre="Gourmandises" produits={produitsGourmandises} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />
+              </Reveal>
+            )}
             {produitsBoissons.length > 0 && (
               <Reveal>
                 <ProductRow surtitre="Fraîcheur" titre="Boissons" produits={produitsBoissons} onOpen={ouvrirProduit} favoris={favoris} onToggleFavori={toggleFavori} />

@@ -1,10 +1,10 @@
 // ============================================================
-//  Fonction serveur PainPrêt — webhook Stripe.
-//  Stripe l'appelle quand un paiement est VALIDÉ. On crée alors la vraie
-//  commande (même si le client a fermé sa page) et on décompte le stock.
+//  PainPret - Stripe webhook.
+//  Stripe calls this when a payment is CONFIRMED. We then create
+//  the real order (even if the client closed the page) and update stock.
 //
-//  ⚠️ À déployer avec "Verify JWT" DÉSACTIVÉ (Stripe n'envoie pas de JWT).
-//  Secrets : STRIPE_SECRET, STRIPE_WEBHOOK_SECRET.
+//  Deploy with "Verify JWT" DISABLED (Stripe does not send a JWT).
+//  Secrets: STRIPE_SECRET, STRIPE_WEBHOOK_SECRET.
 // ============================================================
 
 import Stripe from 'npm:stripe@14'
@@ -32,14 +32,12 @@ Deno.serve(async (req) => {
     const session = event.data.object as any
     const attenteId = session.metadata?.attente
     if (attenteId) {
-      // Récupère la commande en attente
       const { data: att } = await supabase
         .from('commandes_en_attente')
         .select('*')
         .eq('id', attenteId)
         .maybeSingle()
       if (att) {
-        // Crée la vraie commande (anti-doublon via stripe_session)
         await supabase.rpc('passer_commande', {
           p_client: att.client,
           p_email: att.email,
