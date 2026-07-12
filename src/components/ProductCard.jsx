@@ -39,7 +39,7 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
       aria-label={`Voir ${produit.nom}, ${formatPrix(produit.prix)}`}
       // Entrée en cascade discrète (30–50 ms par carte), plafonnée
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-      className="group flex animate-fade-up cursor-pointer flex-col overflow-hidden rounded-xl border border-sand bg-paper transition-[border-color,box-shadow] duration-200 hover:border-crust/40 hover:shadow-[0_10px_28px_-14px_rgba(111,47,67,0.35)]"
+      className="group flex animate-fade-up cursor-pointer flex-col overflow-hidden rounded-2xl border border-sand/80 bg-paper shadow-[0_2px_12px_-8px_rgba(51,34,42,0.18)] transition-[border-color,box-shadow] duration-200 hover:border-crust/40 hover:shadow-[0_14px_32px_-16px_rgba(111,47,67,0.4)]"
     >
       {/* Vignette produit : photo si disponible, sinon dégradé + emoji */}
       <div

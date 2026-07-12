@@ -154,7 +154,7 @@ export default function PickupSlots({ onRetour }) {
           />
         </div>
         <p className="mt-1.5 text-xs text-stone-warm">
-          Le boulanger pourra vous appeler, et vous recevrez votre confirmation par email.
+          Le boulanger pourra vous contacter par téléphone en cas de besoin sur votre commande.
         </p>
       </section>
 
