@@ -31,32 +31,41 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
     return () => window.removeEventListener('scroll', surDefilement)
   }, [])
 
+  // Champ de recherche réutilisé (inline sur ordinateur, pleine largeur sur mobile)
+  const ChampRecherche = ({ className = '' }) => (
+    <div className={`relative ${className}`}>
+      <Search
+        size={17}
+        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm"
+      />
+      <input
+        type="search"
+        value={recherche}
+        onChange={(e) => setRecherche(e.target.value)}
+        placeholder="Rechercher un pain…"
+        className="w-full rounded-lg border border-white/20 bg-white py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:ring-2 focus:ring-[#e9cd90]/50"
+      />
+    </div>
+  )
+
   return (
     <header
       className={`sticky top-0 z-40 border-b-2 border-[#e9cd90]/60 bg-crust transition-transform duration-300 ${
         cache ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-5">
+      <div className="mx-auto w-full max-w-6xl px-4 py-3">
+       <div className="flex items-center gap-2.5 sm:gap-5">
         {/* Logo */}
         <button type="button" onClick={onAccueil} className="shrink-0">
           <Logo taille="sm" clair />
         </button>
 
-        {/* Recherche */}
-        <div className="relative flex-1">
-          <Search
-            size={17}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm"
-          />
-          <input
-            type="search"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-            placeholder="Rechercher un pain…"
-            className="w-full rounded-lg border border-white/20 bg-white py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:ring-2 focus:ring-[#e9cd90]/50"
-          />
-        </div>
+        {/* Recherche — inline sur ordinateur uniquement */}
+        <ChampRecherche className="hidden flex-1 sm:block" />
+
+        {/* Sur mobile, pousse les icônes à droite (la recherche est en 2e ligne) */}
+        <div className="flex-1 sm:hidden" />
 
         {/* Mes commandes (historique) */}
         <button
@@ -97,6 +106,10 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
             </span>
           )}
         </button>
+       </div>
+
+       {/* Recherche pleine largeur sur mobile (2e ligne) */}
+       <ChampRecherche className="mt-2.5 sm:hidden" />
       </div>
     </header>
   )
