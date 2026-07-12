@@ -65,6 +65,7 @@ export default function MerchantLogin({ onSucces, onRetour }) {
             <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-warm" />
             <input
               type="password"
+              inputMode="numeric"
               autoFocus
               value={code}
               onChange={(e) => { setCode(e.target.value); setErreur('') }}
