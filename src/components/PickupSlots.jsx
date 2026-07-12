@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
 import { formatPrix } from '../lib/format'
-import { creerPaiement, memoriserPaiementEnCours } from '../lib/stripe'
+import { creerPaiement } from '../lib/stripe'
 
 // Étape de retrait : récap + coordonnées + créneau + PAIEMENT EN LIGNE (Stripe).
 export default function PickupSlots({ onRetour }) {
@@ -60,21 +60,18 @@ export default function PickupSlots({ onRetour }) {
       ? formatHeure(creneauChoisi.date)
       : creneauChoisi.label
 
-    // On mémorise la commande : elle sera réellement créée au RETOUR de Stripe,
-    // une fois le paiement réussi (paiement uniquement en ligne).
-    memoriserPaiementEnCours({
-      articles,
-      total,
-      client: `${prenom.trim()} ${nom.trim()}`.trim(),
-      email: email.trim(),
-      telephone: telephone.trim(),
-      creneau,
-      heureRetrait: creneauChoisi.date.toISOString(),
-    })
-
     setEnvoiEnCours(true)
     try {
-      const url = await creerPaiement(articles, email.trim())
+      // La commande est envoyée au serveur puis créée après le paiement réussi
+      const url = await creerPaiement({
+        articles,
+        total,
+        client: `${prenom.trim()} ${nom.trim()}`.trim(),
+        email: email.trim(),
+        telephone: telephone.trim(),
+        creneau,
+        heureRetrait: creneauChoisi.date.toISOString(),
+      })
       window.location.href = url // redirection vers la page de paiement Stripe
     } catch (e) {
       setErreur('Le paiement n’a pas pu démarrer. Réessayez dans un instant.')

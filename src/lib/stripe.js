@@ -1,11 +1,12 @@
 import { supabase, modeReel } from './supabase'
 
-// Demande une page de paiement Stripe pour le panier, et renvoie son URL.
-// (Le vrai calcul + la clé secrète restent côté serveur, dans la fonction.)
-export async function creerPaiement(articles, email) {
+// Demande une page de paiement Stripe pour la commande, renvoie son URL.
+// On envoie toute la commande : le serveur la garde "en attente" et la
+// validera (via le webhook) une fois le paiement réussi.
+export async function creerPaiement(commande) {
   if (!modeReel) throw new Error('paiement indisponible')
-  const { data, error } = await supabase.functions.invoke('creer-paiement', {
-    body: { articles, email, base_url: window.location.href.replace(/#.*$/, '') },
+  const { data, error } = await supabase.functions.invoke('payement', {
+    body: { ...commande, base_url: window.location.href.replace(/#.*$/, '') },
   })
   if (error) throw new Error(error.message)
   if (data?.erreur) throw new Error(data.erreur)
@@ -13,18 +14,8 @@ export async function creerPaiement(articles, email) {
   return data.url
 }
 
-// Mémorise la commande en attente de paiement (on la crée au retour de Stripe)
-export function memoriserPaiementEnCours(donnees) {
-  localStorage.setItem('painpret_paiement', JSON.stringify(donnees))
-}
-export function lirePaiementEnCours() {
-  try {
-    const brut = localStorage.getItem('painpret_paiement')
-    return brut ? JSON.parse(brut) : null
-  } catch {
-    return null
-  }
-}
-export function effacerPaiementEnCours() {
-  localStorage.removeItem('painpret_paiement')
+// Lit l'identifiant de session Stripe dans l'adresse (#paiement-reussi?sid=...)
+export function lireSessionPaiement(hash = window.location.hash) {
+  const m = hash.match(/paiement-reussi\?sid=([^&]+)/)
+  return m ? decodeURIComponent(m[1]) : null
 }

@@ -67,6 +67,7 @@ function commandeDepuisRow(r) {
     client: r.client || '',
     email: r.email || '',
     telephone: r.telephone || '',
+    stripeSession: r.stripe_session || null,
     creneau: r.creneau,
     heureRetrait: r.heure_retrait,
     statut: r.statut,

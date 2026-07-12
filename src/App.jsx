@@ -24,7 +24,7 @@ import MobileCartBar from './components/MobileCartBar'
 import { useShop } from './context/ShopContext'
 import { useNotifications } from './context/NotificationsContext'
 import { supabase, modeReel } from './lib/supabase'
-import { lirePaiementEnCours, effacerPaiementEnCours } from './lib/stripe'
+import { lireSessionPaiement } from './lib/stripe'
 
 // Message de notification selon le nouveau statut d'une commande
 function messagePourStatut(statut, numero) {
@@ -39,7 +39,7 @@ function messagePourStatut(statut, numero) {
 }
 
 export default function App() {
-  const { produits, commandes, categories, boutiqueFermee, ajouterCommande } = useShop()
+  const { produits, commandes, categories, boutiqueFermee } = useShop()
   const { ajouterNotification } = useNotifications()
 
   // 'client' | 'login' (code pro) | 'boulanger'
@@ -170,36 +170,49 @@ export default function App() {
     })
   }, [commandes, mesCommandesIds, ajouterNotification])
 
+  // Session Stripe à confirmer (au retour d'un paiement réussi)
+  const [sidPaiement, setSidPaiement] = useState(() => lireSessionPaiement())
+
   // Retour de la page de paiement Stripe (au chargement de l'appli)
   useEffect(() => {
     const h = window.location.hash
     if (h.includes('paiement-reussi')) {
       history.replaceState(null, '', window.location.pathname)
-      const enAttente = lirePaiementEnCours()
-      if (!enAttente) return
-      // Paiement validé -> on crée réellement la commande
-      ajouterCommande(enAttente)
-        .then((commande) => {
-          effacerPaiementEnCours()
-          setMesCommandesIds((ids) => [...ids, commande.id])
-          statutsPrecedents.current[commande.id] = commande.statut
-          ajouterAHistorique(commande)
-          setCommandeConfirmee(commande)
-          setVue('confirmation')
-          window.scrollTo({ top: 0 })
-          ajouterNotification(`Paiement reçu ! Votre commande #${commande.numero} est en préparation.`)
-        })
-        .catch(() => {
-          ajouterNotification(
-            'Paiement reçu, mais l’enregistrement a échoué. Contactez la boutique avec votre preuve de paiement.',
-          )
-        })
+      setVue('paiement') // écran d'attente pendant que le webhook crée la commande
     } else if (h.includes('paiement-annule')) {
       history.replaceState(null, '', window.location.pathname)
       ajouterNotification('Paiement annulé. Vous pouvez recommander quand vous voulez.')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Dès que la commande payée arrive (créée par le webhook, via temps réel) :
+  // on affiche la confirmation.
+  useEffect(() => {
+    if (!sidPaiement) return
+    const commande = commandes.find((c) => c.stripeSession === sidPaiement)
+    if (commande) {
+      setSidPaiement(null)
+      setMesCommandesIds((ids) => (ids.includes(commande.id) ? ids : [...ids, commande.id]))
+      statutsPrecedents.current[commande.id] = commande.statut
+      ajouterAHistorique(commande)
+      setCommandeConfirmee(commande)
+      setVue('confirmation')
+      window.scrollTo({ top: 0 })
+      ajouterNotification(`Paiement reçu ! Votre commande #${commande.numero} est en préparation.`)
+    }
+  }, [commandes, sidPaiement])
+
+  // Filet de sécurité : si la commande n'arrive pas en ~30 s, on n'attend plus
+  useEffect(() => {
+    if (!sidPaiement) return
+    const t = setTimeout(() => {
+      setSidPaiement(null)
+      setVue('historique')
+      ajouterNotification('Paiement reçu ! Votre commande apparaîtra dans « Mes commandes » dans un instant.')
+    }, 30000)
+    return () => clearTimeout(t)
+  }, [sidPaiement])
 
   const produitOuvert = produits.find((p) => p.id === produitOuvertId) ?? null
   // Trois groupes clairs pour l'accueil : Pains, Pains spéciaux et Boissons
@@ -283,7 +296,22 @@ export default function App() {
       )}
 
       <main className="flex-1">
-        {vue === 'confirmation' && commandeConfirmee ? (
+        {vue === 'paiement' ? (
+          <div className="mx-auto flex max-w-md flex-col items-center px-4 py-20 text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-sand border-t-crust" />
+            <h1 className="mt-6 text-2xl text-ink">Paiement reçu !</h1>
+            <p className="mt-2 text-sm text-stone-warm">
+              On enregistre votre commande… un instant.
+            </p>
+            <button
+              type="button"
+              onClick={retourBoutique}
+              className="mt-6 text-sm font-semibold text-crust hover:underline"
+            >
+              Retour à la boutique
+            </button>
+          </div>
+        ) : vue === 'confirmation' && commandeConfirmee ? (
           <Confirmation commande={commandeConfirmee} onTermine={retourBoutique} />
         ) : vue === 'faq' ? (
           <Faq onRetour={retourBoutique} />

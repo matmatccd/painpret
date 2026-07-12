@@ -46,14 +46,12 @@ Deno.serve(async (req) => {
       tag: 'painpret-cmd-' + commande.id,
       url: './#pro',
     })
-    // Encodage UTF-8 explicite pour que les accents s'affichent correctement
-    const payloadUtf8 = new TextEncoder().encode(payload)
     let envoyees = 0
     for (const s of subs ?? []) {
       try {
         await webpush.sendNotification(
           { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          payloadUtf8,
+          payload,
         )
         envoyees++
       } catch (e: any) {
@@ -91,9 +89,9 @@ Deno.serve(async (req) => {
             </div>`,
         }),
       })
-      journal.email = r.ok ? 'envoyé' : 'échec ' + r.status
+      journal.email = r.ok ? 'envoye' : 'echec ' + r.status
     } else {
-      journal.email = commande.email ? 'ignoré (pas de domaine EMAIL_FROM)' : 'pas d’email client'
+      journal.email = commande.email ? 'ignore (pas de domaine EMAIL_FROM)' : 'aucun email client'
     }
 
     return Response.json({ ok: true, ...journal })
