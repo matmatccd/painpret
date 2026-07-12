@@ -35,11 +35,16 @@ function arrondir5min(date) {
 export function genererCreneaux(delaiPrepMin = 15) {
   const maintenant = new Date()
 
-  // Jour de fermeture (vendredi / dernier jeudi du mois) : aucun créneau
-  if (estJourFerme(maintenant)) return []
+  // MODE TEST : adresse avec "?test" -> créneaux ouverts jusqu'à 23h59,
+  // même hors horaires (pour tester un paiement). N'affecte PAS le site normal.
+  const modeTest =
+    typeof window !== 'undefined' && /[?&]test\b/.test(window.location.search)
 
-  // Heure limite du jour = la fermeture réelle de la boutique
-  const { h, m } = fermetureDuJour()
+  // Jour de fermeture (vendredi / dernier jeudi du mois) : aucun créneau
+  if (!modeTest && estJourFerme(maintenant)) return []
+
+  // Heure limite du jour = la fermeture réelle de la boutique (23h59 en mode test)
+  const { h, m } = modeTest ? { h: 23, m: 59 } : fermetureDuJour()
   const fermeture = new Date(maintenant)
   fermeture.setHours(h, m, 0, 0)
 
