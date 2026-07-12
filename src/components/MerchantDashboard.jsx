@@ -29,6 +29,7 @@ import {
   TrendingUp,
   Trophy,
   BellRing,
+  Phone,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { useShop } from '../context/ShopContext'
@@ -74,6 +75,8 @@ function imprimerTicket(commande) {
     <div class="numero">#${commande.numero}</div>
     <p>${quand}</p>
     ${commande.client ? `<p>Client : <strong>${commande.client}</strong></p>` : ''}
+    ${commande.telephone ? `<p>Tel : ${commande.telephone}</p>` : ''}
+    ${commande.email ? `<p>${commande.email}</p>` : ''}
     <p>Retrait : <strong>${commande.creneau}</strong></p>
     <hr><table>${lignes}</table><hr>
     <div class="total"><span>TOTAL</span><span>${euros(commande.total)}</span></div>
@@ -625,6 +628,16 @@ function CarteCommande({ commande, onStatut }) {
           </button>
         </span>
       </div>
+
+      {/* Téléphone du client (appel direct) */}
+      {commande.telephone && (
+        <a
+          href={`tel:${commande.telephone.replace(/\s/g, '')}`}
+          className="mt-1.5 inline-flex w-fit items-center gap-1 text-xs font-medium text-stone-warm hover:text-crust"
+        >
+          <Phone size={12} /> {commande.telephone}
+        </a>
+      )}
 
       {/* Le client a signalé son arrivée en boutique */}
       {commande.arrive && !livree && (

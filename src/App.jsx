@@ -24,6 +24,7 @@ import MobileCartBar from './components/MobileCartBar'
 import { useShop } from './context/ShopContext'
 import { useNotifications } from './context/NotificationsContext'
 import { supabase, modeReel } from './lib/supabase'
+import { lirePaiementEnCours, effacerPaiementEnCours } from './lib/stripe'
 
 // Message de notification selon le nouveau statut d'une commande
 function messagePourStatut(statut, numero) {
@@ -38,7 +39,7 @@ function messagePourStatut(statut, numero) {
 }
 
 export default function App() {
-  const { produits, commandes, categories, boutiqueFermee } = useShop()
+  const { produits, commandes, categories, boutiqueFermee, ajouterCommande } = useShop()
   const { ajouterNotification } = useNotifications()
 
   // 'client' | 'login' (code pro) | 'boulanger'
@@ -169,6 +170,37 @@ export default function App() {
     })
   }, [commandes, mesCommandesIds, ajouterNotification])
 
+  // Retour de la page de paiement Stripe (au chargement de l'appli)
+  useEffect(() => {
+    const h = window.location.hash
+    if (h.includes('paiement-reussi')) {
+      history.replaceState(null, '', window.location.pathname)
+      const enAttente = lirePaiementEnCours()
+      if (!enAttente) return
+      // Paiement validé -> on crée réellement la commande
+      ajouterCommande(enAttente)
+        .then((commande) => {
+          effacerPaiementEnCours()
+          setMesCommandesIds((ids) => [...ids, commande.id])
+          statutsPrecedents.current[commande.id] = commande.statut
+          ajouterAHistorique(commande)
+          setCommandeConfirmee(commande)
+          setVue('confirmation')
+          window.scrollTo({ top: 0 })
+          ajouterNotification(`Paiement reçu ! Votre commande #${commande.numero} est en préparation.`)
+        })
+        .catch(() => {
+          ajouterNotification(
+            'Paiement reçu, mais l’enregistrement a échoué. Contactez la boutique avec votre preuve de paiement.',
+          )
+        })
+    } else if (h.includes('paiement-annule')) {
+      history.replaceState(null, '', window.location.pathname)
+      ajouterNotification('Paiement annulé. Vous pouvez recommander quand vous voulez.')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const produitOuvert = produits.find((p) => p.id === produitOuvertId) ?? null
   // Trois groupes clairs pour l'accueil : Pains, Pains spéciaux et Boissons
   const produitsPains = produits.filter((p) => p.categorie === 'pains')
@@ -275,6 +307,8 @@ export default function App() {
               setCommandeConfirmee(commande)
               setVue('confirmation')
               window.scrollTo({ top: 0 })
+              // Notification client : la commande part en préparation
+              ajouterNotification(`Votre commande #${commande.numero} est en préparation. On vous prévient dès qu'elle est prête !`)
             }}
           />
         ) : produitOuvert ? (

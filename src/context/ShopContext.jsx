@@ -66,6 +66,7 @@ function commandeDepuisRow(r) {
     numero: r.numero,
     client: r.client || '',
     email: r.email || '',
+    telephone: r.telephone || '',
     creneau: r.creneau,
     heureRetrait: r.heure_retrait,
     statut: r.statut,
@@ -283,11 +284,12 @@ export function ShopProvider({ children }) {
 
   // --- Client : passer une commande (paiement validé -> commande réelle) ---
   // Renvoie la commande créée, ou lève une erreur ('boutique_fermee' / 'stock_insuffisant').
-  async function ajouterCommande({ articles, total, creneau, heureRetrait, client = '', email = '' }) {
+  async function ajouterCommande({ articles, total, creneau, heureRetrait, client = '', email = '', telephone = '' }) {
     if (modeReel) {
       const { data, error } = await supabase.rpc('passer_commande', {
         p_client: client,
         p_email: email,
+        p_telephone: telephone,
         p_creneau: creneau,
         p_heure_retrait: heureRetrait,
         p_articles: articles,
@@ -306,6 +308,7 @@ export function ShopProvider({ children }) {
       numero: 'B' + Math.floor(10 + Math.random() * 89),
       client,
       email,
+      telephone,
       date: Date.now(),
       creneau,
       heureRetrait,

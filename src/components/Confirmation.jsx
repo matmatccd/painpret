@@ -6,9 +6,12 @@ import { lienItineraire, lienAvisGoogle } from '../data/bakery'
 import { useShop } from '../context/ShopContext'
 import { useNotifications } from '../context/NotificationsContext'
 
-// Calcule le temps restant (en secondes) avant l'heure de retrait
+// Calcule le temps restant (en secondes) avant l'heure de retrait.
+// Renvoie null si l'heure n'est pas définie (créneau "dès que possible").
 function secondesRestantes(heureISO) {
-  return Math.round((new Date(heureISO).getTime() - Date.now()) / 1000)
+  const t = new Date(heureISO).getTime()
+  if (!heureISO || Number.isNaN(t)) return null
+  return Math.round((t - Date.now()) / 1000)
 }
 
 // Écran de confirmation : numéro, QR Code, heure de retrait, minuteur.
@@ -33,20 +36,22 @@ export default function Confirmation({ commande, onTermine }) {
     return () => clearInterval(minuteur)
   }, [commande.heureRetrait])
 
-  const heure = new Date(commande.heureRetrait).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const heureValide = commande.heureRetrait && !Number.isNaN(new Date(commande.heureRetrait).getTime())
+  const heure = heureValide
+    ? new Date(commande.heureRetrait).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    : commande.creneau || 'Dès que possible'
 
-  // Mise en forme du minuteur : "12 min" ou "C'est prêt !"
+  // Mise en forme du minuteur : "dans 12 min", "à récupérer", etc.
+  const livree = live.statut === 'livree'
   let texteMinuteur
-  if (restant <= 0) {
-    texteMinuteur = 'C’est bientôt prêt !'
+  if (livree) {
+    texteMinuteur = 'Récupérée'
+  } else if (restant === null || restant <= 0) {
+    texteMinuteur = 'À récupérer'
   } else if (restant < 60) {
     texteMinuteur = `${restant} s`
   } else {
-    const min = Math.floor(restant / 60)
-    texteMinuteur = `${min} min`
+    texteMinuteur = `${Math.floor(restant / 60)} min`
   }
 
   return (
@@ -56,9 +61,13 @@ export default function Confirmation({ commande, onTermine }) {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-200">
           <CheckCircle2 size={30} className="text-emerald-600" />
         </div>
-        <h1 className="mt-4 text-2xl text-ink sm:text-3xl">Commande confirmée</h1>
+        <h1 className="mt-4 text-2xl text-ink sm:text-3xl">
+          {livree ? 'Commande récupérée' : 'Commande confirmée'}
+        </h1>
         <p className="mt-1 text-sm text-stone-warm">
-          Présentez ce QR Code en boutique pour récupérer votre commande.
+          {livree
+            ? 'Vous la retrouverez dans « Mes commandes ». Merci !'
+            : 'Présentez ce QR Code en boutique pour récupérer votre commande.'}
         </p>
 
         {/* Numéro de commande */}
@@ -92,7 +101,7 @@ export default function Confirmation({ commande, onTermine }) {
           </div>
           <div className="rounded-xl border border-sand bg-cream p-3">
             <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-stone-warm">
-              <Clock size={13} /> Dans
+              <Clock size={13} /> {livree ? 'Statut' : 'Retrait dans'}
             </div>
             <p className="mt-1 font-display text-xl text-crust">{texteMinuteur}</p>
           </div>
@@ -116,8 +125,12 @@ export default function Confirmation({ commande, onTermine }) {
           <span className="price font-bold text-ink">{formatPrix(commande.total)}</span>
         </div>
 
-        {/* Signaler son arrivée (le boulanger voit un badge "Client sur place") */}
-        {live.arrive ? (
+        {/* Une fois le QR scanné par le boulanger, la commande est récupérée */}
+        {livree ? (
+          <p className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-3 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <CheckCircle2 size={17} /> Commande récupérée — merci et à bientôt !
+          </p>
+        ) : live.arrive ? (
           <p className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-3 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200">
             <CheckCircle2 size={17} /> Le boulanger est prévenu de votre arrivée
           </p>

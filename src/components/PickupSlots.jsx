@@ -1,21 +1,30 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, Clock, CreditCard, Check, User, Ban, Mail } from 'lucide-react'
+import { ArrowLeft, Clock, CreditCard, Check, User, Ban, Lock } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
 import { formatPrix } from '../lib/format'
+import { creerPaiement, memoriserPaiementEnCours } from '../lib/stripe'
 
-// Étape de retrait : récap + prénom/email + choix du créneau.
-// Paiement au retrait, en boutique (pas d'encaissement en ligne pour l'instant).
-export default function PickupSlots({ onRetour, onConfirme }) {
-  const { lignes, total, viderPanier } = useCart()
-  const { ajouterCommande, boutiqueFermee } = useShop()
+// Étape de retrait : récap + coordonnées + créneau + PAIEMENT EN LIGNE (Stripe).
+export default function PickupSlots({ onRetour }) {
+  const { lignes, total } = useCart()
+  const { boutiqueFermee } = useShop()
 
-  // Le prénom et l'email du client — mémorisés pour les prochaines commandes
+  // Coordonnées du client (obligatoires) — mémorisées pour les prochaines fois
   const [prenom, setPrenom] = useState(() => localStorage.getItem('painpret_prenom') || '')
+  const [nom, setNom] = useState(() => localStorage.getItem('painpret_nom') || '')
+  const [telephone, setTelephone] = useState(() => localStorage.getItem('painpret_tel') || '')
   const [email, setEmail] = useState(() => localStorage.getItem('painpret_email') || '')
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [erreur, setErreur] = useState('')
+
+  // Validation simple des coordonnées obligatoires
+  const emailValide = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+  const telValide = telephone.replace(/[^0-9+]/g, '').length >= 10
+  const coordonneesOk = prenom.trim() && nom.trim() && telValide && emailValide
+  const champCoord =
+    'w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15'
 
   // Le délai de prépa = le plus long parmi les produits du panier
   const delaiMax = useMemo(
@@ -28,45 +37,47 @@ export default function PickupSlots({ onRetour, onConfirme }) {
 
   async function confirmer() {
     if (!creneauChoisi || boutiqueFermee || envoiEnCours) return
+    if (!coordonneesOk) {
+      setErreur('Merci de renseigner votre prénom, nom, téléphone et email.')
+      return
+    }
     setErreur('')
     localStorage.setItem('painpret_prenom', prenom.trim())
+    localStorage.setItem('painpret_nom', nom.trim())
+    localStorage.setItem('painpret_tel', telephone.trim())
     localStorage.setItem('painpret_email', email.trim())
 
     // On transforme les lignes du panier en articles lisibles pour le boulanger.
-    // "produitId" permet de décompter le stock au moment de la commande.
-    // "remarque" = la demande du client (ex : bien cuit) que le boulanger verra.
     const articles = lignes.map((l) => ({
       produitId: l.produit.id,
       nom: l.varianteNom ? `${l.produit.nom} (${l.varianteNom})` : l.produit.nom,
       quantite: l.quantite,
-      prix: l.prixUnitaire, // prix unitaire, pour le reçu imprimé
+      prix: l.prixUnitaire,
       remarque: l.remarque || '',
     }))
 
+    const creneau = creneauChoisi.label === 'Dès que possible'
+      ? formatHeure(creneauChoisi.date)
+      : creneauChoisi.label
+
+    // On mémorise la commande : elle sera réellement créée au RETOUR de Stripe,
+    // une fois le paiement réussi (paiement uniquement en ligne).
+    memoriserPaiementEnCours({
+      articles,
+      total,
+      client: `${prenom.trim()} ${nom.trim()}`.trim(),
+      email: email.trim(),
+      telephone: telephone.trim(),
+      creneau,
+      heureRetrait: creneauChoisi.date.toISOString(),
+    })
+
     setEnvoiEnCours(true)
     try {
-      const commande = await ajouterCommande({
-        articles,
-        total,
-        client: prenom.trim(),
-        email: email.trim(),
-        creneau: creneauChoisi.label === 'Dès que possible'
-          ? formatHeure(creneauChoisi.date)
-          : creneauChoisi.label,
-        heureRetrait: creneauChoisi.date.toISOString(),
-      })
-      viderPanier()
-      onConfirme(commande)
+      const url = await creerPaiement(articles, email.trim())
+      window.location.href = url // redirection vers la page de paiement Stripe
     } catch (e) {
-      // Messages clairs pour le client selon la raison
-      if (/boutique_fermee/.test(e.message)) {
-        setErreur('La boutique vient de fermer : commande impossible pour le moment.')
-      } else if (/stock_insuffisant/.test(e.message)) {
-        const nom = e.message.split(':')[1]?.trim()
-        setErreur(`Désolé, « ${nom || 'un produit'} » vient d'être épuisé. Ajustez votre panier.`)
-      } else {
-        setErreur('Un souci est survenu. Réessayez dans un instant.')
-      }
+      setErreur('Le paiement n’a pas pu démarrer. Réessayez dans un instant.')
       setEnvoiEnCours(false)
     }
   }
@@ -97,40 +108,56 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         </div>
       )}
 
-      {/* Prénom : le boulanger appelle "Commande pour Julie !" */}
+      {/* Coordonnées obligatoires pour retirer et payer la commande */}
       <section className="mt-6">
-        <label htmlFor="prenom" className="flex items-center gap-2 text-lg text-ink">
-          <User size={18} className="text-crust" /> Votre prénom
-        </label>
-        <input
-          id="prenom"
-          type="text"
-          value={prenom}
-          onChange={(e) => setPrenom(e.target.value)}
-          placeholder="Ex : Julie"
-          autoComplete="given-name"
-          className="mt-3 w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
-        />
-        <p className="mt-1.5 text-xs text-stone-warm">
-          Il sera affiché au boulanger pour vous appeler quand c'est prêt.
+        <h2 className="flex items-center gap-2 text-lg text-ink">
+          <User size={18} className="text-crust" /> Vos coordonnées
+        </h2>
+        <p className="mt-1 text-xs text-stone-warm">
+          Obligatoires pour préparer et vous remettre votre commande.
         </p>
-
-        {/* Email : pour recevoir la confirmation et retrouver son QR Code */}
-        <label htmlFor="email" className="mt-4 flex items-center gap-2 text-lg text-ink">
-          <Mail size={18} className="text-crust" /> Votre email
-          <span className="text-sm font-normal text-stone-warm">(facultatif)</span>
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Ex : julie@email.com"
-          autoComplete="email"
-          className="mt-3 w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15"
-        />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <input
+            aria-label="Prénom"
+            type="text"
+            value={prenom}
+            onChange={(e) => setPrenom(e.target.value)}
+            placeholder="Prénom *"
+            autoComplete="given-name"
+            className={champCoord}
+          />
+          <input
+            aria-label="Nom"
+            type="text"
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            placeholder="Nom *"
+            autoComplete="family-name"
+            className={champCoord}
+          />
+          <input
+            aria-label="Téléphone"
+            type="tel"
+            value={telephone}
+            onChange={(e) => setTelephone(e.target.value)}
+            placeholder="Téléphone *"
+            autoComplete="tel"
+            inputMode="tel"
+            className={champCoord}
+          />
+          <input
+            aria-label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email *"
+            autoComplete="email"
+            inputMode="email"
+            className={champCoord}
+          />
+        </div>
         <p className="mt-1.5 text-xs text-stone-warm">
-          Pour recevoir votre confirmation et retrouver votre QR Code si vous l'oubliez.
+          Le boulanger pourra vous appeler, et vous recevrez votre confirmation par email.
         </p>
       </section>
 
@@ -195,16 +222,16 @@ export default function PickupSlots({ onRetour, onConfirme }) {
         </div>
       </section>
 
-      {/* Paiement : au retrait, en boutique */}
+      {/* Paiement en ligne sécurisé (Stripe) */}
       <section className="mt-6">
         <h2 className="flex items-center gap-2 text-lg text-ink">
-          <CreditCard size={18} className="text-crust" /> Paiement
+          <CreditCard size={18} className="text-crust" /> Paiement en ligne
         </h2>
         <div className="mt-3 flex items-start gap-3 rounded-xl border border-sand bg-paper p-4">
-          <Check size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+          <Lock size={18} className="mt-0.5 shrink-0 text-emerald-600" />
           <p className="text-sm text-stone-warm">
-            Vous réglez <span className="font-semibold text-ink">au retrait, en boutique</span>{' '}
-            (carte bancaire ou espèces). Rien à payer maintenant.
+            Réglez par carte sur une page <span className="font-semibold text-ink">sécurisée Stripe</span>.
+            Votre commande est enregistrée dès que le paiement est validé.
           </p>
         </div>
       </section>
@@ -220,19 +247,21 @@ export default function PickupSlots({ onRetour, onConfirme }) {
       <button
         type="button"
         onClick={confirmer}
-        disabled={!creneauChoisi || boutiqueFermee || envoiEnCours}
+        disabled={!creneauChoisi || boutiqueFermee || envoiEnCours || !coordonneesOk}
         className="mt-7 w-full rounded-xl bg-crust py-4 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-sand disabled:text-stone-warm"
       >
         {boutiqueFermee
           ? 'Boutique fermée — commandes suspendues'
           : envoiEnCours
-            ? 'Validation en cours…'
-            : creneauChoisi
-              ? `Confirmer ma commande · ${formatPrix(total)}`
-              : 'Choisissez un créneau'}
+            ? 'Redirection vers le paiement…'
+            : !creneauChoisi
+              ? 'Choisissez un créneau'
+              : !coordonneesOk
+                ? 'Remplissez vos coordonnées'
+                : `Payer en ligne · ${formatPrix(total)}`}
       </button>
-      <p className="mt-3 text-center text-xs text-stone-warm">
-        En confirmant, votre commande part en préparation. Vous réglez au retrait.
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-stone-warm">
+        <Lock size={12} /> Paiement sécurisé par Stripe · Retrait en boutique
       </p>
     </div>
   )
