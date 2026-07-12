@@ -1,51 +1,34 @@
-import { Wheat } from 'lucide-react'
+import { Wheat, Flame, Clock, MapPin } from 'lucide-react'
+import { bakery } from '../data/bakery'
 
-// Messages du bandeau
-const MESSAGES = [
-  'Pain frais du jour',
-  'Fait maison',
-  'Cuit sur place, devant vous',
-  'Artisan boulanger depuis 2012',
-  'Commandez, passez, repartez',
+// Bandeau de réassurance : les atouts de la boulangerie, sobre et élégant.
+// (Remplace l'ancien marquee défilant en capitales, trop chargé.)
+const ATOUTS = [
+  { Icone: Wheat, titre: 'Pain frais du jour', sous: 'Fait maison' },
+  { Icone: Flame, titre: 'Cuit sur place', sous: 'Devant vous' },
+  { Icone: Clock, titre: `Prêt en ~${bakery.tempsPreparation} min`, sous: 'Sans attente' },
+  { Icone: MapPin, titre: 'Retrait à Reims', sous: '164 av. Jean Jaurès' },
 ]
 
-// Ruban élégant entre le Hero et la boutique : flux bordeaux très lent,
-// petites capitales espacées, fins épis dorés en séparateurs.
-// Le contenu est affiché deux fois pour une boucle sans couture
-// (la seconde copie est masquée aux lecteurs d'écran).
 export default function Bandeau() {
-  const Serie = ({ cache = false }) => (
-    <div className="flex items-center" aria-hidden={cache || undefined}>
-      {MESSAGES.map((m) => (
-        <span key={m} className="flex items-center">
-          <span className="whitespace-nowrap px-8 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2d3d8]/90 sm:text-xs">
-            {m}
-          </span>
-          <Wheat size={12} className="shrink-0 text-[#e9cd90]/45" />
-        </span>
-      ))}
-    </div>
-  )
-
   return (
-    <div
-      className="relative mt-6 overflow-hidden border-y border-[#e9cd90]/30 py-3.5"
-      // Les bords s'estompent en fondu : plus élégant qu'une coupure nette.
-      style={{
-        maskImage: 'linear-gradient(to right, transparent, #000 9%, #000 91%, transparent)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, #000 9%, #000 91%, transparent)',
-      }}
-    >
-      {/* Flux bordeaux, très lent, légèrement assombri */}
-      <div className="flux-petrie absolute inset-0" />
-      <div className="absolute inset-0 bg-[#2c1019]/40" />
-      {/* Filets dorés fins en haut et en bas pour un rendu "enseigne" */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e9cd90]/60 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#e9cd90]/60 to-transparent" />
-      <div className="marquee-petrie relative">
-        <Serie />
-        <Serie cache />
+    <section className="mt-6 border-y border-sand bg-gradient-to-b from-paper to-cream">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-3 gap-y-4 px-4 py-4 sm:grid-cols-4 sm:gap-0">
+        {ATOUTS.map(({ Icone, titre, sous }) => (
+          <div
+            key={titre}
+            className="group flex items-center gap-3 sm:justify-center"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-crust ring-1 ring-sand transition-colors group-hover:text-ember group-hover:ring-crust/30">
+              <Icone size={17} strokeWidth={1.75} />
+            </span>
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[13px] font-semibold text-ink">{titre}</p>
+              <p className="truncate text-[11px] text-stone-warm">{sous}</p>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   )
 }
