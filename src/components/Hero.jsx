@@ -38,9 +38,11 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="mx-auto w-full max-w-6xl animate-fade-up px-4 pt-6">
-      <div className="relative overflow-hidden rounded-2xl border border-sand">
-        <div className="relative flex min-h-[300px] flex-col justify-end p-7 sm:min-h-[380px] sm:p-10">
+    // Bannière pleine largeur : la photo couvre l'écran bord à bord,
+    // sans cadre ni espaces blancs autour.
+    <section className="animate-fade-up">
+      <div className="relative overflow-hidden">
+        <div className="relative flex min-h-[340px] flex-col justify-end sm:min-h-[440px]">
           {/* Les photos, empilées : seule celle d'index visible (fondu doux) */}
           {PHOTOS.map((photo, i) => (
             <img
@@ -57,8 +59,10 @@ export default function Hero() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/92 via-[#2c1019]/62 to-[#2c1019]/28" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#2c1019]/45 to-transparent" />
 
+          {/* Contenu centré (la photo, elle, couvre tout l'écran) */}
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-20 sm:px-6 sm:pb-10">
           {/* Badges d'état */}
-          <div className="relative mb-5 flex flex-wrap items-center gap-2">
+          <div className="mb-5 flex flex-wrap items-center gap-2">
             {estOuvertMaintenant() ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -76,7 +80,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <div className="relative text-white">
+          <div className="text-white">
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#e9cd90]">
               Click &amp; Collect · {bakery.ville.replace(/^\d+\s*/, '')}
             </p>
@@ -111,6 +115,7 @@ export default function Hero() {
                 <Navigation size={13} /> Itinéraire
               </a>
             </div>
+          </div>
           </div>
 
           {/* Points du diaporama (cliquables) */}

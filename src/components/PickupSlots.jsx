@@ -56,9 +56,14 @@ export default function PickupSlots({ onRetour }) {
       remarque: l.remarque || '',
     }))
 
-    const creneau = creneauChoisi.label === 'Dès que possible'
+    // Le créneau enregistré garde le jour si le retrait n'est pas aujourd'hui
+    // (ex : "Demain 07:15") pour que le boulanger s'y retrouve.
+    const heure = creneauChoisi.label === 'Dès que possible'
       ? formatHeure(creneauChoisi.date)
       : creneauChoisi.label
+    const creneau = creneauChoisi.jourLabel
+      ? `${creneauChoisi.jourLabel.charAt(0).toUpperCase() + creneauChoisi.jourLabel.slice(1)} ${heure}`
+      : heure
 
     setEnvoiEnCours(true)
     try {
@@ -186,10 +191,17 @@ export default function PickupSlots({ onRetour }) {
         <h2 className="flex items-center gap-2 text-lg text-ink">
           <Clock size={18} className="text-crust" /> Choisissez votre heure de retrait
         </h2>
-        {/* Plus de créneaux = la boutique est fermée pour aujourd'hui */}
+        {/* Boutique fermée en ce moment : on propose le prochain jour d'ouverture */}
+        {creneaux.length > 0 && creneaux[0].jourLabel && (
+          <p className="mt-3 rounded-xl bg-cream px-4 py-3 text-sm text-stone-warm ring-1 ring-sand">
+            La boutique est fermée pour le moment — commandez dès maintenant pour{' '}
+            <span className="font-semibold text-ink">{creneaux[0].jourLabel}</span> :
+          </p>
+        )}
+        {/* Aucun créneau du tout (cas exceptionnel) */}
         {creneaux.length === 0 && (
           <p className="mt-3 rounded-xl border border-dashed border-sand bg-paper px-4 py-5 text-center text-sm text-stone-warm">
-            La boutique est fermée pour aujourd'hui — les commandes reprennent demain dès l'ouverture.
+            Aucun créneau disponible pour le moment — revenez un peu plus tard.
           </p>
         )}
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">

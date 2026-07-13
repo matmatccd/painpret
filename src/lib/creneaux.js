@@ -1,9 +1,10 @@
 // ============================================================
 //  Calcul des créneaux de retrait
 //  -----------------------------------------------------------
-//  On propose une heure "dès que possible" (maintenant + temps de
-//  préparation) puis des créneaux réguliers tous les quarts d'heure,
-//  jusqu'à la FERMETURE RÉELLE du jour (ex : 13h00 le dimanche).
+//  AUJOURD'HUI si c'est encore possible : "dès que possible" puis
+//  des créneaux tous les quarts d'heure jusqu'à la fermeture.
+//  Sinon (boutique fermée, trop tard) : on propose le PROCHAIN jour
+//  d'ouverture (demain, ou après si fermé) dès l'ouverture.
 // ============================================================
 
 import { bakery, estJourFerme } from '../data/bakery'
@@ -13,14 +14,18 @@ export function formatHeure(date) {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-// Lit l'heure de fermeture d'aujourd'hui dans les horaires de la boulangerie.
-// Les horaires sont écrits "07:00 – 20:00" -> on récupère { h: 20, m: 0 }.
-function fermetureDuJour() {
-  const jourJS = new Date().getDay() // 0 = dimanche
+// Lit les horaires d'un jour donné : { ouverture: {h,m}, fermeture: {h,m} }
+// ou null si la ligne est "Fermé".
+function horairesDuJour(date) {
+  const jourJS = date.getDay() // 0 = dimanche, notre tableau commence lundi
   const ligne = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
-  const match = ligne?.heures.match(/(\d{1,2}):(\d{2})\s*$/)
-  if (!match) return { h: 20, m: 0 } // valeur de secours
-  return { h: parseInt(match[1]), m: parseInt(match[2]) }
+  const debut = ligne?.heures.match(/^(\d{1,2}):(\d{2})/)
+  const fin = ligne?.heures.match(/(\d{1,2}):(\d{2})\s*$/)
+  if (!debut || !fin) return null
+  return {
+    ouverture: { h: parseInt(debut[1]), m: parseInt(debut[2]) },
+    fermeture: { h: parseInt(fin[1]), m: parseInt(fin[2]) },
+  }
 }
 
 // Arrondit une date aux 5 minutes supérieures
@@ -31,50 +36,78 @@ function arrondir5min(date) {
   return d
 }
 
-// Génère la liste des créneaux disponibles à partir d'un délai de prépa (minutes)
-export function genererCreneaux(delaiPrepMin = 15) {
-  const maintenant = new Date()
-
-  // Jour de fermeture (vendredi / dernier jeudi du mois) : aucun créneau
-  if (estJourFerme(maintenant)) return []
-
-  // Heure limite du jour = la fermeture réelle de la boutique
-  const { h, m } = fermetureDuJour()
-  const fermeture = new Date(maintenant)
-  fermeture.setHours(h, m, 0, 0)
-
-  // Heure "prête au plus tôt" = maintenant + délai de préparation
-  const auPlusTot = arrondir5min(new Date(maintenant.getTime() + delaiPrepMin * 60000))
-
+// Fabrique jusqu'à 8 créneaux de 15 min entre "auPlusTot" et "fermeture".
+function creneauxEntre(auPlusTot, fermeture, jourLabel) {
   const creneaux = []
-
-  // "Dès que possible" seulement si la boutique est encore ouverte à cette heure
-  if (auPlusTot <= fermeture) {
-    creneaux.push({
-      id: 'asap',
-      label: 'Dès que possible',
-      detail: `vers ${formatHeure(auPlusTot)}`,
-      date: auPlusTot,
-      complet: false,
-    })
-  }
-
-  // Premier créneau "rond" : prochain quart d'heure après l'heure au plus tôt
   const premier = new Date(auPlusTot)
   premier.setMinutes(Math.ceil(premier.getMinutes() / 15) * 15, 0, 0)
-
-  // On propose jusqu'à 8 créneaux de 15 min, sans dépasser la fermeture
   for (let i = 0; i < 8; i++) {
     const d = new Date(premier.getTime() + i * 15 * 60000)
     if (d > fermeture) break
     creneaux.push({
-      id: formatHeure(d),
+      id: (jourLabel || 'auj') + '-' + formatHeure(d),
       label: formatHeure(d),
-      detail: null,
+      detail: jourLabel || null,
       date: d,
       complet: false,
+      jourLabel: jourLabel || '',
     })
   }
-
   return creneaux
+}
+
+// Génère la liste des créneaux disponibles à partir d'un délai de prépa (minutes)
+export function genererCreneaux(delaiPrepMin = 15) {
+  const maintenant = new Date()
+
+  // ---- 1) Aujourd'hui, si la boutique est ouverte et qu'il reste du temps ----
+  if (!estJourFerme(maintenant)) {
+    const horaires = horairesDuJour(maintenant)
+    if (horaires) {
+      const fermeture = new Date(maintenant)
+      fermeture.setHours(horaires.fermeture.h, horaires.fermeture.m, 0, 0)
+      const auPlusTot = arrondir5min(new Date(maintenant.getTime() + delaiPrepMin * 60000))
+
+      const creneaux = []
+      if (auPlusTot <= fermeture) {
+        creneaux.push({
+          id: 'asap',
+          label: 'Dès que possible',
+          detail: `vers ${formatHeure(auPlusTot)}`,
+          date: auPlusTot,
+          complet: false,
+          jourLabel: '',
+        })
+      }
+      creneaux.push(...creneauxEntre(auPlusTot, fermeture, ''))
+      if (creneaux.length > 0) return creneaux
+    }
+  }
+
+  // ---- 2) Sinon : le prochain jour d'ouverture (jusqu'à 6 jours devant) ----
+  for (let j = 1; j <= 6; j++) {
+    const jour = new Date(maintenant)
+    jour.setDate(jour.getDate() + j)
+    jour.setHours(0, 0, 0, 0)
+    if (estJourFerme(jour)) continue
+    const horaires = horairesDuJour(jour)
+    if (!horaires) continue
+
+    const ouverture = new Date(jour)
+    ouverture.setHours(horaires.ouverture.h, horaires.ouverture.m, 0, 0)
+    const fermeture = new Date(jour)
+    fermeture.setHours(horaires.fermeture.h, horaires.fermeture.m, 0, 0)
+    // Prêt au plus tôt : l'ouverture + le temps de préparation
+    const auPlusTot = arrondir5min(new Date(ouverture.getTime() + delaiPrepMin * 60000))
+
+    const jourLabel =
+      j === 1
+        ? 'demain'
+        : jour.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'numeric' })
+
+    const creneaux = creneauxEntre(auPlusTot, fermeture, jourLabel)
+    if (creneaux.length > 0) return creneaux
+  }
+
+  return []
 }

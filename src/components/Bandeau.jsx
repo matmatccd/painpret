@@ -13,7 +13,8 @@ const ATOUTS = [
 
 export default function Bandeau() {
   return (
-    <section className="relative mt-6 overflow-hidden">
+    // Collé directement sous la bannière photo : aucun espace blanc entre les deux.
+    <section className="relative overflow-hidden">
       {/* Fond : flux de couleurs de la façade + léger assombrissement */}
       <div className="flux-petrie absolute inset-0" />
       <div className="absolute inset-0 bg-[#2c1019]/30" />

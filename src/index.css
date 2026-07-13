@@ -222,6 +222,24 @@
 }
 .bandeau-icone { animation: bandeau-flotte 3.6s ease-in-out infinite; }
 
+/* ---- Démo 3D "Comment ça marche" ---- */
+/* Le téléphone pivote lentement en 3D, comme présenté en vitrine */
+.scene-3d { perspective: 1100px; }
+@keyframes tel-3d {
+  0%, 100% { transform: rotateY(-14deg) rotateX(4deg); }
+  50% { transform: rotateY(14deg) rotateX(1deg); }
+}
+.tel-3d {
+  transform-style: preserve-3d;
+  animation: tel-3d 9s ease-in-out infinite;
+}
+/* L'ombre au sol respire avec la rotation */
+@keyframes tel-ombre {
+  0%, 100% { transform: translateX(-14px) scaleX(0.9); opacity: 0.35; }
+  50% { transform: translateX(14px) scaleX(1.05); opacity: 0.25; }
+}
+.tel-ombre { animation: tel-ombre 9s ease-in-out infinite; }
+
 /* Respect des préférences d'accessibilité : on coupe le mouvement…
    SAUF les animations de marque, très lentes et douces (flux de couleurs,
    bandeau, titre, épi du logo) — elles ne provoquent pas de vertige et
@@ -238,4 +256,6 @@
   .logo-ble { animation: ondule 4s ease-in-out infinite !important; }
   .bandeau-reflet { animation: bandeau-reflet 7s ease-in-out infinite !important; }
   .bandeau-icone { animation: bandeau-flotte 3.6s ease-in-out infinite !important; }
+  .tel-3d { animation: tel-3d 9s ease-in-out infinite !important; }
+  .tel-ombre { animation: tel-ombre 9s ease-in-out infinite !important; }
 }
