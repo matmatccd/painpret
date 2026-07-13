@@ -37,7 +37,7 @@ export default function AvisClients() {
         {/* Flux de couleurs qui bouge, aux teintes de la façade */}
         <div className="flux-petrie absolute inset-0" />
         {/* Léger voile pour la lisibilité du texte */}
-        <div className="absolute inset-0 bg-[#2c1019]/25" />
+        <div className="absolute inset-0 bg-[#291022]/25" />
 
         <div className="relative px-6 py-10 sm:px-12 sm:py-14 text-white">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">

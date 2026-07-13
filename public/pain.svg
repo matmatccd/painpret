@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <!-- Logo PainPrêt : épi de blé doré sur tuile prune (façade La Pétrie) -->
-  <rect width="48" height="48" rx="11" fill="#6f2f43"/>
+  <rect width="48" height="48" rx="11" fill="#6b2a4e"/>
   <rect x="1.5" y="1.5" width="45" height="45" rx="9.5" fill="none" stroke="#e9cd90" stroke-opacity="0.55" stroke-width="1.5"/>
   <path d="M24 45 C24 36 24 26 24 13" fill="none" stroke="#e9cd90" stroke-width="2.4" stroke-linecap="round"/>
   <path d="M24 41 C17 41.5 12.5 38 11 32.5 C17.5 33 22 36 24 41Z" fill="#e9cd90" opacity="0.55"/>

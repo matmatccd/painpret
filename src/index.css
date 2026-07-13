@@ -13,11 +13,11 @@
   --color-paper: #ffffff; /* cartes */
   --color-sand: #ecd9d6; /* bordures douces (rose grisé) */
   --color-sand-soft: #f4e6e3; /* séparateurs très légers */
-  --color-crust: #6f2f43; /* prune La Pétrie (marque, boutons) */
-  --color-crust-dark: #521f30; /* survol / texte fort */
-  --color-ember: #a13352; /* accent framboise / prix */
-  --color-ink: #33222a; /* titres & texte fort (encre prune) */
-  --color-stone-warm: #6d5560; /* texte secondaire (mauve chaud) */
+  --color-crust: #6b2a4e; /* prune La Pétrie (marque, boutons) */
+  --color-crust-dark: #4e1d3a; /* survol / texte fort */
+  --color-ember: #9c3061; /* accent framboise / prix */
+  --color-ink: #34222f; /* titres & texte fort (encre prune) */
+  --color-stone-warm: #6d5565; /* texte secondaire (mauve chaud) */
   --color-gilt: #b98a2f; /* filet doré de la devanture */
 
   /* Police */
@@ -91,7 +91,9 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up { animation: fade-up 0.4s var(--ease-out-soft) both; }
+/* "backwards" (et pas "both") : une fois l'entrée finie, l'animation rend
+   la main — les effets au survol (inclinaison 3D des cartes) fonctionnent. */
+.animate-fade-up { animation: fade-up 0.4s var(--ease-out-soft) backwards; }
 
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.96); }
@@ -120,7 +122,7 @@
 .flux-petrie {
   background: linear-gradient(
     115deg,
-    #3f1622, #521f30, #6f2f43, #8a3350, #a13352, #6f2f43, #521f30, #3f1622
+    #3b152e, #4e1d3a, #6b2a4e, #85305c, #9c3061, #6b2a4e, #4e1d3a, #3b152e
   );
   background-size: 300% 300%;
   animation: flux 28s ease-in-out infinite;
@@ -140,7 +142,7 @@
   .titre-petrie {
     background: linear-gradient(
       100deg,
-      #f6dde4, #e3a8ba, #c66a88, #a13352, #c66a88, #e3a8ba, #f6dde4
+      #f6dde4, #e3a8ba, #c66a88, #9c3061, #c66a88, #e3a8ba, #f6dde4
     );
     background-size: 320% auto;
     -webkit-background-clip: text;
@@ -240,6 +242,27 @@
 }
 .tel-ombre { animation: tel-ombre 9s ease-in-out infinite; }
 
+/* ---- Fluidité générale ---- */
+/* Les photos du diaporama "respirent" : zoom très lent (effet cinéma) */
+@keyframes kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.07); }
+}
+.hero-photo { animation: kenburns 14s ease-in-out infinite alternate; }
+
+/* Les cartes produits s'inclinent légèrement en 3D au survol,
+   comme le téléphone de la démo (souris uniquement, pas au doigt) */
+@media (hover: hover) {
+  .carte-3d {
+    transition: transform 0.35s var(--ease-out-soft),
+      border-color 0.2s, box-shadow 0.35s var(--ease-out-soft);
+  }
+  .carte-3d:hover {
+    transform: perspective(900px) rotateX(2.5deg) rotateY(-2.5deg) translateY(-5px);
+  }
+}
+.carte-3d:active { transform: scale(0.985); }
+
 /* Respect des préférences d'accessibilité : on coupe le mouvement…
    SAUF les animations de marque, très lentes et douces (flux de couleurs,
    bandeau, titre, épi du logo) — elles ne provoquent pas de vertige et
@@ -258,4 +281,5 @@
   .bandeau-icone { animation: bandeau-flotte 3.6s ease-in-out infinite !important; }
   .tel-3d { animation: tel-3d 9s ease-in-out infinite !important; }
   .tel-ombre { animation: tel-ombre 9s ease-in-out infinite !important; }
+  .hero-photo { animation: kenburns 14s ease-in-out infinite alternate !important; }
 }

@@ -49,7 +49,7 @@ export default function Hero() {
               key={photo.src}
               src={photo.src}
               alt={i === index ? photo.alt : ''}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+              className={`hero-photo absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
                 i === index ? 'opacity-100' : 'opacity-0'
               }`}
             />
@@ -57,7 +57,7 @@ export default function Hero() {
 
           {/* Voile léger : sombre seulement derrière le texte (en bas),
               pour que les photos restent bien visibles en haut */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/85 via-[#2c1019]/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#291022]/85 via-[#291022]/30 to-transparent" />
 
           {/* Contenu centré (la photo, elle, couvre tout l'écran) */}
           <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-20 sm:px-6 sm:pb-10">

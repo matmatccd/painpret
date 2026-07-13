@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <!-- Icône d'application PainPrêt (fond plein : les téléphones arrondissent) -->
-  <rect width="48" height="48" fill="#6f2f43"/>
+  <rect width="48" height="48" fill="#6b2a4e"/>
   <rect x="3" y="3" width="42" height="42" rx="8" fill="none" stroke="#e9cd90" stroke-opacity="0.55" stroke-width="1.4"/>
   <path d="M24 43 C24 35 24 26 24 14" fill="none" stroke="#e9cd90" stroke-width="2.4" stroke-linecap="round"/>
   <path d="M24 39.5 C17.6 40 13.5 36.8 12 31.8 C18 32.3 22.2 35 24 39.5Z" fill="#e9cd90" opacity="0.55"/>

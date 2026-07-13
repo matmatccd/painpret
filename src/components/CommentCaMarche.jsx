@@ -90,7 +90,7 @@ function EcranEtape({ etape }) {
           style={{ animationDelay: '400ms' }}
         >
           <div className="flex items-center gap-1 rounded-md border border-sand bg-white px-2 py-1.5">
-            <span className="h-2 w-3 rounded-sm bg-gradient-to-r from-[#a13352] to-[#6f2f43]" />
+            <span className="h-2 w-3 rounded-sm bg-gradient-to-r from-[#9c3061] to-[#6b2a4e]" />
             <span className="text-[7px] text-stone-warm">•••• 4242</span>
           </div>
           <div className="rounded-lg bg-emerald-600 py-1.5 text-center text-[8px] font-bold text-white">

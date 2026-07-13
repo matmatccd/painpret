@@ -17,7 +17,7 @@ export default function Bandeau() {
     <section className="relative overflow-hidden">
       {/* Fond : flux de couleurs de la façade + léger assombrissement */}
       <div className="flux-petrie absolute inset-0" />
-      <div className="absolute inset-0 bg-[#2c1019]/30" />
+      <div className="absolute inset-0 bg-[#291022]/30" />
       {/* Reflet doré qui balaye le bandeau */}
       <div className="bandeau-reflet" />
       {/* Filets dorés fins, comme sur la devanture */}
