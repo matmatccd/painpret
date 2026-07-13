@@ -55,9 +55,9 @@ export default function Hero() {
             />
           ))}
 
-          {/* Voile prune (couleurs de la devanture) pour la lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/92 via-[#2c1019]/62 to-[#2c1019]/28" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2c1019]/45 to-transparent" />
+          {/* Voile léger : sombre seulement derrière le texte (en bas),
+              pour que les photos restent bien visibles en haut */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2c1019]/85 via-[#2c1019]/30 to-transparent" />
 
           {/* Contenu centré (la photo, elle, couvre tout l'écran) */}
           <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-20 sm:px-6 sm:pb-10">

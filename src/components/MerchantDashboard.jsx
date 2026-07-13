@@ -32,6 +32,7 @@ import {
   Phone,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
+import AssistantFournil from './AssistantFournil'
 import { useShop } from '../context/ShopContext'
 import { bakery } from '../data/bakery'
 import { resolveImage } from '../data/images'
@@ -425,6 +426,9 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           </button>
         </section>
       )}
+
+      {/* 0. L'assistant du fournil : conseils calculés sur les vraies ventes */}
+      <AssistantFournil commandes={commandes} produits={produits} />
 
       {/* 1. Clients sur place : priorité absolue */}
       {surPlace.length > 0 && (
