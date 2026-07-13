@@ -13,7 +13,7 @@ import { Sparkles, TrendingUp, Clock, AlertTriangle, GraduationCap } from 'lucid
 
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']
 
-function analyser(commandes, produits) {
+export function analyser(commandes, produits) {
   const conseils = []
   const maintenant = new Date()
   const jourSem = maintenant.getDay()
@@ -71,7 +71,7 @@ function analyser(commandes, produits) {
     .map((prev) => {
       const produit = produits.find((p) => p.nom === prev.nom)
       return produit && produit.stock < prev.moyenne
-        ? { nom: prev.nom, stock: produit.stock, attendu: prev.moyenne }
+        ? { id: produit.id, nom: prev.nom, stock: produit.stock, attendu: prev.moyenne }
         : null
     })
     .filter(Boolean)
@@ -81,17 +81,16 @@ function analyser(commandes, produits) {
     conseils.push({
       icone: AlertTriangle,
       alerte: true,
-      titre: 'Stock à recharger avant le rush',
-      texte: aRecharger
-        .map((p) => `${p.nom} : il en reste ${p.stock}, il en part ~${p.attendu} un ${JOURS[jourSem]}`)
-        .join(' · '),
+      titre: 'Stock à prévoir pour la journée',
+      texte: `D'après les habitudes de vos clients un ${JOURS[jourSem]} :`,
+      stocks: aRecharger,
     })
   }
 
   return { conseils, nbVentes: historique.length }
 }
 
-export default function AssistantFournil({ commandes, produits }) {
+export default function AssistantFournil({ commandes, produits, ajusterStock }) {
   const { conseils, nbVentes } = analyser(commandes, produits)
 
   return (
@@ -135,10 +134,31 @@ export default function AssistantFournil({ commandes, produits }) {
                   size={18}
                   className={`mt-0.5 shrink-0 ${c.alerte ? 'text-amber-600' : 'text-crust'}`}
                 />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-ink">{c.titre}</p>
                   <p className="mt-0.5 text-sm leading-relaxed text-stone-warm">{c.texte}</p>
                   {c.note && <p className="mt-1 text-xs text-stone-warm/80">{c.note}</p>}
+                  {/* Stocks conseillés : un bouton pour les appliquer d'un geste */}
+                  {c.stocks && (
+                    <ul className="mt-2 space-y-1.5">
+                      {c.stocks.map((s) => (
+                        <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                          <span className="text-ink">
+                            {s.nom} — <span className="text-stone-warm">reste {s.stock}, il en part ~{s.attendu}</span>
+                          </span>
+                          {ajusterStock && (
+                            <button
+                              type="button"
+                              onClick={() => ajusterStock(s.id, s.attendu - s.stock)}
+                              className="rounded-lg bg-crust px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-crust-dark"
+                            >
+                              Prévoir ~{s.attendu}
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )

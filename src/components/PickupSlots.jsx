@@ -3,13 +3,14 @@ import { ArrowLeft, Clock, CreditCard, Check, User, Ban, Lock } from 'lucide-rea
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
 import { genererCreneaux, formatHeure } from '../lib/creneaux'
+import { surchargeProduit } from '../lib/charge'
 import { formatPrix } from '../lib/format'
 import { creerPaiement } from '../lib/stripe'
 
 // Étape de retrait : récap + coordonnées + créneau + PAIEMENT EN LIGNE (Stripe).
 export default function PickupSlots({ onRetour }) {
   const { lignes, total } = useCart()
-  const { boutiqueFermee } = useShop()
+  const { boutiqueFermee, commandes } = useShop()
 
   // Coordonnées du client (obligatoires) — mémorisées pour les prochaines fois
   const [prenom, setPrenom] = useState(() => localStorage.getItem('painpret_prenom') || '')
@@ -26,11 +27,19 @@ export default function PickupSlots({ onRetour }) {
   const champCoord =
     'w-full rounded-xl border border-sand bg-paper px-4 py-3 text-sm outline-none transition placeholder:text-stone-warm/70 focus:border-crust focus:ring-2 focus:ring-crust/15'
 
-  // Le délai de prépa = le plus long parmi les produits du panier
-  const delaiMax = useMemo(
-    () => Math.max(10, ...lignes.map((l) => l.produit.delaiPreparation || 10)),
-    [lignes],
-  )
+  // Le délai de prépa = le plus long parmi les produits du panier,
+  // ALLONGÉ automatiquement si le fournil est très demandé en ce moment
+  // (beaucoup de commandes en attente sur les mêmes produits).
+  const { delaiMax, minutesSurcharge } = useMemo(() => {
+    const delaiBase = Math.max(10, ...lignes.map((l) => l.produit.delaiPreparation || 10))
+    const delaiCharge = Math.max(
+      10,
+      ...lignes.map(
+        (l) => (l.produit.delaiPreparation || 10) + surchargeProduit(l.produit.id, commandes),
+      ),
+    )
+    return { delaiMax: delaiCharge, minutesSurcharge: delaiCharge - delaiBase }
+  }, [lignes, commandes])
   const creneaux = useMemo(() => genererCreneaux(delaiMax), [delaiMax])
 
   const [creneauChoisi, setCreneauChoisi] = useState(null)
@@ -191,6 +200,17 @@ export default function PickupSlots({ onRetour }) {
         <h2 className="flex items-center gap-2 text-lg text-ink">
           <Clock size={18} className="text-crust" /> Choisissez votre heure de retrait
         </h2>
+        {/* Forte demande : le délai s'est allongé pour laisser le temps au fournil */}
+        {minutesSurcharge > 0 && (
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
+            <Clock size={16} className="mt-0.5 shrink-0" />
+            <span>
+              Beaucoup de commandes en ce moment : le fournil a besoin d'environ{' '}
+              <span className="font-semibold">{minutesSurcharge} min de plus</span> pour préparer
+              la vôtre. Les créneaux en tiennent compte.
+            </span>
+          </p>
+        )}
         {/* Boutique fermée en ce moment : on propose le prochain jour d'ouverture */}
         {creneaux.length > 0 && creneaux[0].jourLabel && (
           <p className="mt-3 rounded-xl bg-cream px-4 py-3 text-sm text-stone-warm ring-1 ring-sand">

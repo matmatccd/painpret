@@ -428,7 +428,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
       )}
 
       {/* 0. L'assistant du fournil : conseils calculés sur les vraies ventes */}
-      <AssistantFournil commandes={commandes} produits={produits} />
+      <AssistantFournil commandes={commandes} produits={produits} ajusterStock={ajusterStock} />
 
       {/* 1. Clients sur place : priorité absolue */}
       {surPlace.length > 0 && (
