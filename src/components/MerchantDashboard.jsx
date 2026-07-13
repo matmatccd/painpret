@@ -222,18 +222,18 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
           <Indicateur valeur={produitsEpuises} label="Produits épuisés" />
         </div>
 
-        {/* 4 onglets simples — gros et faciles à taper sur tablette */}
-        <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-sand bg-paper p-1 no-scrollbar">
-          <BoutonOnglet actif={onglet === 'jour'} onClick={() => setOnglet('jour')} icone={<LayoutDashboard size={17} />}>
+        {/* 4 onglets simples — gros, tous visibles, faciles à taper */}
+        <div className="mb-6 grid grid-cols-4 gap-1 rounded-xl border border-sand bg-paper p-1">
+          <BoutonOnglet actif={onglet === 'jour'} onClick={() => setOnglet('jour')} icone={<LayoutDashboard size={19} />}>
             Aujourd'hui
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'commandes'} onClick={() => setOnglet('commandes')} icone={<ClipboardList size={17} />} badge={commandesActives}>
+          <BoutonOnglet actif={onglet === 'commandes'} onClick={() => setOnglet('commandes')} icone={<ClipboardList size={19} />} badge={commandesActives}>
             Commandes
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'retrait'} onClick={() => setOnglet('retrait')} icone={<QrCode size={17} />}>
-            Scanner un retrait
+          <BoutonOnglet actif={onglet === 'retrait'} onClick={() => setOnglet('retrait')} icone={<QrCode size={19} />}>
+            Scanner
           </BoutonOnglet>
-          <BoutonOnglet actif={onglet === 'produits'} onClick={() => setOnglet('produits')} icone={<Package size={17} />}>
+          <BoutonOnglet actif={onglet === 'produits'} onClick={() => setOnglet('produits')} icone={<Package size={19} />}>
             Mes produits
           </BoutonOnglet>
         </div>
@@ -349,20 +349,22 @@ function Indicateur({ valeur, label }) {
 }
 
 // --- Onglet (avec pastille de compteur facultative) ---
+// Gros bouton tactile : icône au-dessus du nom sur téléphone, côte à côte
+// sur grand écran. Les 4 restent toujours visibles (pas de défilement).
 function BoutonOnglet({ actif, onClick, icone, badge, children }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
-        actif ? 'bg-ink text-white' : 'text-stone-warm hover:text-ink'
+      className={`relative flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-2.5 text-[11px] font-semibold leading-tight transition-colors sm:flex-row sm:gap-2 sm:px-3 sm:text-sm ${
+        actif ? 'bg-ink text-white' : 'text-stone-warm hover:bg-cream hover:text-ink'
       }`}
     >
       {icone}
-      {children}
+      <span className="truncate">{children}</span>
       {badge > 0 && (
         <span
-          className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+          className={`absolute -top-1.5 right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold sm:static ${
             actif ? 'bg-white text-ink' : 'bg-ember text-white'
           }`}
         >
@@ -408,8 +410,8 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 
   return (
     <div className="space-y-8">
-      {/* Fermeture exceptionnelle : congés, jour férié, imprévu */}
-      {boutiqueFermee ? (
+      {/* Boutique fermée exceptionnellement : bannière bien visible en haut */}
+      {boutiqueFermee && (
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-rose-50 p-4 ring-1 ring-rose-200">
           <p className="flex items-center gap-2 font-semibold text-rose-700">
             <Ban size={18} /> Boutique fermée — les clients ne peuvent plus commander
@@ -421,80 +423,6 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           >
             Rouvrir les commandes
           </button>
-        </section>
-      ) : (
-        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
-          <div>
-            <p className="text-sm font-semibold text-ink">Fermeture exceptionnelle</p>
-            <p className="text-xs text-stone-warm">
-              Congés, jour férié, imprévu : suspend les commandes en ligne côté client.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={basculerFermeture}
-            className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-rose-700"
-          >
-            Fermer la boutique aujourd'hui
-          </button>
-        </section>
-      )}
-
-      {/* 0. Chiffre d'affaires : aujourd'hui + cette semaine */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <section className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
-          <div>
-            <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
-              <Euro size={13} /> Chiffre d'affaires du jour
-            </p>
-            <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caJour)}</p>
-          </div>
-          <div className="text-right text-sm text-stone-warm">
-            <p>
-              <span className="font-semibold text-ink">{commandes.length}</span> commande
-              {commandes.length > 1 ? 's' : ''}
-            </p>
-            <p>
-              <span className="font-semibold text-emerald-700">{nbLivrees}</span> livrée
-              {nbLivrees > 1 ? 's' : ''}
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-sand bg-paper p-4">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
-            <TrendingUp size={13} /> Cette semaine (depuis lundi)
-          </p>
-          <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caSemaine)}</p>
-          <p className="text-xs text-stone-warm">
-            {commandesSemaine.length} commande{commandesSemaine.length > 1 ? 's' : ''}
-          </p>
-        </section>
-      </div>
-
-      {/* 0 bis. Les produits les plus vendus de la semaine */}
-      {topProduits.length > 0 && (
-        <section className="rounded-xl border border-sand bg-paper p-4">
-          <p className="mb-2.5 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
-            <Trophy size={13} className="text-gilt" /> Les plus vendus cette semaine
-          </p>
-          <ol className="space-y-1.5">
-            {topProduits.map(([nom, quantite], i) => (
-              <li key={nom} className="flex items-center justify-between gap-2 text-sm">
-                <span className="flex items-center gap-2 text-ink">
-                  <span
-                    className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white ${
-                      ['bg-gilt', 'bg-stone-warm', 'bg-[#b0713e]'][i]
-                    }`}
-                  >
-                    {i + 1}
-                  </span>
-                  {nom}
-                </span>
-                <span className="tnum font-semibold text-stone-warm">×{quantite}</span>
-              </li>
-            ))}
-          </ol>
         </section>
       )}
 
@@ -589,6 +517,91 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           </p>
         )}
       </section>
+
+      {/* 4. La caisse : aujourd'hui + cette semaine */}
+      <section>
+        <h2 className="mb-3 flex items-center gap-2 text-lg text-ink">
+          <Euro size={18} className="text-crust" /> La caisse
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
+            <div>
+              <p className="text-xs font-medium text-stone-warm">Aujourd'hui</p>
+              <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caJour)}</p>
+            </div>
+            <div className="text-right text-sm text-stone-warm">
+              <p>
+                <span className="font-semibold text-ink">{commandes.length}</span> commande
+                {commandes.length > 1 ? 's' : ''}
+              </p>
+              <p>
+                <span className="font-semibold text-emerald-700">{nbLivrees}</span> livrée
+                {nbLivrees > 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-sand bg-paper p-4">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
+              <TrendingUp size={13} /> Cette semaine (depuis lundi)
+            </p>
+            <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caSemaine)}</p>
+            <p className="text-xs text-stone-warm">
+              {commandesSemaine.length} commande{commandesSemaine.length > 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+
+        {/* Les produits les plus vendus de la semaine */}
+        {topProduits.length > 0 && (
+          <div className="mt-3 rounded-xl border border-sand bg-paper p-4">
+            <p className="mb-2.5 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
+              <Trophy size={13} className="text-gilt" /> Les plus vendus cette semaine
+            </p>
+            <ol className="space-y-1.5">
+              {topProduits.map(([nom, quantite], i) => (
+                <li key={nom} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="flex items-center gap-2 text-ink">
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white ${
+                        ['bg-gilt', 'bg-stone-warm', 'bg-[#b0713e]'][i]
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    {nom}
+                  </span>
+                  <span className="tnum font-semibold text-stone-warm">×{quantite}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
+
+      {/* 5. Fermeture exceptionnelle — tout en bas, avec confirmation
+             pour éviter une fermeture accidentelle. */}
+      {!boutiqueFermee && (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
+          <div>
+            <p className="text-sm font-semibold text-ink">Fermeture exceptionnelle</p>
+            <p className="text-xs text-stone-warm">
+              Congés, jour férié, imprévu : suspend les commandes en ligne côté client.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Fermer la boutique aujourd’hui ?\nLes clients ne pourront plus commander en ligne jusqu’à la réouverture.')) {
+                basculerFermeture()
+              }
+            }}
+            className="rounded-lg px-4 py-2.5 text-sm font-bold text-rose-600 ring-1 ring-rose-300 transition-colors hover:bg-rose-50"
+          >
+            Fermer la boutique aujourd'hui
+          </button>
+        </section>
+      )}
     </div>
   )
 }
