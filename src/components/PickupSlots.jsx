@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowLeft, Clock, CreditCard, Check, User, Ban, Lock } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
-import { genererCreneaux, formatHeure } from '../lib/creneaux'
+import { joursDisponibles, formatHeure } from '../lib/creneaux'
 import { surchargeProduit } from '../lib/charge'
 import { formatPrix } from '../lib/format'
 import { creerPaiement } from '../lib/stripe'
@@ -40,7 +40,12 @@ export default function PickupSlots({ onRetour }) {
     )
     return { delaiMax: delaiCharge, minutesSurcharge: delaiCharge - delaiBase }
   }, [lignes, commandes])
-  const creneaux = useMemo(() => genererCreneaux(delaiMax), [delaiMax])
+  // Les jours proposés (aujourd'hui + jours d'ouverture suivants),
+  // chacun avec ses créneaux — les quarts d'heure trop chargés sont "Complet".
+  const jours = useMemo(() => joursDisponibles(delaiMax, commandes), [delaiMax, commandes])
+  const [offsetJour, setOffsetJour] = useState(null) // null = premier jour dispo
+  const jourActif = jours.find((j) => j.offset === offsetJour) ?? jours[0] ?? null
+  const creneaux = jourActif?.creneaux ?? []
 
   const [creneauChoisi, setCreneauChoisi] = useState(null)
 
@@ -211,18 +216,44 @@ export default function PickupSlots({ onRetour }) {
             </span>
           </p>
         )}
-        {/* Boutique fermée en ce moment : on propose le prochain jour d'ouverture */}
-        {creneaux.length > 0 && creneaux[0].jourLabel && (
+        {/* Boutique fermée en ce moment : on commande pour un prochain jour */}
+        {jours.length > 0 && jours[0].offset > 0 && (
           <p className="mt-3 rounded-xl bg-cream px-4 py-3 text-sm text-stone-warm ring-1 ring-sand">
             La boutique est fermée pour le moment — commandez dès maintenant pour{' '}
-            <span className="font-semibold text-ink">{creneaux[0].jourLabel}</span> :
+            <span className="font-semibold text-ink">{jours[0].libelle.toLowerCase()}</span> :
           </p>
         )}
         {/* Aucun créneau du tout (cas exceptionnel) */}
-        {creneaux.length === 0 && (
+        {jours.length === 0 && (
           <p className="mt-3 rounded-xl border border-dashed border-sand bg-paper px-4 py-5 text-center text-sm text-stone-warm">
             Aucun créneau disponible pour le moment — revenez un peu plus tard.
           </p>
+        )}
+
+        {/* Choix du JOUR de retrait (précommande possible) */}
+        {jours.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {jours.map((j) => {
+              const actif = j.offset === (jourActif?.offset ?? -1)
+              return (
+                <button
+                  key={j.offset}
+                  type="button"
+                  onClick={() => {
+                    setOffsetJour(j.offset)
+                    setCreneauChoisi(null)
+                  }}
+                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold capitalize transition-colors ${
+                    actif
+                      ? 'border-crust bg-crust text-white'
+                      : 'border-sand bg-paper text-stone-warm hover:border-crust/40 hover:text-ink'
+                  }`}
+                >
+                  {j.libelle}
+                </button>
+              )
+            })}
+          </div>
         )}
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {creneaux.map((c) => {

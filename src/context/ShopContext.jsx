@@ -74,6 +74,7 @@ function commandeDepuisRow(r) {
     articles: r.articles || [],
     total: Number(r.total),
     arrive: r.arrive || false,
+    remboursee: r.remboursee || false,
     date: cree,
     nouvelle: Date.now() - cree < DUREE_COMMANDE_NEUVE,
   }
@@ -353,6 +354,17 @@ export function ShopProvider({ children }) {
     await changerStatut(id, suivant)
   }
 
+  // --- Boulanger : rembourser une commande payée (via la fonction serveur,
+  //     qui parle à Stripe — l'argent repart sur la carte du client) ---
+  async function rembourserCommande(id) {
+    if (!modeReel) throw new Error('remboursement indisponible en mode démo')
+    const { data, error } = await supabase.functions.invoke('rembourser', { body: { id } })
+    if (error) throw new Error(error.message)
+    if (data?.erreur) throw new Error(data.erreur)
+    setCommandes((cmds) => cmds.map((c) => (c.id === id ? { ...c, remboursee: true } : c)))
+    return data
+  }
+
   // --- Boulanger : valider un retrait (scan QR ou numéro saisi) ---
   async function validerRetrait(saisie) {
     const texte = (saisie || '').trim().toUpperCase()
@@ -380,6 +392,7 @@ export function ShopProvider({ children }) {
     supprimerSousCategorie,
     ajouterCommande,
     signalerArrivee,
+    rembourserCommande,
     changerStatut,
     avancerCommande,
     validerRetrait,

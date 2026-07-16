@@ -30,6 +30,8 @@ import {
   Trophy,
   BellRing,
   Phone,
+  Download,
+  Undo2,
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import AssistantFournil from './AssistantFournil'
@@ -326,6 +328,42 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
   )
 }
 
+// --- Export comptable : les commandes du mois en CSV (ouvrable dans Excel) ---
+const STATUTS_LISIBLES = { 'a-preparer': 'A preparer', prete: 'Prete', livree: 'Livree' }
+function exporterCommandesCSV(commandes) {
+  const debutMois = new Date()
+  debutMois.setDate(1)
+  debutMois.setHours(0, 0, 0, 0)
+  const duMois = commandes.filter((c) => (c.date ?? 0) >= debutMois.getTime())
+
+  const lignes = [
+    ['Numero', 'Date', 'Retrait', 'Client', 'Telephone', 'Email', 'Articles', 'Total (EUR)', 'Statut', 'Remboursee', 'Paiement Stripe'],
+    ...duMois.map((c) => [
+      c.numero,
+      new Date(c.date).toLocaleString('fr-FR'),
+      c.creneau,
+      c.client,
+      c.telephone,
+      c.email,
+      (c.articles || []).map((a) => `${a.quantite}x ${a.nom}`).join(' | '),
+      String(c.total).replace('.', ','),
+      STATUTS_LISIBLES[c.statut] || c.statut,
+      c.remboursee ? 'Oui' : '',
+      c.stripeSession || '',
+    ]),
+  ]
+  // BOM UTF-8 + point-virgule : accents et colonnes corrects dans Excel français
+  const csv =
+    '\ufeff' +
+    lignes.map((l) => l.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `painpret-commandes-${new Date().toISOString().slice(0, 7)}.csv`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
 // --- Petit état vide réutilisable (icône SVG, pas d'emoji) ---
 function EtatVide({ icone: Icone = ClipboardList, titre, texte }) {
   return (
@@ -524,9 +562,20 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 
       {/* 4. La caisse : aujourd'hui + cette semaine */}
       <section>
-        <h2 className="mb-3 flex items-center gap-2 text-lg text-ink">
-          <Euro size={18} className="text-crust" /> La caisse
-        </h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-center gap-2 text-lg text-ink">
+            <Euro size={18} className="text-crust" /> La caisse
+          </h2>
+          {/* Export comptable : toutes les commandes du mois, en fichier
+              CSV lisible par Excel (pour les dossiers / le comptable) */}
+          <button
+            type="button"
+            onClick={() => exporterCommandesCSV(commandes)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-sand bg-paper px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-crust/40 hover:text-crust"
+          >
+            <Download size={14} /> Exporter le mois (Excel)
+          </button>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
             <div>
@@ -615,6 +664,23 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 // On tape sur celui qu'on veut — et on peut revenir en arrière si on s'est trompé.
 function CarteCommande({ commande, onStatut }) {
   const livree = commande.statut === 'livree'
+  const { rembourserCommande } = useShop()
+  const [remboursement, setRemboursement] = useState('') // '' | 'encours' | message d'erreur
+
+  async function rembourser() {
+    const ok = window.confirm(
+      `Rembourser ${formatPrix(commande.total)} à ${commande.client || 'ce client'} ?\n` +
+        `L'argent repartira sur sa carte (2 à 5 jours). Cette action est définitive.`,
+    )
+    if (!ok) return
+    setRemboursement('encours')
+    try {
+      await rembourserCommande(commande.id)
+      setRemboursement('')
+    } catch (e) {
+      setRemboursement('Remboursement impossible : ' + (e?.message || e))
+    }
+  }
 
   return (
     <div className={`flex flex-col rounded-xl border border-sand bg-paper p-4 ${livree ? 'opacity-75' : ''}`}>
@@ -707,6 +773,28 @@ function CarteCommande({ commande, onStatut }) {
             )
           })}
         </div>
+
+        {/* Remboursement : badge si déjà fait, sinon petit lien discret */}
+        {commande.remboursee ? (
+          <p className="mt-2.5">
+            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700 ring-1 ring-rose-200">
+              Remboursée
+            </span>
+          </p>
+        ) : commande.stripeSession ? (
+          <button
+            type="button"
+            onClick={rembourser}
+            disabled={remboursement === 'encours'}
+            className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-stone-warm transition-colors hover:text-rose-600 disabled:opacity-50"
+          >
+            <Undo2 size={12} />
+            {remboursement === 'encours' ? 'Remboursement en cours…' : 'Rembourser le client'}
+          </button>
+        ) : null}
+        {remboursement && remboursement !== 'encours' && (
+          <p className="mt-1 text-xs text-rose-600">{remboursement}</p>
+        )}
       </div>
     </div>
   )

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { CheckCircle2, Clock, Store, Navigation, Star } from 'lucide-react'
+import { CheckCircle2, Clock, Store, Navigation, Star, BellRing } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { lienItineraire, lienAvisGoogle } from '../data/bakery'
+import { activerNotifCommande, pushClientDisponible } from '../lib/notifClient'
 import { useShop } from '../context/ShopContext'
 import { useNotifications } from '../context/NotificationsContext'
 
@@ -26,6 +27,17 @@ export default function Confirmation({ commande, onTermine }) {
   function jeSuisArrive() {
     signalerArrivee(commande.id)
     ajouterNotification('Le boulanger est prévenu de votre arrivée.')
+  }
+
+  // "Me prévenir quand c'est prêt" : notification push, même appli fermée
+  const [etatNotif, setEtatNotif] = useState('') // '' | 'encours' | 'ok' | 'refuse'
+  async function activerAlerte() {
+    setEtatNotif('encours')
+    const resultat = await activerNotifCommande(commande.numero)
+    setEtatNotif(resultat === 'ok' ? 'ok' : 'refuse')
+    if (resultat === 'ok') {
+      ajouterNotification('C’est noté ! Vous serez prévenu dès que votre commande est prête.')
+    }
   }
 
   // Minuteur : on met à jour chaque seconde
@@ -143,6 +155,30 @@ export default function Confirmation({ commande, onTermine }) {
             <Store size={18} />
             Je suis arrivé
           </button>
+        )}
+
+        {/* Être prévenu quand la commande est prête (push, même appli fermée) */}
+        {!livree && pushClientDisponible() && etatNotif !== 'ok' && (
+          <button
+            type="button"
+            onClick={activerAlerte}
+            disabled={etatNotif === 'encours'}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-sand bg-cream py-3 text-sm font-semibold text-ink transition-colors hover:border-crust/40 disabled:opacity-60"
+          >
+            <BellRing size={16} className="text-crust" />
+            {etatNotif === 'encours' ? 'Activation…' : 'Me prévenir quand c’est prêt'}
+          </button>
+        )}
+        {etatNotif === 'ok' && (
+          <p className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <BellRing size={15} /> Vous serez prévenu dès que c'est prêt
+          </p>
+        )}
+        {etatNotif === 'refuse' && (
+          <p className="mt-2 text-xs text-stone-warm">
+            Notifications indisponibles sur cet appareil (autorisez-les dans les réglages, ou
+            installez l'appli sur l'écran d'accueil sur iPhone).
+          </p>
         )}
 
         <button
