@@ -49,11 +49,17 @@ export default function Confirmation({ commande, onTermine }) {
   }, [commande.heureRetrait])
 
   const heureValide = commande.heureRetrait && !Number.isNaN(new Date(commande.heureRetrait).getTime())
+  const dateRetrait = heureValide ? new Date(commande.heureRetrait) : null
+  const retraitAujourdhui = dateRetrait && dateRetrait.toDateString() === new Date().toDateString()
+  // Aujourd'hui : "11:30". Précommande : le créneau complet ("Demain 07:15").
   const heure = heureValide
-    ? new Date(commande.heureRetrait).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    ? retraitAujourdhui
+      ? dateRetrait.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+      : commande.creneau ||
+        dateRetrait.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     : commande.creneau || 'Dès que possible'
 
-  // Mise en forme du minuteur : "dans 12 min", "à récupérer", etc.
+  // Mise en forme du minuteur : secondes, minutes, heures ou jours selon l'attente
   const livree = live.statut === 'livree'
   let texteMinuteur
   if (livree) {
@@ -62,8 +68,13 @@ export default function Confirmation({ commande, onTermine }) {
     texteMinuteur = 'À récupérer'
   } else if (restant < 60) {
     texteMinuteur = `${restant} s`
-  } else {
+  } else if (restant < 7200) {
     texteMinuteur = `${Math.floor(restant / 60)} min`
+  } else if (restant < 86400) {
+    texteMinuteur = `${Math.round(restant / 3600)} h`
+  } else {
+    const jours = Math.round(restant / 86400)
+    texteMinuteur = `${jours} jour${jours > 1 ? 's' : ''}`
   }
 
   return (
@@ -81,6 +92,13 @@ export default function Confirmation({ commande, onTermine }) {
             ? 'Vous la retrouverez dans « Mes commandes ». Merci !'
             : 'Présentez ce QR Code en boutique pour récupérer votre commande.'}
         </p>
+
+        {/* Commande remboursée par la boutique */}
+        {live.remboursee && (
+          <p className="mt-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">
+            Commande remboursée — le montant repart sur votre carte (2 à 5 jours).
+          </p>
+        )}
 
         {/* Numéro de commande */}
         <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-cream px-4 py-1.5 ring-1 ring-sand">

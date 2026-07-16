@@ -249,9 +249,17 @@ export default function App() {
     window.scrollTo({ top: 0 })
   }
 
-  const termeRecherche = recherche.trim().toLowerCase()
+  // Recherche tolérante : sans tenir compte des accents ni des majuscules,
+  // dans le nom mais aussi la description et la catégorie du produit.
+  const normaliser = (t) =>
+    (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  const termeRecherche = normaliser(recherche.trim())
   const resultats = termeRecherche
-    ? produits.filter((p) => p.nom.toLowerCase().includes(termeRecherche))
+    ? produits.filter((p) =>
+        normaliser(`${p.nom} ${p.description} ${p.sousCategorie} ${p.categorie}`).includes(
+          termeRecherche,
+        ),
+      )
     : []
 
   // --- Accès pro : code (mémorisé ensuite sur l'appareil) ---

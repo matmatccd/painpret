@@ -5,11 +5,15 @@ import { bakery, lienItineraire } from '../data/bakery'
 const QUESTIONS = [
   {
     q: 'Comment passer commande ?',
-    r: 'Choisissez vos pains dans la boutique en ligne, ajoutez-les au panier et sélectionnez votre heure de retrait. Votre QR Code de retrait s’affiche immédiatement.',
+    r: 'Choisissez vos pains dans la boutique en ligne, ajoutez-les au panier, sélectionnez votre jour et votre heure de retrait, puis payez par carte. Votre QR Code de retrait s’affiche immédiatement.',
   },
   {
     q: 'Quand et comment est-ce que je paie ?',
-    r: 'Vous réglez directement en boutique au moment du retrait, par carte bancaire ou en espèces. Rien à payer en ligne : vous commandez, vous passez, vous réglez et vous repartez.',
+    r: 'Le paiement se fait en ligne, par carte bancaire, sur une page sécurisée Stripe au moment de la commande. Rien à régler en boutique : vous passez, vous montrez votre QR Code et vous repartez.',
+  },
+  {
+    q: 'Puis-je commander à l’avance ou quand la boutique est fermée ?',
+    r: 'Oui ! Même boutique fermée, vous pouvez commander pour le lendemain ou l’un des prochains jours d’ouverture : choisissez simplement votre jour au moment de la commande. Votre pain vous attendra, tout frais, à l’heure choisie.',
   },
   {
     q: 'Où et comment récupérer ma commande ?',
@@ -17,12 +21,16 @@ const QUESTIONS = [
     itineraire: true,
   },
   {
+    q: 'Comment savoir quand ma commande est prête ?',
+    r: 'Sur l’écran de confirmation, touchez « Me prévenir quand c’est prêt » : vous recevrez une notification dès que le boulanger a terminé, même si vous avez quitté le site. (Sur iPhone, installez d’abord le site sur votre écran d’accueil.)',
+  },
+  {
     q: 'J’ai perdu mon QR Code, que faire ?',
     r: 'Touchez l’icône horloge en haut du site (« Mes commandes ») : vous y retrouvez vos commandes en cours et pouvez réafficher votre QR Code à tout moment.',
   },
   {
     q: 'Puis-je modifier ou annuler ma commande ?',
-    r: `Pour l’instant, appelez directement la boutique au ${bakery.telephone} ou passez au comptoir : l’équipe trouvera toujours une solution.`,
+    r: `Appelez directement la boutique au ${bakery.telephone} ou passez au comptoir : l’équipe trouvera toujours une solution, et peut vous rembourser intégralement sur votre carte si besoin.`,
   },
   {
     q: 'Comment contacter la boutique ?',

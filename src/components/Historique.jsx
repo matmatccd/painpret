@@ -56,8 +56,15 @@ export default function Historique({ historique, onRetour, onVoirQR }) {
                       retrait {entree.creneau}
                     </span>
                   </span>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${infos.classe}`}>
-                    {infos.label}
+                  <span className="flex items-center gap-1.5">
+                    {live?.remboursee && (
+                      <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+                        Remboursée
+                      </span>
+                    )}
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${infos.classe}`}>
+                      {infos.label}
+                    </span>
                   </span>
                 </div>
 
