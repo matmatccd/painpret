@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Star, Timer, Navigation } from 'lucide-react'
+import { MapPin, Star, Timer, Navigation, CheckCircle2, QrCode } from 'lucide-react'
 import { bakery, lienItineraire, estOuvertMaintenant } from '../data/bakery'
 import boutique from '../assets/photos/boutique.jpg'
 import fournil from '../assets/photos/fournil.jpg'
@@ -58,6 +58,29 @@ export default function Hero() {
           {/* Voile léger : sombre seulement derrière le texte (en bas),
               pour que les photos restent bien visibles en haut */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#291022]/85 via-[#291022]/30 to-transparent" />
+
+          {/* Cartes flottantes (grand écran) : elles lévitent au-dessus de la photo,
+              comme le téléphone de la démo — un aperçu vivant du service */}
+          <div className="pointer-events-none absolute right-10 top-16 z-10 hidden lg:block" aria-hidden="true">
+            <div className="carte-flotte flex items-center gap-2.5 rounded-2xl bg-white/90 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)] backdrop-blur-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
+                <CheckCircle2 size={18} className="text-emerald-600" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-ink">Commande #B12 prête !</span>
+                <span className="block text-xs text-stone-warm">Encore chaude, elle vous attend</span>
+              </span>
+            </div>
+            <div className="carte-flotte-2 ml-16 mt-4 flex items-center gap-2.5 rounded-2xl bg-white/90 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)] backdrop-blur-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cream ring-1 ring-sand">
+                <QrCode size={17} className="text-crust" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-ink">Scanné en 1 seconde</span>
+                <span className="block text-xs text-stone-warm">Zéro attente au comptoir</span>
+              </span>
+            </div>
+          </div>
 
           {/* Contenu centré (la photo, elle, couvre tout l'écran) */}
           <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 pt-20 sm:px-6 sm:pb-10">

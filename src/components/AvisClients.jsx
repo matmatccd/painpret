@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react'
 import { Star, Quote } from 'lucide-react'
 import { bakery, avisClients, lienAvisGoogle } from '../data/bakery'
 
-// Étoiles pleines/vides selon la note (sur 5)
-function Etoiles({ note, clair = false }) {
+// Étoiles pleines/vides selon la note (sur 5).
+// "animees" : elles se remplissent une à une, comme si on notait en direct.
+function Etoiles({ note, clair = false, animees = false }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${note} sur 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
           size={16}
-          className={n <= note ? 'fill-amber-300 text-amber-300' : clair ? 'text-white/30' : 'text-sand'}
+          style={animees && n <= note ? { animationDelay: `${n * 110}ms` } : undefined}
+          className={`${animees && n <= note ? 'etoile-pop ' : ''}${
+            n <= note ? 'fill-amber-300 text-amber-300' : clair ? 'text-white/30' : 'text-sand'
+          }`}
         />
       ))}
     </span>
@@ -59,7 +63,7 @@ export default function AvisClients() {
           {/* L'avis courant (change en fondu) */}
           <figure key={index} className="animate-avis min-h-[7.5rem] max-w-2xl">
             <Quote size={30} className="mb-2 text-[#e9cd90]" />
-            <Etoiles note={avis.note} clair />
+            <Etoiles note={avis.note} clair animees />
             <blockquote className="mt-3 font-display text-xl leading-snug text-white sm:text-2xl">
               « {avis.texte} »
             </blockquote>

@@ -2,6 +2,7 @@ import { Plus, Check, Timer, Heart } from 'lucide-react'
 import { useState } from 'react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
+import { volerVersPanier } from '../lib/volAuPanier'
 
 // Carte d'un produit. Interaction volontairement sobre :
 // - pas de "tout qui décolle au survol" (le réflexe qui fait too-much)
@@ -15,6 +16,9 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
     e.stopPropagation()
     if (epuise) return
     ajouter(produit, { quantite: 1 })
+    // La photo du produit s'envole vers le panier de l'en-tête
+    const photo = e.currentTarget.closest('article')?.querySelector('img')
+    if (photo) volerVersPanier(photo)
     setAjoute(true)
     setTimeout(() => setAjoute(false), 1000)
   }

@@ -368,6 +368,28 @@ function exporterCommandesCSV(commandes) {
   URL.revokeObjectURL(a.href)
 }
 
+// --- Nombre qui "compte" jusqu'à sa valeur (effet caisse enregistreuse) ---
+function NombreAnime({ valeur, rendu = (v) => v }) {
+  const [affiche, setAffiche] = useState(valeur)
+  const precedent = useRef(valeur)
+  useEffect(() => {
+    const depart = precedent.current
+    precedent.current = valeur
+    if (depart === valeur) return
+    const debut = performance.now()
+    let raf
+    const tick = (t) => {
+      const p = Math.min(1, (t - debut) / 700)
+      const doux = 1 - Math.pow(1 - p, 3)
+      setAffiche(depart + (valeur - depart) * doux)
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [valeur])
+  return <>{rendu(affiche)}</>
+}
+
 // --- Petit état vide réutilisable (icône SVG, pas d'emoji) ---
 function EtatVide({ icone: Icone = ClipboardList, titre, texte }) {
   return (
@@ -634,7 +656,9 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           <div className="flex items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
             <div>
               <p className="text-xs font-medium text-stone-warm">Aujourd'hui</p>
-              <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caJour)}</p>
+              <p className="price mt-0.5 font-display text-3xl text-ink">
+                <NombreAnime valeur={caJour} rendu={(v) => formatPrix(v)} />
+              </p>
             </div>
             <div className="text-right text-sm text-stone-warm">
               <p>
@@ -652,7 +676,9 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
             <p className="flex items-center gap-1.5 text-xs font-medium text-stone-warm">
               <TrendingUp size={13} /> Cette semaine (depuis lundi)
             </p>
-            <p className="price mt-0.5 font-display text-3xl text-ink">{formatPrix(caSemaine)}</p>
+            <p className="price mt-0.5 font-display text-3xl text-ink">
+              <NombreAnime valeur={caSemaine} rendu={(v) => formatPrix(v)} />
+            </p>
             <p className="text-xs text-stone-warm">
               {commandesSemaine.length} commande{commandesSemaine.length > 1 ? 's' : ''}
             </p>

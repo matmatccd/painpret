@@ -349,7 +349,9 @@ export default function PickupSlots({ onRetour }) {
         type="button"
         onClick={confirmer}
         disabled={!creneauChoisi || boutiqueFermee || envoiEnCours || !coordonneesOk}
-        className="mt-7 w-full rounded-xl bg-crust py-4 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-sand disabled:text-stone-warm"
+        className={`mt-7 w-full rounded-xl bg-crust py-4 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-sand disabled:text-stone-warm ${
+          creneauChoisi && !boutiqueFermee && !envoiEnCours && coordonneesOk ? 'bouton-brillant' : ''
+        }`}
       >
         {boutiqueFermee
           ? 'Boutique fermée — commandes suspendues'
