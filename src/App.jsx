@@ -329,6 +329,10 @@ export default function App() {
           <Historique
             historique={historique}
             onRetour={retourBoutique}
+            onPanierRempli={() => {
+              retourBoutique()
+              setPanierOuvert(true)
+            }}
             onVoirQR={(commande) => {
               setCommandeConfirmee(commande)
               setVue('confirmation')

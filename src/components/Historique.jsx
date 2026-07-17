@@ -1,6 +1,8 @@
-import { ArrowLeft, QrCode, History } from 'lucide-react'
+import { ArrowLeft, QrCode, History, RotateCcw } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useShop } from '../context/ShopContext'
+import { useCart } from '../context/CartContext'
+import { useNotifications } from '../context/NotificationsContext'
 
 // Libellés des statuts, côté client
 const LIBELLES_STATUT = {
@@ -10,8 +12,36 @@ const LIBELLES_STATUT = {
 }
 
 // Historique des commandes du client (mémorisé sur l'appareil).
-export default function Historique({ historique, onRetour, onVoirQR }) {
-  const { commandes } = useShop()
+export default function Historique({ historique, onRetour, onVoirQR, onPanierRempli }) {
+  const { commandes, produits } = useShop()
+  const { ajouter } = useCart()
+  const { ajouterNotification } = useNotifications()
+
+  // "Commander à nouveau" : remplit le panier à l'identique (dans la limite
+  // des produits encore disponibles), puis ouvre le panier.
+  function commanderANouveau(entree) {
+    let ajoutes = 0
+    let manquants = 0
+    entree.articles.forEach((a) => {
+      const produit = produits.find((p) => p.id === a.produitId)
+      if (produit && produit.disponible) {
+        ajouter(produit, { quantite: a.quantite })
+        ajoutes++
+      } else {
+        manquants++
+      }
+    })
+    if (ajoutes === 0) {
+      ajouterNotification('Ces produits ne sont plus disponibles aujourd’hui.')
+      return
+    }
+    ajouterNotification(
+      manquants > 0
+        ? 'Panier rempli ! (certains produits, épuisés, n’ont pas pu être ajoutés)'
+        : 'Panier rempli à l’identique !',
+    )
+    onPanierRempli?.()
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-up px-4 py-6">
@@ -72,17 +102,27 @@ export default function Historique({ historique, onRetour, onVoirQR }) {
                   {entree.articles.map((a) => `${a.quantite}× ${a.nom}`).join(' · ')}
                 </p>
 
-                <div className="mt-3 flex items-center justify-between border-t border-sand pt-3">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-sand pt-3">
                   <span className="price font-bold text-ink">{formatPrix(entree.total)}</span>
-                  {live && statut !== 'livree' && (
+                  <span className="flex items-center gap-2">
+                    {/* Recommander la même chose en un tap */}
                     <button
                       type="button"
-                      onClick={() => onVoirQR(live)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-crust px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-crust-dark"
+                      onClick={() => commanderANouveau(entree)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-sand bg-paper px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-crust/40 hover:text-crust"
                     >
-                      <QrCode size={14} /> Revoir mon QR Code
+                      <RotateCcw size={13} /> Commander à nouveau
                     </button>
-                  )}
+                    {live && statut !== 'livree' && (
+                      <button
+                        type="button"
+                        onClick={() => onVoirQR(live)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-crust px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-crust-dark"
+                      >
+                        <QrCode size={14} /> Revoir mon QR Code
+                      </button>
+                    )}
+                  </span>
                 </div>
               </div>
             )

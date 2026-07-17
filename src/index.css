@@ -242,6 +242,14 @@
 }
 .tel-ombre { animation: tel-ombre 9s ease-in-out infinite; }
 
+/* ---- File d'attente du fournil (message "pas de priorité") ----
+   Trois petits pains avancent sagement vers le comptoir, chacun son tour. */
+@keyframes file-avance {
+  0%, 55%, 100% { transform: translateX(0); }
+  20%, 35% { transform: translateX(7px); }
+}
+.file-pain { animation: file-avance 3.2s ease-in-out infinite; }
+
 /* ---- Fluidité générale ---- */
 /* Les photos du diaporama "respirent" : zoom très lent (effet cinéma) */
 @keyframes kenburns {
@@ -282,4 +290,5 @@
   .tel-3d { animation: tel-3d 9s ease-in-out infinite !important; }
   .tel-ombre { animation: tel-ombre 9s ease-in-out infinite !important; }
   .hero-photo { animation: kenburns 14s ease-in-out infinite alternate !important; }
+  .file-pain { animation: file-avance 3.2s ease-in-out infinite !important; }
 }

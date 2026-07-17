@@ -10,7 +10,7 @@ import { creerPaiement } from '../lib/stripe'
 // Étape de retrait : récap + coordonnées + créneau + PAIEMENT EN LIGNE (Stripe).
 export default function PickupSlots({ onRetour }) {
   const { lignes, total } = useCart()
-  const { boutiqueFermee, commandes } = useShop()
+  const { boutiqueFermee, commandes, pauseJusqua } = useShop()
 
   // Coordonnées du client (obligatoires) — mémorisées pour les prochaines fois
   const [prenom, setPrenom] = useState(() => localStorage.getItem('painpret_prenom') || '')
@@ -30,7 +30,7 @@ export default function PickupSlots({ onRetour }) {
   // Le délai de prépa = le plus long parmi les produits du panier,
   // ALLONGÉ automatiquement si le fournil est très demandé en ce moment
   // (beaucoup de commandes en attente sur les mêmes produits).
-  const { delaiMax, minutesSurcharge } = useMemo(() => {
+  const { delaiMax, minutesSurcharge, minutesPause } = useMemo(() => {
     const delaiBase = Math.max(10, ...lignes.map((l) => l.produit.delaiPreparation || 10))
     const delaiCharge = Math.max(
       10,
@@ -38,8 +38,15 @@ export default function PickupSlots({ onRetour }) {
         (l) => (l.produit.delaiPreparation || 10) + surchargeProduit(l.produit.id, commandes),
       ),
     )
-    return { delaiMax: delaiCharge, minutesSurcharge: delaiCharge - delaiBase }
-  }, [lignes, commandes])
+    // Pause du fournil : on ajoute le temps de pause restant
+    const finPause = pauseJusqua ? new Date(pauseJusqua).getTime() : 0
+    const pause = Math.max(0, Math.ceil((finPause - Date.now()) / 60000))
+    return {
+      delaiMax: delaiCharge + pause,
+      minutesSurcharge: delaiCharge - delaiBase,
+      minutesPause: pause,
+    }
+  }, [lignes, commandes, pauseJusqua])
   // Les jours proposés (aujourd'hui + jours d'ouverture suivants),
   // chacun avec ses créneaux — les quarts d'heure trop chargés sont "Complet".
   const jours = useMemo(() => joursDisponibles(delaiMax, commandes), [delaiMax, commandes])
@@ -205,6 +212,17 @@ export default function PickupSlots({ onRetour }) {
         <h2 className="flex items-center gap-2 text-lg text-ink">
           <Clock size={18} className="text-crust" /> Choisissez votre heure de retrait
         </h2>
+        {/* Le fournil est en pause : les créneaux sont décalés le temps de souffler */}
+        {minutesPause > 0 && (
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-cream px-4 py-3 text-sm text-stone-warm ring-1 ring-sand">
+            <Clock size={16} className="mt-0.5 shrink-0 text-crust" />
+            <span>
+              Le fournil fait une courte pause — les premiers créneaux sont décalés d'environ{' '}
+              <span className="font-semibold text-ink">{minutesPause} min</span>. Merci de votre
+              patience !
+            </span>
+          </p>
+        )}
         {/* Forte demande : le délai s'est allongé pour laisser le temps au fournil */}
         {minutesSurcharge > 0 && (
           <p className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
@@ -281,6 +299,29 @@ export default function PickupSlots({ onRetour }) {
           })}
         </div>
       </section>
+
+      {/* Chacun son tour : commander en ligne ne donne aucune priorité */}
+      <aside className="mt-6 flex items-start gap-4 rounded-2xl border border-sand bg-gradient-to-br from-paper to-cream p-4">
+        {/* Petite file animée : trois pains avancent sagement vers le comptoir */}
+        <span className="mt-1 flex shrink-0 items-center gap-1" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="file-pain h-2.5 w-4 rounded-full bg-gradient-to-br from-[#e9b872] to-[#c98a3a]"
+              style={{ animationDelay: `${(2 - i) * 0.35}s` }}
+            />
+          ))}
+          <span className="ml-1 h-4 w-1.5 rounded-sm bg-crust" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-ink">Chacun son tour !</p>
+          <p className="mt-0.5 text-sm leading-relaxed text-stone-warm">
+            Commander en ligne, c'est pratique — mais ça ne fait doubler personne. Votre commande
+            prend sa place dans la file du fournil, comme au comptoir, et le créneau proposé en
+            tient déjà compte. Merci de votre patience !
+          </p>
+        </div>
+      </aside>
 
       {/* Paiement en ligne sécurisé (Stripe) */}
       <section className="mt-6">

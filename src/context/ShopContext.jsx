@@ -105,6 +105,8 @@ export function ShopProvider({ children }) {
   const [boutiqueFermee, setBoutiqueFermee] = useState(
     () => !modeReel && localStorage.getItem('painpret_fermee') === '1',
   )
+  // Pause du fournil (coup de feu) : date de fin, ou null si pas de pause
+  const [pauseJusqua, setPauseJusqua] = useState(null)
 
   // ---- Chargement initial + temps réel (mode réel uniquement) ----
   useEffect(() => {
@@ -121,7 +123,11 @@ export function ShopProvider({ children }) {
     }
     async function chargerReglages() {
       const { data } = await supabase.from('reglages').select('*').eq('id', 1).maybeSingle()
-      if (vivant && data) setBoutiqueFermee(data.boutique_fermee)
+      if (vivant && data) {
+        setBoutiqueFermee(data.boutique_fermee)
+        // Colonne pause_jusqua absente tant que le SQL n'est pas passé : null
+        setPauseJusqua(data.pause_jusqua ?? null)
+      }
     }
     async function chargerCategories() {
       const { data, error } = await supabase.from('categories').select('*').order('ordre')
@@ -273,6 +279,24 @@ export function ShopProvider({ children }) {
     if (modeReel) await supabase.from('categories').update({ sous_categories: suivantes }).eq('id', catId)
   }
 
+  // --- Pause du fournil (coup de feu) : décale les créneaux de N minutes,
+  //     puis tout redémarre tout seul à la fin de la pause. ---
+  async function basculerPause(minutes = 30) {
+    const active = pauseJusqua && new Date(pauseJusqua).getTime() > Date.now()
+    const nouvelle = active ? null : new Date(Date.now() + minutes * 60000).toISOString()
+    setPauseJusqua(nouvelle)
+    if (modeReel) {
+      const { error } = await supabase
+        .from('reglages')
+        .update({ pause_jusqua: nouvelle })
+        .eq('id', 1)
+      if (error) {
+        setPauseJusqua(null)
+        throw new Error('La pause nécessite une petite mise à jour de la base (colonne pause_jusqua).')
+      }
+    }
+  }
+
   // --- Fermeture exceptionnelle ---
   async function basculerFermeture() {
     const suivant = !boutiqueFermee
@@ -398,6 +422,8 @@ export function ShopProvider({ children }) {
     validerRetrait,
     boutiqueFermee,
     basculerFermeture,
+    pauseJusqua,
+    basculerPause,
   }
 
   return <ShopContext.Provider value={valeur}>{children}</ShopContext.Provider>

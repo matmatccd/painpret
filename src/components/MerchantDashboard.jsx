@@ -121,6 +121,8 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
     supprimerSousCategorie,
     boutiqueFermee,
     basculerFermeture,
+    pauseJusqua,
+    basculerPause,
   } = useShop()
 
   // L'onglet "Aujourd'hui" est l'écran d'accueil du boulanger : l'essentiel en un coup d'œil.
@@ -254,6 +256,8 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
             allerVoir={setOnglet}
             boutiqueFermee={boutiqueFermee}
             basculerFermeture={basculerFermeture}
+            pauseJusqua={pauseJusqua}
+            basculerPause={basculerPause}
           />
         )}
 
@@ -415,7 +419,24 @@ function BoutonOnglet({ actif, onClick, icone, badge, children }) {
 }
 
 // --- "Aujourd'hui" : l'essentiel de la journée en un coup d'œil ---
-function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreEnStock, allerVoir, boutiqueFermee, basculerFermeture }) {
+function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreEnStock, allerVoir, boutiqueFermee, basculerFermeture, pauseJusqua, basculerPause }) {
+  // Pause du fournil : minutes restantes (rafraîchies toutes les 30 s)
+  const [, setTic] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setTic((n) => n + 1), 30000)
+    return () => clearInterval(t)
+  }, [])
+  const finPause = pauseJusqua ? new Date(pauseJusqua).getTime() : 0
+  const minutesPause = Math.max(0, Math.ceil((finPause - Date.now()) / 60000))
+  const [erreurPause, setErreurPause] = useState('')
+  async function togglePause() {
+    setErreurPause('')
+    try {
+      await basculerPause(30)
+    } catch (e) {
+      setErreurPause(e?.message || String(e))
+    }
+  }
   const actives = commandes.filter((c) => c.statut !== 'livree')
   // Chiffre d'affaires du jour : toutes les commandes sont payées en ligne
   const caJour = commandes.reduce((somme, c) => somme + c.total, 0)
@@ -439,6 +460,23 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
   const topProduits = Object.entries(compteur)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
+
+  // --- Le chiffre d'affaires des 7 derniers jours (pour le petit graphique) ---
+  const jours7 = [...Array(7)].map((_, i) => {
+    const debut = new Date()
+    debut.setHours(0, 0, 0, 0)
+    debut.setDate(debut.getDate() - (6 - i))
+    const fin = debut.getTime() + 86400000
+    const ca = commandes
+      .filter((c) => (c.date ?? 0) >= debut.getTime() && (c.date ?? 0) < fin)
+      .reduce((somme, c) => somme + c.total, 0)
+    return {
+      label: debut.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', ''),
+      ca,
+      aujourdhui: i === 6,
+    }
+  })
+  const maxCA7 = Math.max(1, ...jours7.map((j) => j.ca))
   // Clients qui ont signalé leur arrivée : à servir en priorité
   const surPlace = actives.filter((c) => c.arrive)
   // Prochain créneau à préparer
@@ -461,6 +499,22 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
             className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
           >
             Rouvrir les commandes
+          </button>
+        </section>
+      )}
+
+      {/* Pause du fournil en cours : bannière + reprise en un tap */}
+      {minutesPause > 0 && (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200">
+          <p className="flex items-center gap-2 font-semibold text-amber-800">
+            <Clock size={18} /> Pause en cours — les créneaux clients sont décalés de {minutesPause} min
+          </p>
+          <button
+            type="button"
+            onClick={togglePause}
+            className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+          >
+            Reprendre maintenant
           </button>
         </section>
       )}
@@ -605,6 +659,35 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           </div>
         </div>
 
+        {/* La tendance : le CA de chacun des 7 derniers jours */}
+        <div className="mt-3 rounded-xl border border-sand bg-paper p-4">
+          <p className="mb-3 text-xs font-medium text-stone-warm">Les 7 derniers jours</p>
+          <div className="flex items-end gap-2">
+            {jours7.map((j, i) => (
+              <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                <span className="tnum text-[10px] text-stone-warm">
+                  {j.ca > 0 ? Math.round(j.ca) + '€' : ''}
+                </span>
+                <div className="flex h-16 w-full items-end">
+                  <div
+                    className={`w-full rounded-t-md transition-[height] duration-500 ${
+                      j.aujourdhui ? 'bg-crust' : 'bg-sand'
+                    }`}
+                    style={{ height: `${Math.max(j.ca > 0 ? 8 : 3, (j.ca / maxCA7) * 100)}%` }}
+                  />
+                </div>
+                <span
+                  className={`text-[10px] font-semibold capitalize ${
+                    j.aujourdhui ? 'text-crust' : 'text-stone-warm'
+                  }`}
+                >
+                  {j.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Les produits les plus vendus de la semaine */}
         {topProduits.length > 0 && (
           <div className="mt-3 rounded-xl border border-sand bg-paper p-4">
@@ -631,6 +714,27 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           </div>
         )}
       </section>
+
+      {/* 4 bis. Coup de feu : une pause de 30 min qui décale les créneaux,
+             puis tout redémarre tout seul. */}
+      {minutesPause === 0 && (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sand bg-paper p-4">
+          <div>
+            <p className="text-sm font-semibold text-ink">Coup de feu au fournil ?</p>
+            <p className="text-xs text-stone-warm">
+              Décale les créneaux clients de 30 minutes, le temps de souffler. Tout redémarre tout seul.
+            </p>
+            {erreurPause && <p className="mt-1 text-xs text-rose-600">{erreurPause}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={togglePause}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+          >
+            <Clock size={15} /> Pause 30 min
+          </button>
+        </section>
+      )}
 
       {/* 5. Fermeture exceptionnelle — tout en bas, avec confirmation
              pour éviter une fermeture accidentelle. */}

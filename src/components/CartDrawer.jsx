@@ -1,10 +1,24 @@
 import { X, Minus, Plus, Trash2, ShoppingBag, Wheat } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
+import { useShop } from '../context/ShopContext'
 
 // Panneau "panier" qui glisse depuis la droite.
 export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
-  const { lignes, modifierQuantite, retirer, total, nombreArticles } = useCart()
+  const { lignes, modifierQuantite, retirer, ajouter, total, nombreArticles } = useCart()
+  const { produits } = useShop()
+
+  // "Et avec ceci ?" — 3 gourmandises/viennoiseries disponibles,
+  // pas déjà dans le panier. La question rituelle de la boulangerie !
+  const dejaAuPanier = new Set(lignes.map((l) => l.produit.id))
+  const suggestions = produits
+    .filter(
+      (p) =>
+        p.disponible &&
+        !dejaAuPanier.has(p.id) &&
+        (p.categorie === 'gourmandises' || p.categorie === 'viennoiseries'),
+    )
+    .slice(0, 3)
 
   return (
     <>
@@ -125,6 +139,43 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                 </div>
               </div>
             ))}
+
+            {/* "Et avec ceci ?" — la question rituelle, en version douce */}
+            {suggestions.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ember">
+                  Et avec ceci ?
+                </p>
+                <div className="mt-2 space-y-2">
+                  {suggestions.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-3 rounded-xl border border-dashed border-sand bg-paper/70 p-2.5"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-sand">
+                        {p.image ? (
+                          <img src={p.image} alt={p.nom} className="h-full w-full object-contain p-1" />
+                        ) : (
+                          <Wheat size={18} className="text-crust" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-ink">{p.nom}</p>
+                        <p className="price text-xs font-bold text-ember">{formatPrix(p.prix)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => ajouter(p, { quantite: 1 })}
+                        aria-label={`Ajouter ${p.nom} au panier`}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-crust text-white transition-colors hover:bg-crust-dark active:scale-90"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
