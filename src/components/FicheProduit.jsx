@@ -57,7 +57,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
               key={visuel}
               src={visuel}
               alt={gout ? `${produit.nom} ${gout.nom}` : produit.nom}
-              className={`h-full w-full animate-fade-up object-contain p-6 ${epuise ? 'opacity-40 grayscale' : ''}`}
+              className={`h-full w-full animate-fade-up object-contain p-6 transition-transform duration-500 ease-out hover:scale-[1.06] ${epuise ? 'opacity-40 grayscale' : ''}`}
             />
           ) : (
             <span className={`text-[7rem] ${epuise ? 'opacity-40 grayscale' : ''}`}>{produit.emoji}</span>

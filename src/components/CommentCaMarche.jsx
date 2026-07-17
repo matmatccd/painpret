@@ -163,6 +163,7 @@ export default function CommentCaMarche({ onFAQ }) {
       <header className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Simple et rapide</p>
         <h2 className="mt-1 text-2xl text-ink sm:text-3xl">Comment ça marche ?</h2>
+        <span className="filet-titre" aria-hidden="true" />
       </header>
 
       <div className="grid items-center gap-10 lg:grid-cols-2">

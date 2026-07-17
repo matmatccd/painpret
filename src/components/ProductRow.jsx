@@ -11,6 +11,7 @@ export default function ProductRow({ titre, surtitre, produits, onOpen, favoris 
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">{surtitre}</p>
         )}
         <h2 className="mt-1 text-2xl text-ink sm:text-3xl">{titre}</h2>
+        <span className="filet-titre" aria-hidden="true" />
       </header>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

@@ -122,7 +122,10 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                       >
                         <Minus size={15} />
                       </button>
-                      <span className="tnum w-7 text-center text-sm font-semibold">{ligne.quantite}</span>
+                      {/* La quantité "pop" à chaque changement */}
+                      <span key={ligne.quantite} className="tnum w-7 animate-pop-in text-center text-sm font-semibold">
+                        {ligne.quantite}
+                      </span>
                       <button
                         type="button"
                         aria-label="Augmenter"
@@ -188,7 +191,7 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
             <button
               type="button"
               onClick={onCheckout}
-              className="w-full rounded-xl bg-crust py-3.5 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99]"
+              className="bouton-brillant w-full rounded-xl bg-crust py-3.5 font-semibold text-white transition-colors hover:bg-crust-dark active:scale-[0.99]"
             >
               Choisir mon créneau de retrait
             </button>

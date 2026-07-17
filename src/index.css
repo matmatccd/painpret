@@ -250,6 +250,36 @@
 }
 .file-pain { animation: file-avance 3.2s ease-in-out infinite; }
 
+/* ---- Liseré doré sous les titres de sections : il se dessine à l'arrivée ---- */
+@keyframes trait-dessine {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.filet-titre {
+  display: block;
+  height: 3px;
+  width: 54px;
+  margin-top: 10px;
+  border-radius: 2px;
+  transform-origin: left;
+  background: linear-gradient(90deg, #b98a2f, #e9cd90);
+  animation: trait-dessine 0.9s var(--ease-out-soft) both;
+}
+
+/* ---- Barre de défilement aux couleurs de la boutique ---- */
+html {
+  scrollbar-color: #d8bcc7 var(--color-cream);
+  scrollbar-width: thin;
+}
+body::-webkit-scrollbar { width: 10px; }
+body::-webkit-scrollbar-track { background: var(--color-cream); }
+body::-webkit-scrollbar-thumb {
+  background: #d8bcc7;
+  border-radius: 8px;
+  border: 2px solid var(--color-cream);
+}
+body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
+
 /* ---- Carte flottante du Hero (comme le téléphone de la démo) ----
    Une petite carte "notification" lévite doucement au-dessus de la photo. */
 @keyframes carte-flotte {
@@ -328,4 +358,5 @@
   .carte-flotte-2 { animation: carte-flotte 6.5s ease-in-out 1.2s infinite !important; }
   .bouton-brillant::after { animation: bouton-brille 3.5s ease-in-out infinite !important; }
   .etoile-pop { animation: etoile-pop 0.45s var(--ease-out-soft) both !important; }
+  .filet-titre { animation: trait-dessine 0.9s var(--ease-out-soft) both !important; }
 }
