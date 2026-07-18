@@ -3,6 +3,7 @@ import { formatPrix } from '../lib/format'
 import { useShop } from '../context/ShopContext'
 import { useCart } from '../context/CartContext'
 import { useNotifications } from '../context/NotificationsContext'
+import { IllustrationPain } from './Illustrations'
 
 // Libellés des statuts, côté client
 const LIBELLES_STATUT = {
@@ -55,11 +56,12 @@ export default function Historique({ historique, onRetour, onVoirQR, onPanierRem
 
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Mon compte</p>
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Mes commandes</h1>
+      <span className="filet-titre" aria-hidden="true" />
 
       {historique.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-sand bg-paper px-6 py-12 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cream text-crust ring-1 ring-sand">
-            <History size={26} />
+          <span className="illustration-vide mx-auto block w-fit">
+            <IllustrationPain />
           </span>
           <p className="mt-4 font-display text-lg text-ink">Aucune commande pour l'instant</p>
           <p className="mt-1 text-sm text-stone-warm">

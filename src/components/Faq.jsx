@@ -64,6 +64,7 @@ export default function Faq({ onRetour }) {
 
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">On vous répond</p>
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Questions fréquentes</h1>
+      <span className="filet-titre" aria-hidden="true" />
 
       <div className="mt-6 space-y-2.5">
         {QUESTIONS.map((item) => (

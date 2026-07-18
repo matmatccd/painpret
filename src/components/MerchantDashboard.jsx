@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import AssistantFournil from './AssistantFournil'
+import { IllustrationPain } from './Illustrations'
 import { useShop } from '../context/ShopContext'
 import { bakery } from '../data/bakery'
 import { resolveImage } from '../data/images'
@@ -173,9 +174,11 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
 
   return (
     <div className="min-h-dvh bg-cream">
-      {/* En-tête de l'espace boulanger */}
-      <header className="sticky top-0 z-40 border-b border-crust-dark/40 bg-ink text-white">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
+      {/* En-tête de l'espace boulanger — le flux de l'enseigne, comme le site client */}
+      <header className="sticky top-0 z-40 overflow-hidden border-b-2 border-[#e9cd90]/40 text-white">
+        <div className="flux-petrie absolute inset-0" />
+        <div className="absolute inset-0 bg-[#1f0c19]/45" />
+        <div className="relative mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
               <Wheat size={18} />
@@ -265,7 +268,7 @@ export default function MerchantDashboard({ onRetourClient, onDeconnexion }) {
         {onglet === 'commandes' && (
           <div className="space-y-6">
             {creneaux.length === 0 ? (
-              <EtatVide icone={ClipboardList} titre="Aucune commande en cours" texte="Les nouvelles commandes des clients apparaîtront ici." />
+              <EtatVide illustration={<IllustrationPain />} titre="Aucune commande en cours" texte="Les nouvelles commandes des clients apparaîtront ici." />
             ) : (
               creneaux.map((creneau) => {
                 const cmdsDuCreneau = commandesEnCours.filter((c) => c.creneau === creneau)
@@ -390,24 +393,30 @@ function NombreAnime({ valeur, rendu = (v) => v }) {
   return <>{rendu(affiche)}</>
 }
 
-// --- Petit état vide réutilisable (icône SVG, pas d'emoji) ---
-function EtatVide({ icone: Icone = ClipboardList, titre, texte }) {
+// --- Petit état vide réutilisable (illustration maison si fournie, sinon icône) ---
+function EtatVide({ icone: Icone = ClipboardList, titre, texte, illustration = null }) {
   return (
     <div className="rounded-xl border border-dashed border-sand bg-paper px-6 py-12 text-center">
-      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cream text-crust ring-1 ring-sand">
-        <Icone size={26} />
-      </span>
+      {illustration ? (
+        <span className="illustration-vide mx-auto block w-fit">{illustration}</span>
+      ) : (
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cream text-crust ring-1 ring-sand">
+          <Icone size={26} />
+        </span>
+      )}
       <p className="mt-3 font-display text-lg text-ink">{titre}</p>
       <p className="mt-1 text-sm text-stone-warm">{texte}</p>
     </div>
   )
 }
 
-// --- Indicateur ---
+// --- Indicateur (le chiffre "compte" quand il change) ---
 function Indicateur({ valeur, label }) {
   return (
-    <div className="rounded-xl border border-sand bg-paper p-4">
-      <p className="font-display text-2xl text-ink">{valeur}</p>
+    <div className="rounded-xl border border-sand bg-paper p-4 shadow-[0_2px_10px_-6px_rgba(52,34,47,0.15)]">
+      <p className="font-display text-2xl text-ink">
+        <NombreAnime valeur={valeur} rendu={(v) => Math.round(v)} />
+      </p>
       <p className="mt-0.5 text-xs text-stone-warm">{label}</p>
     </div>
   )
@@ -583,7 +592,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
             ))}
           </div>
         ) : (
-          <EtatVide icone={CheckCircle2} titre="Rien à préparer" texte="Les nouvelles commandes en ligne apparaîtront ici." />
+          <EtatVide illustration={<IllustrationPain />} titre="Rien à préparer" texte="Les nouvelles commandes en ligne apparaîtront ici." />
         )}
       </section>
 

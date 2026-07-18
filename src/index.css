@@ -341,6 +341,25 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   pointer-events: none;
 }
 
+/* ---- Fiche produit : le produit tourne légèrement en 3D (comme le
+   téléphone de la démo), présenté sur son ombre comme en vitrine. ---- */
+@keyframes produit-3d {
+  0%, 100% { transform: rotateY(-8deg) rotateX(2deg); }
+  50% { transform: rotateY(8deg) rotateX(-1deg); }
+}
+.produit-3d {
+  transform-style: preserve-3d;
+  animation: produit-3d 8s ease-in-out infinite;
+}
+@keyframes produit-ombre {
+  0%, 100% { transform: translateX(-10px) scaleX(0.92); opacity: 0.3; }
+  50% { transform: translateX(10px) scaleX(1.04); opacity: 0.2; }
+}
+.produit-ombre { animation: produit-ombre 8s ease-in-out infinite; }
+
+/* Les illustrations d'états vides flottent doucement */
+.illustration-vide { animation: bandeau-flotte 4s ease-in-out infinite; }
+
 /* ---- Fluidité générale ---- */
 /* Les photos du diaporama "respirent" : zoom très lent (effet cinéma) */
 @keyframes kenburns {
@@ -389,4 +408,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   .filet-titre { animation: trait-dessine 0.9s var(--ease-out-soft) both !important; }
   .confetti { animation: confetti-tombe var(--cf-duree, 2.4s) ease-in var(--cf-delai, 0s) both !important; }
   .pastille-pulse { animation: pastille-pulse 1.8s ease-out infinite !important; }
+  .produit-3d { animation: produit-3d 8s ease-in-out infinite !important; }
+  .produit-ombre { animation: produit-ombre 8s ease-in-out infinite !important; }
+  .illustration-vide { animation: bandeau-flotte 4s ease-in-out infinite !important; }
 }

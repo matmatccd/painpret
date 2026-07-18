@@ -117,6 +117,7 @@ export default function PickupSlots({ onRetour }) {
 
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Commande en ligne · Retrait en boutique</p>
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Finaliser ma commande</h1>
+      <span className="filet-titre" aria-hidden="true" />
 
       {/* Boutique fermée exceptionnellement : on ne prend plus de commandes */}
       {boutiqueFermee && (

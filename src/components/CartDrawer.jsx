@@ -2,6 +2,7 @@ import { X, Minus, Plus, Trash2, ShoppingBag, Wheat } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
 import { useShop } from '../context/ShopContext'
+import { IllustrationPanier } from './Illustrations'
 
 // Panneau "panier" qui glisse depuis la droite.
 export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
@@ -57,8 +58,8 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
 
         {lignes.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-paper text-crust ring-1 ring-sand">
-              <Wheat size={30} />
+            <span className="illustration-vide">
+              <IllustrationPanier />
             </span>
             <p className="mt-4 font-display text-lg text-ink">Votre panier est vide</p>
             <p className="mt-1 text-sm text-stone-warm">

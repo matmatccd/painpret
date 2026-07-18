@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, Minus, Plus, Timer, CheckCircle2, Leaf, ShieldAlert } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
+import { volerVersPanier } from '../lib/volAuPanier'
 import ProductCard from './ProductCard'
 
 // Fiche détaillée d'un produit (+ suggestions de la même catégorie).
@@ -31,6 +32,9 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
       prixUnitaire,
       remarque: remarque.trim(),
     })
+    // La photo s'envole vers le panier de l'en-tête
+    const photo = document.querySelector('.produit-3d')
+    if (photo) volerVersPanier(photo)
     onAjoutReussi?.()
   }
 
@@ -46,19 +50,30 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
       </button>
 
       <div className="grid gap-8 md:grid-cols-2">
-        {/* Visuel : photo si dispo (sinon dégradé + emoji).
-            Le goût sélectionné applique une teinte de couleur par-dessus. */}
+        {/* Visuel façon vitrine : fond doux, produit qui tourne légèrement
+            en 3D (comme le téléphone de la démo), ombre portée qui respire. */}
         <div
-          className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-sand bg-white"
-          style={visuel ? undefined : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }}
+          className="scene-3d relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl border border-sand"
+          style={
+            visuel
+              ? { background: 'radial-gradient(circle at 50% 38%, #ffffff 0%, #fdf7f5 55%, #f4e4e0 100%)' }
+              : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }
+          }
         >
           {visuel ? (
-            <img
-              key={visuel}
-              src={visuel}
-              alt={gout ? `${produit.nom} ${gout.nom}` : produit.nom}
-              className={`h-full w-full animate-fade-up object-contain p-6 transition-transform duration-500 ease-out hover:scale-[1.06] ${epuise ? 'opacity-40 grayscale' : ''}`}
-            />
+            <>
+              <img
+                key={visuel}
+                src={visuel}
+                alt={gout ? `${produit.nom} ${gout.nom}` : produit.nom}
+                className={`produit-3d relative z-10 h-[74%] w-full animate-fade-up object-contain px-8 mix-blend-multiply ${epuise ? 'opacity-40 grayscale' : ''}`}
+              />
+              {/* L'ombre au sol suit la rotation du produit */}
+              <div
+                className="produit-ombre -mt-[5%] h-4 w-2/5 rounded-[100%] bg-ink/25 blur-md"
+                aria-hidden="true"
+              />
+            </>
           ) : (
             <span className={`text-[7rem] ${epuise ? 'opacity-40 grayscale' : ''}`}>{produit.emoji}</span>
           )}
@@ -90,6 +105,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
             </p>
           )}
           <h1 className="text-3xl text-ink sm:text-4xl">{produit.nom}</h1>
+          <span className="filet-titre" aria-hidden="true" />
 
           <div className="mt-2 flex items-center gap-3">
             <span className="price text-2xl font-bold text-ember">{formatPrix(prixUnitaire)}</span>
@@ -252,6 +268,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
           <header className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Nos suggestions</p>
             <h2 className="mt-1 text-2xl text-ink">À goûter aussi</h2>
+            <span className="filet-titre" aria-hidden="true" />
           </header>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {suggestions.map((p, i) => (
