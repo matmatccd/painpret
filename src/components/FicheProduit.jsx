@@ -66,7 +66,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
                 key={visuel}
                 src={visuel}
                 alt={gout ? `${produit.nom} ${gout.nom}` : produit.nom}
-                className={`produit-3d relative z-10 h-[74%] w-full animate-fade-up object-contain px-8 mix-blend-multiply ${epuise ? 'opacity-40 grayscale' : ''}`}
+                className={`produit-3d relative z-10 h-[74%] w-full object-contain px-8 mix-blend-multiply ${epuise ? 'opacity-40 grayscale' : ''}`}
               />
               {/* L'ombre au sol suit la rotation du produit */}
               <div

@@ -343,13 +343,22 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
 
 /* ---- Fiche produit : le produit tourne légèrement en 3D (comme le
    téléphone de la démo), présenté sur son ombre comme en vitrine. ---- */
+/* L'entrée : le produit pivote pour se présenter face au client (au clic) */
+@keyframes produit-entree {
+  0% { transform: rotateY(-80deg) scale(0.88); opacity: 0; }
+  55% { opacity: 1; }
+  100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
+/* Puis il continue de tourner doucement, bien visible */
 @keyframes produit-3d {
-  0%, 100% { transform: rotateY(-8deg) rotateX(2deg); }
-  50% { transform: rotateY(8deg) rotateX(-1deg); }
+  0%, 100% { transform: rotateY(-15deg) rotateX(4deg); }
+  50% { transform: rotateY(15deg) rotateX(-2deg); }
 }
 .produit-3d {
   transform-style: preserve-3d;
-  animation: produit-3d 8s ease-in-out infinite;
+  animation:
+    produit-entree 0.85s var(--ease-out-soft) both,
+    produit-3d 6s ease-in-out 0.85s infinite;
 }
 @keyframes produit-ombre {
   0%, 100% { transform: translateX(-10px) scaleX(0.92); opacity: 0.3; }
@@ -408,7 +417,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   .filet-titre { animation: trait-dessine 0.9s var(--ease-out-soft) both !important; }
   .confetti { animation: confetti-tombe var(--cf-duree, 2.4s) ease-in var(--cf-delai, 0s) both !important; }
   .pastille-pulse { animation: pastille-pulse 1.8s ease-out infinite !important; }
-  .produit-3d { animation: produit-3d 8s ease-in-out infinite !important; }
+  .produit-3d { animation: produit-entree 0.85s var(--ease-out-soft) both, produit-3d 6s ease-in-out 0.85s infinite !important; }
   .produit-ombre { animation: produit-ombre 8s ease-in-out infinite !important; }
   .illustration-vide { animation: bandeau-flotte 4s ease-in-out infinite !important; }
 }
