@@ -250,6 +250,34 @@
 }
 .file-pain { animation: file-avance 3.2s ease-in-out infinite; }
 
+/* ---- Confettis de la confirmation de commande (moment de fête !) ----
+   Chaque confetti règle sa durée/son retard via des variables CSS. */
+@keyframes confetti-tombe {
+  0% { transform: translateY(-30px) rotate(0turn); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translateY(250px) rotate(2.2turn); opacity: 0; }
+}
+.confetti {
+  top: 0;
+  border-radius: 2px;
+  opacity: 0;
+  animation: confetti-tombe var(--cf-duree, 2.4s) ease-in var(--cf-delai, 0s) both;
+}
+
+/* ---- Pastille "Ouvert maintenant" : elle pulse doucement ---- */
+@keyframes pastille-pulse {
+  0% { transform: scale(1); opacity: 0.75; }
+  80%, 100% { transform: scale(2.6); opacity: 0; }
+}
+.pastille-pulse { animation: pastille-pulse 1.8s ease-out infinite; }
+
+/* ---- Barre panier mobile : elle glisse depuis le bas ---- */
+@keyframes glisse-haut {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+.animate-glisse-haut { animation: glisse-haut 0.35s var(--ease-out-soft) both; }
+
 /* ---- Liseré doré sous les titres de sections : il se dessine à l'arrivée ---- */
 @keyframes trait-dessine {
   from { transform: scaleX(0); }
@@ -359,4 +387,6 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   .bouton-brillant::after { animation: bouton-brille 3.5s ease-in-out infinite !important; }
   .etoile-pop { animation: etoile-pop 0.45s var(--ease-out-soft) both !important; }
   .filet-titre { animation: trait-dessine 0.9s var(--ease-out-soft) both !important; }
+  .confetti { animation: confetti-tombe var(--cf-duree, 2.4s) ease-in var(--cf-delai, 0s) both !important; }
+  .pastille-pulse { animation: pastille-pulse 1.8s ease-out infinite !important; }
 }

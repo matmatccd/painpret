@@ -7,6 +7,30 @@ import { activerNotifCommande, pushClientDisponible } from '../lib/notifClient'
 import { useShop } from '../context/ShopContext'
 import { useNotifications } from '../context/NotificationsContext'
 
+// Petite pluie de confettis aux couleurs de la boutique (jouée une fois,
+// à l'arrivée sur la confirmation — le moment de fête !)
+const COULEURS_CONFETTI = ['#e9cd90', '#b98a2f', '#9c3061', '#6b2a4e', '#f2d3d8', '#34d399']
+function Confettis() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 h-44" aria-hidden="true">
+      {[...Array(14)].map((_, i) => (
+        <span
+          key={i}
+          className="confetti absolute"
+          style={{
+            left: `${5 + i * 6.6}%`,
+            background: COULEURS_CONFETTI[i % COULEURS_CONFETTI.length],
+            width: i % 3 === 0 ? '10px' : '7px',
+            height: i % 3 === 0 ? '5px' : '9px',
+            '--cf-duree': `${2 + (i % 5) * 0.35}s`,
+            '--cf-delai': `${(i % 7) * 0.12}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // Calcule le temps restant (en secondes) avant l'heure de retrait.
 // Renvoie null si l'heure n'est pas définie (créneau "dès que possible").
 function secondesRestantes(heureISO) {
@@ -79,7 +103,9 @@ export default function Confirmation({ commande, onTermine }) {
 
   return (
     <div className="mx-auto w-full max-w-md px-4 py-10">
-      <div className="animate-pop-in rounded-2xl border border-sand bg-paper p-7 text-center">
+      <div className="animate-pop-in relative overflow-hidden rounded-2xl border border-sand bg-paper p-7 text-center">
+        {/* Confettis de célébration (seulement pour une commande fraîche) */}
+        {!livree && <Confettis />}
         {/* Confirmation */}
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-200">
           <CheckCircle2 size={30} className="text-emerald-600" />

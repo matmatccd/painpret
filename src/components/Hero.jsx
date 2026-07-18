@@ -88,7 +88,11 @@ export default function Hero() {
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {estOuvertMaintenant() ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                {/* La pastille verte pulse doucement : la boutique vit */}
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="pastille-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
                 Ouvert maintenant
               </span>
             ) : (

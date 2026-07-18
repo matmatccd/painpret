@@ -10,8 +10,11 @@ export default function Footer({ onFAQ }) {
   const aujourdHui = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
 
   return (
-    <footer className="mt-10 border-t-2 border-[#e9cd90]/60 bg-crust text-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
+    <footer className="relative mt-10 overflow-hidden border-t-2 border-[#e9cd90]/60 text-white">
+      {/* Le flux de couleurs de la devanture, comme sur le bandeau */}
+      <div className="flux-petrie absolute inset-0" />
+      <div className="absolute inset-0 bg-[#291022]/35" />
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Logo taille="sm" clair />
         </div>
@@ -57,7 +60,7 @@ export default function Footer({ onFAQ }) {
         </div>
       </div>
 
-      <div className="border-t border-white/15">
+      <div className="relative border-t border-white/15">
         <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-white/55">
           © {new Date().getFullYear()} {bakery.nom} · {bakery.adresse}, {bakery.ville} — Commande en ligne, retrait en boutique.
         </p>
