@@ -37,6 +37,11 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         // On greffe notre gestionnaire de notifications push au service worker
         importScripts: ['push-sw.js'],
+        // La nouvelle version prend la main immédiatement, et on efface
+        // les anciens caches : plus de version périmée qui traîne.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
       },
     }),
   ],
