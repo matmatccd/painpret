@@ -102,13 +102,20 @@ export default function App() {
   const [categorieActive, setCategorieActive] = useState(null)
   const [panierOuvert, setPanierOuvert] = useState(false)
 
-  // Court chargement simulé au démarrage (affiche le squelette).
-  // Prêt pour un vrai chargement de données plus tard (Supabase).
-  const [chargement, setChargement] = useState(true)
+  // Squelette de chargement : affiché au moins 700 ms (anti-flash) ET, en mode
+  // réel, jusqu'à ce que les produits soient réellement arrivés de la base —
+  // avec une sécurité à 6 s pour ne jamais rester bloqué.
+  const [minEcoule, setMinEcoule] = useState(false)
+  const [tropLong, setTropLong] = useState(false)
   useEffect(() => {
-    const t = setTimeout(() => setChargement(false), 700)
-    return () => clearTimeout(t)
+    const t1 = setTimeout(() => setMinEcoule(true), 700)
+    const t2 = setTimeout(() => setTropLong(true), 6000)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
   }, [])
+  const chargement = !tropLong && (!minEcoule || (modeReel && produits.length === 0))
 
   // --- Favoris du client (mémorisés sur l'appareil) ---
   const [favoris, setFavoris] = useState(() => {
