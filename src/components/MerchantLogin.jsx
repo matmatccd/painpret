@@ -50,8 +50,11 @@ export default function MerchantLogin({ onSucces, onRetour }) {
     'w-full rounded-lg border border-sand bg-cream py-3 pl-10 pr-4 text-sm outline-none transition focus:border-crust focus:ring-2 focus:ring-crust/15'
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-4">
-      <div className="w-full max-w-sm animate-pop-in rounded-2xl border border-sand bg-paper p-7 text-center">
+    // Le flux animé de l'enseigne en toile de fond — la carte blanche ressort
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4">
+      <div className="flux-petrie absolute inset-0" />
+      <div className="absolute inset-0 bg-[#291022]/35" />
+      <div className="relative w-full max-w-sm animate-pop-in rounded-2xl border border-white/20 bg-paper p-7 text-center shadow-[0_30px_60px_-25px_rgba(0,0,0,0.5)]">
         <div className="flex justify-center">
           <Logo />
         </div>
