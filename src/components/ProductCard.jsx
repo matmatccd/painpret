@@ -1,5 +1,8 @@
-import { Plus, Check, Timer, Heart } from 'lucide-react'
+import { Plus, Check, Timer, Heart, Flame } from 'lucide-react'
 import { useState } from 'react'
+
+// En dessous de ce stock, on affiche « Plus que N » pour signaler la rareté.
+const SEUIL_STOCK_BAS = 5
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
 import { volerVersPanier } from '../lib/volAuPanier'
@@ -70,11 +73,18 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
           </span>
         )}
 
-        {produit.nouveau && !epuise && (
+        {/* Badge en haut à gauche : la rareté (« Plus que 3 ») prime sur
+            « Nouveau » car c'est l'info la plus utile pour décider vite. */}
+        {!epuise && produit.stock > 0 && produit.stock <= SEUIL_STOCK_BAS ? (
+          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+            <Flame size={11} className="shrink-0" />
+            Plus que {produit.stock}
+          </span>
+        ) : produit.nouveau && !epuise ? (
           <span className="absolute left-3 top-3 rounded-full bg-crust px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm ring-1 ring-[#e9cd90]/50">
             Nouveau
           </span>
-        )}
+        ) : null}
 
         {/* Cœur "favori" (mémorisé sur l'appareil) */}
         {onToggleFavori && (
