@@ -11,6 +11,7 @@ import PickupSlots from './components/PickupSlots'
 import Confirmation from './components/Confirmation'
 import Historique from './components/Historique'
 import Faq from './components/Faq'
+import PagesLegales from './components/PagesLegales'
 import CommentCaMarche from './components/CommentCaMarche'
 import AvisClients from './components/AvisClients'
 import Bandeau from './components/Bandeau'
@@ -95,6 +96,14 @@ export default function App() {
 
   // Vue côté client : 'boutique' | 'checkout' | 'confirmation'
   const [vue, setVue] = useState('boutique')
+  // Onglet actif des pages légales quand on y arrive depuis le pied de page
+  const [ongletLegal, setOngletLegal] = useState('mentions')
+  function ouvrirLegal(onglet = 'mentions') {
+    setOngletLegal(onglet)
+    setProduitOuvertId(null)
+    setVue('legal')
+    window.scrollTo({ top: 0 })
+  }
   const [commandeConfirmee, setCommandeConfirmee] = useState(null)
 
   const [recherche, setRecherche] = useState('')
@@ -332,6 +341,8 @@ export default function App() {
           <Confirmation commande={commandeConfirmee} onTermine={retourBoutique} />
         ) : vue === 'faq' ? (
           <Faq onRetour={retourBoutique} />
+        ) : vue === 'legal' ? (
+          <PagesLegales onRetour={retourBoutique} ongletInitial={ongletLegal} />
         ) : vue === 'historique' ? (
           <Historique
             historique={historique}
@@ -439,7 +450,10 @@ export default function App() {
         )}
       </main>
 
-      <Footer onFAQ={() => { setVue('faq'); setProduitOuvertId(null); window.scrollTo({ top: 0 }) }} />
+      <Footer
+        onFAQ={() => { setVue('faq'); setProduitOuvertId(null); window.scrollTo({ top: 0 }) }}
+        onLegal={ouvrirLegal}
+      />
 
       {/* Espace en bas pour ne pas masquer le contenu derrière la barre mobile */}
       {vue !== 'checkout' && vue !== 'confirmation' && <div className="h-20 sm:hidden" />}

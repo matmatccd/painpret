@@ -533,3 +533,30 @@ export const commandesInitiales = [
     arrive: true, // ce client a signalé son arrivée en boutique
   },
 ]
+
+// ============================================================
+//  Informations légales (mentions légales, CGV, RGPD)
+//  -----------------------------------------------------------
+//  ⚠️ À COMPLÉTER par le boulanger : remplacer chaque [À COMPLÉTER…]
+//  par la vraie valeur. Ces champs alimentent les pages légales.
+// ============================================================
+export const legal = {
+  // Forme juridique de l'entreprise (ex : « Entreprise individuelle »,
+  // « EURL », « SARL »…)
+  formeJuridique: '[À COMPLÉTER : forme juridique, ex. Entreprise individuelle]',
+  // Nom complet du responsable / directeur de la publication
+  responsable: '[À COMPLÉTER : nom complet, ex. Johnatan …]',
+  // Numéro SIRET (14 chiffres) — obligatoire
+  siret: '[À COMPLÉTER : SIRET à 14 chiffres]',
+  // Si société : ville du RCS + numéro (sinon laisser vide '')
+  rcs: '',
+  // N° TVA intracommunautaire si assujetti (sinon laisser vide '')
+  tva: '',
+  // E-mail de contact de la boulangerie
+  email: '[À COMPLÉTER : e-mail de contact]',
+  // Médiateur de la consommation (obligatoire pour la vente en ligne) :
+  // nom + site. À souscrire (ex. CM2C, MEDICYS…) puis renseigner ici.
+  mediateur: '[À COMPLÉTER : nom et site du médiateur de la consommation]',
+  // Date de dernière mise à jour des pages légales
+  miseAJour: '20 juillet 2026',
+}

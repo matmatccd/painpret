@@ -4,7 +4,7 @@ import Logo from './Logo'
 
 // Pied de page aux couleurs de la devanture : fond prune, filet doré,
 // slogan rose poudré — comme l'enseigne de La Pétrie.
-export default function Footer({ onFAQ }) {
+export default function Footer({ onFAQ, onLegal }) {
   // Horaires du jour : getDay() renvoie 0 pour dimanche, notre tableau commence lundi
   const jourJS = new Date().getDay()
   const aujourdHui = bakery.horaires[jourJS === 0 ? 6 : jourJS - 1]
@@ -61,9 +61,22 @@ export default function Footer({ onFAQ }) {
       </div>
 
       <div className="relative border-t border-white/15">
-        <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-white/55">
-          © {new Date().getFullYear()} {bakery.nom} · {bakery.adresse}, {bakery.ville} — Commande en ligne, retrait en boutique.
-        </p>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-4 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            © {new Date().getFullYear()} {bakery.nom} · {bakery.adresse}, {bakery.ville} — Commande en ligne, retrait en boutique.
+          </p>
+          <nav className="flex flex-wrap gap-x-4 gap-y-1">
+            <button type="button" onClick={() => onLegal?.('mentions')} className="transition-colors hover:text-white hover:underline">
+              Mentions légales
+            </button>
+            <button type="button" onClick={() => onLegal?.('cgv')} className="transition-colors hover:text-white hover:underline">
+              CGV
+            </button>
+            <button type="button" onClick={() => onLegal?.('confidentialite')} className="transition-colors hover:text-white hover:underline">
+              Confidentialité
+            </button>
+          </nav>
+        </div>
       </div>
     </footer>
   )
