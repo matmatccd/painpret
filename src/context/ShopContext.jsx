@@ -117,8 +117,17 @@ export function ShopProvider({ children }) {
       const { data } = await supabase.from('produits').select('*').order('id')
       if (vivant && data) setProduitsBase(data.map(produitDepuisRow))
     }
+    // Colonnes SANS données perso : c'est tout ce que le client (rôle anon)
+    // a le droit de lire depuis la mise à jour RGPD (securite-parcours.sql).
+    // Le boulanger, lui, est connecté -> il lit tout (nom, e-mail, téléphone).
+    const COLS_CLIENT =
+      'id,numero,creneau,heure_retrait,statut,articles,total,arrive,remboursee,stripe_session,cree_le'
     async function chargerCommandes() {
-      const { data } = await supabase.from('commandes').select('*').order('cree_le')
+      const { data: { session } } = await supabase.auth.getSession()
+      const { data } = await supabase
+        .from('commandes')
+        .select(session ? '*' : COLS_CLIENT)
+        .order('cree_le')
       if (vivant && data) setCommandes(data.map(commandeDepuisRow))
     }
     async function chargerReglages() {
@@ -312,10 +321,14 @@ export function ShopProvider({ children }) {
   // Renvoie la commande créée, ou lève une erreur ('boutique_fermee' / 'stock_insuffisant').
   async function ajouterCommande({ articles, total, creneau, heureRetrait, client = '', email = '', telephone = '' }) {
     if (modeReel) {
+      // Note : dans le vrai parcours, la commande est créée par le webhook
+      // Stripe (paiement garanti). Cette voie directe est un filet de secours ;
+      // elle passe p_stripe_session pour coller à la signature à 8 arguments.
       const { data, error } = await supabase.rpc('passer_commande', {
         p_client: client,
         p_email: email,
         p_telephone: telephone,
+        p_stripe_session: null,
         p_creneau: creneau,
         p_heure_retrait: heureRetrait,
         p_articles: articles,

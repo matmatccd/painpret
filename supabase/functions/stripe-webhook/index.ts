@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
         .eq('id', attenteId)
         .maybeSingle()
       if (att) {
-        await supabase.rpc('passer_commande', {
+        const { error: eRpc } = await supabase.rpc('passer_commande', {
           p_client: att.client,
           p_email: att.email,
           p_telephone: att.telephone,
@@ -48,6 +48,16 @@ Deno.serve(async (req) => {
           p_articles: att.articles,
           p_total: att.total,
         })
+        // Si la commande n'a PAS pu être créée (ex : un produit vient de tomber
+        // à zéro entre le panier et le paiement), on NE supprime PAS la ligne
+        // en attente : elle garde la preuve du paiement, récupérable et
+        // remboursable. On renvoie une erreur pour que Stripe réessaie plus
+        // tard (et que l'échec soit visible dans le tableau de bord Stripe).
+        if (eRpc) {
+          console.error('passer_commande a échoué (attente ' + attenteId + '): ' + eRpc.message)
+          return new Response('commande non créée: ' + eRpc.message, { status: 500 })
+        }
+        // Succès : la vraie commande existe, on retire la ligne en attente.
         await supabase.from('commandes_en_attente').delete().eq('id', attenteId)
       }
     }
