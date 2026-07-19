@@ -81,7 +81,7 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                 className="flex gap-3 rounded-xl border border-sand bg-paper p-3"
               >
                 <div
-                  className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-3xl ring-1 ring-sand"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo text-3xl ring-1 ring-sand"
                   style={ligne.produit.image ? undefined : { background: `linear-gradient(150deg, ${ligne.produit.from}, ${ligne.produit.to})` }}
                 >
                   {ligne.produit.image ? (
@@ -156,7 +156,7 @@ export default function CartDrawer({ ouvert, onFermer, onCheckout }) {
                       key={p.id}
                       className="flex items-center gap-3 rounded-xl border border-dashed border-sand bg-paper/70 p-2.5"
                     >
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-sand">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo ring-1 ring-sand">
                         {p.image ? (
                           <img src={p.image} alt={p.nom} className="h-full w-full object-contain p-1" />
                         ) : (

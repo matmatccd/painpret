@@ -19,6 +19,8 @@
   --color-ink: #34222f; /* titres & texte fort (encre prune) */
   --color-stone-warm: #6d5565; /* texte secondaire (mauve chaud) */
   --color-gilt: #b98a2f; /* filet doré de la devanture */
+  --color-photo: #ffffff; /* fond des vignettes produit — TOUJOURS blanc,
+                             car les photos ont un fond blanc détouré */
 
   /* Police */
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -26,6 +28,49 @@
 
   /* Courbes d'animation sobres */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ===========================================================
+   MODE SOMBRE — "le fournil à l'aube"
+   On ne redéfinit QUE les couleurs : tout le site suit tout seul,
+   parce qu'il n'utilise que des couleurs nommées (cream, paper, ink…).
+   Pas de noir pur : un prune très sombre, plus chaleureux et moins
+   fatigant pour les yeux qu'un vrai noir.
+   =========================================================== */
+:root[data-theme='sombre'] {
+  --color-cream: #1a1117; /* fond de page (prune nuit) */
+  --color-paper: #251a22; /* cartes, légèrement décollées du fond */
+  --color-sand: #3f2e39; /* bordures */
+  --color-sand-soft: #2e212a; /* séparateurs discrets */
+  --color-crust: #8a3a63; /* prune éclairci : lisible sur fond sombre */
+  --color-crust-dark: #a34776; /* le "survol" s'éclaircit au lieu de foncer */
+  --color-ember: #d9679b; /* accent framboise, remonté pour le contraste */
+  --color-ink: #f6eef2; /* texte fort (quasi blanc rosé) */
+  --color-stone-warm: #b49daa; /* texte secondaire */
+  --color-gilt: #d9a94a; /* doré plus lumineux */
+  /* --color-photo reste blanc : les vignettes produit gardent leur fond. */
+
+  color-scheme: dark; /* barres de défilement + champs natifs en sombre */
+}
+
+/* Le bandeau prune animé s'assombrit aussi (sinon il éblouit la nuit) */
+:root[data-theme='sombre'] .flux-petrie {
+  background: #2a1220;
+}
+:root[data-theme='sombre'] .flux-petrie::before {
+  background: linear-gradient(115deg, #170812, #24101d, #2a1220, #3a1a2c, #4a2038, #2a1220, #24101d, #170812);
+}
+
+/* Les ombres portées claires n'existent pas dans le noir : on les adoucit */
+:root[data-theme='sombre'] .carte-flotte,
+:root[data-theme='sombre'] .carte-flotte-2 {
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* Bascule douce quand on change de mode (mais pas sur les animations en cours) */
+:root.transition-theme,
+:root.transition-theme * {
+  transition: background-color 0.28s ease, border-color 0.28s ease, color 0.28s ease !important;
 }
 
 /* Styles de base dans @layer base : ainsi les utilitaires Tailwind

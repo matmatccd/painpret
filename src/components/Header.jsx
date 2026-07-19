@@ -3,6 +3,7 @@ import { Search, ShoppingBag, History } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import Logo from './Logo'
 import NotificationBell from './NotificationBell'
+import BoutonTheme from './BoutonTheme'
 
 // En-tête aux couleurs de la devanture La Pétrie : bandeau prune,
 // lettrage clair — comme l'enseigne de la boutique.
@@ -65,7 +66,7 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
         value={recherche}
         onChange={(e) => setRecherche(e.target.value)}
         placeholder="Rechercher un pain…"
-        className="w-full rounded-lg border border-white/20 bg-white py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:ring-2 focus:ring-[#e9cd90]/50"
+        className="w-full rounded-lg border border-white/20 bg-paper py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-stone-warm/70 focus:ring-2 focus:ring-[#e9cd90]/50"
       />
     </div>
   )
@@ -107,6 +108,9 @@ export default function Header({ recherche, setRecherche, onAccueil, onOuvrirPan
         >
           <History size={18} />
         </button>
+
+        {/* Mode clair / sombre */}
+        <BoutonTheme />
 
         {/* Notifications */}
         <NotificationBell clair />

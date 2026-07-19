@@ -62,7 +62,7 @@ export default function Hero() {
           {/* Cartes flottantes (grand écran) : elles lévitent au-dessus de la photo,
               comme le téléphone de la démo — un aperçu vivant du service */}
           <div className="pointer-events-none absolute right-10 top-16 z-10 hidden lg:block" aria-hidden="true">
-            <div className="carte-flotte flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
+            <div className="carte-flotte flex items-center gap-2.5 rounded-2xl bg-paper/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
                 <CheckCircle2 size={18} className="text-emerald-600" />
               </span>
@@ -71,7 +71,7 @@ export default function Hero() {
                 <span className="block text-xs text-stone-warm">Encore chaude, elle vous attend</span>
               </span>
             </div>
-            <div className="carte-flotte-2 ml-16 mt-4 flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
+            <div className="carte-flotte-2 ml-16 mt-4 flex items-center gap-2.5 rounded-2xl bg-paper/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cream ring-1 ring-sand">
                 <QrCode size={17} className="text-crust" />
               </span>

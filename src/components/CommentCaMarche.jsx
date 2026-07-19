@@ -46,7 +46,7 @@ function EcranEtape({ etape }) {
         ].map((p) => (
           <div
             key={p.nom}
-            className="animate-fade-up rounded-lg border border-sand bg-white p-2"
+            className="animate-fade-up rounded-lg border border-sand bg-paper p-2"
             style={{ animationDelay: p.delay }}
           >
             <div className="h-8 rounded-md bg-gradient-to-br from-[#e9b872] to-[#c98a3a]" />
@@ -76,7 +76,7 @@ function EcranEtape({ etape }) {
             <div
               key={h}
               className={`animate-fade-up rounded-md py-1.5 text-center text-[8px] font-semibold ${
-                i === 1 ? 'bg-crust text-white' : 'border border-sand bg-white text-ink'
+                i === 1 ? 'bg-crust text-white' : 'border border-sand bg-paper text-ink'
               }`}
               style={{ animationDelay: `${i * 90}ms` }}
             >
@@ -89,7 +89,7 @@ function EcranEtape({ etape }) {
           className="mt-auto animate-fade-up space-y-1.5"
           style={{ animationDelay: '400ms' }}
         >
-          <div className="flex items-center gap-1 rounded-md border border-sand bg-white px-2 py-1.5">
+          <div className="flex items-center gap-1 rounded-md border border-sand bg-paper px-2 py-1.5">
             <span className="h-2 w-3 rounded-sm bg-gradient-to-r from-[#9c3061] to-[#6b2a4e]" />
             <span className="text-[7px] text-stone-warm">•••• 4242</span>
           </div>
@@ -107,7 +107,7 @@ function EcranEtape({ etape }) {
         Commande prête !
       </span>
       <div
-        className="animate-fade-up grid grid-cols-7 gap-[2px] rounded-lg border border-sand bg-white p-2"
+        className="animate-fade-up grid grid-cols-7 gap-[2px] rounded-lg border border-sand bg-paper p-2"
         style={{ animationDelay: '150ms' }}
       >
         {MOTIF_QR.map((v, i) => (
@@ -224,7 +224,7 @@ export default function CommentCaMarche({ onFAQ }) {
                 </span>
                 <span>
                   <span className="flex items-center gap-2">
-                    <span className={`font-display text-lg transition-colors ${active ? 'text-ember' : 'text-sand'}`}>
+                    <span className={`font-display text-lg transition-colors ${active ? 'text-ember' : 'text-stone-warm'}`}>
                       0{i + 1}
                     </span>
                     <span className="font-sans text-[15px] font-semibold text-ink">{e.titre}</span>
@@ -238,7 +238,7 @@ export default function CommentCaMarche({ onFAQ }) {
           <button
             type="button"
             onClick={onFAQ}
-            className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-crust transition-colors hover:text-ember"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ember transition-colors hover:text-crust-dark"
           >
             <HelpCircle size={15} /> Des questions ? Consultez la FAQ →
           </button>

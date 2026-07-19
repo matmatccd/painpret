@@ -136,7 +136,7 @@ export default function Confirmation({ commande, onTermine }) {
 
         {/* QR Code */}
         <div className="mt-6 flex justify-center">
-          <div className="rounded-2xl border border-sand bg-white p-4">
+          <div className="rounded-2xl border border-sand bg-paper p-4">
             <QRCodeSVG
               value={`PAINPRET|${commande.numero}|${heure}`}
               size={168}

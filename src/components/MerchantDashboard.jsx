@@ -439,7 +439,7 @@ function BoutonOnglet({ actif, onClick, icone, badge, children }) {
       {badge > 0 && (
         <span
           className={`absolute -top-1.5 right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold sm:static ${
-            actif ? 'bg-white text-ink' : 'bg-ember text-white'
+            actif ? 'bg-paper text-ink' : 'bg-ember text-white'
           }`}
         >
           {badge}
@@ -585,7 +585,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
               const produit = produits.find((x) => x.id === p.produitId)
               return (
                 <li key={p.nom} className="flex items-center gap-3 px-4 py-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-sand">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo ring-1 ring-sand">
                     {produit?.image ? (
                       <img src={produit.image} alt="" className="h-full w-full object-contain p-0.5" />
                     ) : (
@@ -663,7 +663,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
             {stockBas.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-xl border border-sand bg-paper p-3">
                 <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-xl"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo text-xl"
                   style={p.image ? undefined : { background: `linear-gradient(150deg, ${p.from}, ${p.to})` }}
                 >
                   {p.image ? <img src={p.image} alt="" className="h-full w-full object-contain" /> : p.emoji}
@@ -1260,7 +1260,7 @@ function SectionCategorie({
       {/* En-tête : illustration + nom + suppression de la catégorie */}
       <div className="flex items-center gap-3 border-b border-sand-soft p-4">
         <span
-          className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-2xl text-white ring-1 ring-sand"
+          className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-photo text-2xl text-white ring-1 ring-sand"
           style={categorie.image ? undefined : { background: `linear-gradient(150deg, ${categorie.from}, ${categorie.to})` }}
         >
           {categorie.image ? (
@@ -1639,7 +1639,7 @@ function CategorieForm({ onAjouter }) {
           <span className="mb-1 block text-xs font-medium text-stone-warm">Photo</span>
           <div className="flex items-center gap-3">
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-white"
+              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-photo"
               style={image ? undefined : { background: `linear-gradient(150deg, ${from}, ${to})` }}
             >
               {image ? (
