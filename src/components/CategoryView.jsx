@@ -23,6 +23,7 @@ export default function CategoryView({ categorie, produits, onRetour, onOpen }) 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">Catégorie</p>
           <h2 className="text-2xl text-ink sm:text-3xl">{categorie.nom}</h2>
+          <span className="mt-2 block h-[3px] w-12 rounded-full bg-gradient-to-r from-gilt to-gilt/20" />
         </div>
       </header>
 

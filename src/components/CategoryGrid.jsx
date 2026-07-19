@@ -9,6 +9,7 @@ export default function CategoryGrid({ onSelect }) {
       <header className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ember">La boutique</p>
         <h2 className="mt-1 text-2xl text-ink sm:text-3xl">Nos catégories</h2>
+        <span className="mt-3 block h-[3px] w-12 rounded-full bg-gradient-to-r from-gilt to-gilt/20" />
       </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

@@ -48,20 +48,21 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
       {/* Vignette produit : photo si disponible, sinon dégradé + emoji */}
       <div
         className="relative flex aspect-[4/3] items-center justify-center overflow-hidden"
-        style={produit.image ? { background: '#ffffff' } : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }}
+        style={produit.image ? { background: 'var(--color-photo)' } : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }}
       >
         {produit.image ? (
           <img
             src={produit.image}
             alt={produit.nom}
             loading="lazy"
-            className={`h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.06] ${epuise ? 'opacity-40 grayscale' : ''}`}
+            className={`h-full w-full object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.07] ${epuise ? 'opacity-40 grayscale' : ''}`}
           />
         ) : (
           <span className={`text-5xl ${epuise ? 'opacity-40 grayscale' : ''}`}>{produit.emoji}</span>
         )}
-        {/* léger voile pour un rendu "photographié", moins criard */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+        {/* Fondu très doux vers la couleur de la carte : sépare la photo du
+            texte sans la ternir (l'ancien voile noir salissait les photos). */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-paper/50 to-transparent" />
 
         {epuise && (
           <span className="absolute inset-x-0 bottom-0 bg-ink/70 py-1.5 text-center text-xs font-semibold uppercase tracking-widest text-white">
@@ -70,7 +71,7 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
         )}
 
         {produit.nouveau && !epuise && (
-          <span className="absolute left-3 top-3 rounded-full bg-paper/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-crust">
+          <span className="absolute left-3 top-3 rounded-full bg-crust px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm ring-1 ring-[#e9cd90]/50">
             Nouveau
           </span>
         )}
@@ -96,8 +97,10 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
             type="button"
             onClick={ajouterAuPanier}
             aria-label={`Ajouter ${produit.nom} au panier`}
-            className={`absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition active:scale-90 ${
-              ajoute ? 'bg-emerald-600 text-white' : 'bg-paper text-crust hover:bg-crust hover:text-white'
+            className={`absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full shadow-[0_4px_12px_-2px_rgba(107,42,78,0.35)] ring-1 ring-black/5 transition-all duration-200 active:scale-90 ${
+              ajoute
+                ? 'scale-110 bg-emerald-600 text-white'
+                : 'bg-paper text-crust hover:scale-110 hover:bg-crust hover:text-white hover:shadow-[0_6px_18px_-3px_rgba(107,42,78,0.55)]'
             }`}
           >
             {ajoute ? <Check size={18} strokeWidth={3} /> : <Plus size={18} strokeWidth={2.5} />}
@@ -118,12 +121,12 @@ export default function ProductCard({ produit, onOpen, index = 0, favori = false
         <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-stone-warm">
           {produit.description}
         </p>
-        <div className="mt-2.5 flex items-center justify-between gap-2">
-          <span className="price text-[15px] font-bold text-ember">
+        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+          <span className="price whitespace-nowrap text-[17px] font-bold leading-none text-ember">
             {formatPrix(produit.prix)}
           </span>
           {produit.delaiPreparation > 0 && !epuise && (
-            <span className="flex items-center gap-1 text-[11px] font-medium text-stone-warm">
+            <span className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-sand-soft px-2 py-0.5 text-[11px] font-medium text-stone-warm">
               <Timer size={12} /> ~{produit.delaiPreparation} min
             </span>
           )}
