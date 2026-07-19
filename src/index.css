@@ -222,7 +222,7 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
-.bandeau-icone { animation: bandeau-flotte 3.6s ease-in-out infinite; }
+.bandeau-icone { will-change: transform; animation: bandeau-flotte 3.6s ease-in-out infinite; }
 
 /* ---- Démo 3D "Comment ça marche" ---- */
 /* Le téléphone pivote lentement en 3D, comme présenté en vitrine */
@@ -233,6 +233,8 @@
 }
 .tel-3d {
   transform-style: preserve-3d;
+  will-change: transform;
+  backface-visibility: hidden;
   animation: tel-3d 9s ease-in-out infinite;
 }
 /* L'ombre au sol respire avec la rotation */
@@ -314,8 +316,8 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   0%, 100% { transform: translateY(0) rotate(-2deg); }
   50% { transform: translateY(-12px) rotate(1.5deg); }
 }
-.carte-flotte { animation: carte-flotte 5.5s ease-in-out infinite; }
-.carte-flotte-2 { animation: carte-flotte 6.5s ease-in-out 1.2s infinite; }
+.carte-flotte { will-change: transform; animation: carte-flotte 5.5s ease-in-out infinite; }
+.carte-flotte-2 { will-change: transform; animation: carte-flotte 6.5s ease-in-out 1.2s infinite; }
 
 /* ---- Étoiles des avis : elles se remplissent une à une ---- */
 @keyframes etoile-pop {
@@ -356,9 +358,12 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
 }
 .produit-3d {
   transform-style: preserve-3d;
+  /* Confiées à la carte graphique : rotation parfaitement fluide */
+  will-change: transform;
+  backface-visibility: hidden;
   animation:
     produit-entree 0.85s var(--ease-out-soft) both,
-    produit-3d 6s ease-in-out 0.85s infinite;
+    produit-3d 7s cubic-bezier(0.37, 0, 0.63, 1) 0.85s infinite;
 }
 @keyframes produit-ombre {
   0%, 100% { transform: translateX(-10px) scaleX(0.92); opacity: 0.3; }
@@ -375,7 +380,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   from { transform: scale(1); }
   to { transform: scale(1.07); }
 }
-.hero-photo { animation: kenburns 14s ease-in-out infinite alternate; }
+.hero-photo { will-change: transform; animation: kenburns 14s ease-in-out infinite alternate; }
 
 /* Les cartes produits s'inclinent légèrement en 3D au survol,
    comme le téléphone de la démo (souris uniquement, pas au doigt) */
@@ -417,7 +422,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
   .filet-titre { animation: trait-dessine 0.9s var(--ease-out-soft) both !important; }
   .confetti { animation: confetti-tombe var(--cf-duree, 2.4s) ease-in var(--cf-delai, 0s) both !important; }
   .pastille-pulse { animation: pastille-pulse 1.8s ease-out infinite !important; }
-  .produit-3d { animation: produit-entree 0.85s var(--ease-out-soft) both, produit-3d 6s ease-in-out 0.85s infinite !important; }
+  .produit-3d { animation: produit-entree 0.85s var(--ease-out-soft) both, produit-3d 7s cubic-bezier(0.37, 0, 0.63, 1) 0.85s infinite !important; }
   .produit-ombre { animation: produit-ombre 8s ease-in-out infinite !important; }
   .illustration-vide { animation: bandeau-flotte 4s ease-in-out infinite !important; }
 }

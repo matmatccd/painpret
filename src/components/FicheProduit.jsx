@@ -56,7 +56,14 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
           className="scene-3d relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl border border-sand"
           style={
             visuel
-              ? { background: 'radial-gradient(circle at 50% 38%, #ffffff 0%, #fdf7f5 55%, #f4e4e0 100%)' }
+              ? {
+                  // Blanc pur : le fond blanc des photos studio devient
+                  // totalement invisible (et aucun effet coûteux qui
+                  // saccaderait la rotation). L'effet vitrine vient du cadre
+                  // arrondi et de son ombre, posés sur le crème de la page.
+                  background: '#ffffff',
+                  boxShadow: '0 18px 40px -24px rgba(52, 34, 47, 0.35)',
+                }
               : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }
           }
         >
@@ -66,7 +73,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
                 key={visuel}
                 src={visuel}
                 alt={gout ? `${produit.nom} ${gout.nom}` : produit.nom}
-                className={`produit-3d relative z-10 h-[74%] w-full object-contain px-8 mix-blend-multiply ${epuise ? 'opacity-40 grayscale' : ''}`}
+                className={`produit-3d relative z-10 h-[74%] w-full object-contain px-8 ${epuise ? 'opacity-40 grayscale' : ''}`}
               />
               {/* L'ombre au sol suit la rotation du produit */}
               <div
