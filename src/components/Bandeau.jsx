@@ -28,7 +28,7 @@ export default function Bandeau() {
         {ATOUTS.map(({ Icone, titre, sous }, i) => (
           <div key={titre} className="flex items-center gap-3 sm:justify-center">
             <span
-              className="bandeau-icone flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#e9cd90] shadow-[0_4px_14px_-6px_rgba(0,0,0,0.45)] ring-1 ring-[#e9cd90]/45 backdrop-blur-sm"
+              className="bandeau-icone flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#e9cd90] shadow-[0_4px_14px_-6px_rgba(0,0,0,0.45)] ring-1 ring-[#e9cd90]/45"
               style={{ animationDelay: `${i * 0.45}s` }}
             >
               <Icone size={18} strokeWidth={1.75} />

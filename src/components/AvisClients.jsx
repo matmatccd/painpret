@@ -91,7 +91,7 @@ export default function AvisClients() {
               href={lienAvisGoogle}
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-sm transition-colors hover:bg-white/25"
+              className="shrink-0 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/25"
             >
               Laisser un avis
             </a>

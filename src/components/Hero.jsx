@@ -62,7 +62,7 @@ export default function Hero() {
           {/* Cartes flottantes (grand écran) : elles lévitent au-dessus de la photo,
               comme le téléphone de la démo — un aperçu vivant du service */}
           <div className="pointer-events-none absolute right-10 top-16 z-10 hidden lg:block" aria-hidden="true">
-            <div className="carte-flotte flex items-center gap-2.5 rounded-2xl bg-white/90 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)] backdrop-blur-sm">
+            <div className="carte-flotte flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
                 <CheckCircle2 size={18} className="text-emerald-600" />
               </span>
@@ -71,7 +71,7 @@ export default function Hero() {
                 <span className="block text-xs text-stone-warm">Encore chaude, elle vous attend</span>
               </span>
             </div>
-            <div className="carte-flotte-2 ml-16 mt-4 flex items-center gap-2.5 rounded-2xl bg-white/90 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)] backdrop-blur-sm">
+            <div className="carte-flotte-2 ml-16 mt-4 flex items-center gap-2.5 rounded-2xl bg-white/95 px-4 py-3 shadow-[0_18px_40px_-16px_rgba(20,8,12,0.5)]">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cream ring-1 ring-sand">
                 <QrCode size={17} className="text-crust" />
               </span>
@@ -87,7 +87,7 @@ export default function Hero() {
           {/* Badges d'état */}
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {estOuvertMaintenant() ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25">
                 {/* La pastille verte pulse doucement : la boutique vit */}
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="pastille-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400" />
@@ -96,12 +96,12 @@ export default function Hero() {
                 Ouvert maintenant
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25">
                 <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
                 Fermé — réouvre bientôt
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/25">
               <Timer size={13} />
               Prêt en ~{bakery.tempsPreparation} min
             </span>

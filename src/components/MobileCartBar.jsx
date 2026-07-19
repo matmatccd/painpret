@@ -10,7 +10,7 @@ export default function MobileCartBar({ onOuvrir }) {
   if (nombreArticles === 0) return null
 
   return (
-    <div className="animate-glisse-haut fixed inset-x-0 bottom-0 z-30 border-t border-sand bg-cream/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
+    <div className="animate-glisse-haut fixed inset-x-0 bottom-0 z-30 border-t border-sand bg-cream p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden">
       <button
         type="button"
         onClick={onOuvrir}

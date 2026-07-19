@@ -516,6 +516,21 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
   // Stock bas ou épuisé : à surveiller
   const stockBas = produits.filter((p) => p.stock <= 3)
 
+  // Le total à sortir du four, tous créneaux confondus : le boulanger voit
+  // d'un coup d'œil combien de chaque pain préparer, sans lire commande
+  // par commande.
+  const totaux = {}
+  actives
+    .filter((c) => c.statut === 'a-preparer')
+    .forEach((c) => {
+      ;(c.articles || []).forEach((a) => {
+        if (!totaux[a.nom]) totaux[a.nom] = { nom: a.nom, quantite: 0, produitId: a.produitId }
+        totaux[a.nom].quantite += a.quantite || 0
+      })
+    })
+  const aSortir = Object.values(totaux).sort((x, y) => y.quantite - x.quantite)
+  const totalPieces = aSortir.reduce((n, p) => n + p.quantite, 0)
+
   return (
     <div className="space-y-8">
       {/* Boutique fermée exceptionnellement : bannière bien visible en haut */}
@@ -552,6 +567,39 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 
       {/* 0. L'assistant du fournil : conseils calculés sur les vraies ventes */}
       <AssistantFournil commandes={commandes} produits={produits} ajusterStock={ajusterStock} />
+
+      {/* 0 bis. LE TOTAL À SORTIR : combien de chaque pain, toutes commandes
+             confondues — l'info n°1 quand on enfourne. */}
+      {aSortir.length > 0 && (
+        <section className="overflow-hidden rounded-2xl border-2 border-crust/25 bg-paper">
+          <div className="flex items-center justify-between gap-3 border-b border-sand bg-cream px-4 py-3">
+            <h2 className="flex items-center gap-2 text-lg text-ink">
+              <ChefHat size={19} className="text-crust" /> À sortir du four
+            </h2>
+            <span className="rounded-full bg-crust px-3 py-1 text-sm font-bold text-white">
+              {totalPieces} pièce{totalPieces > 1 ? 's' : ''}
+            </span>
+          </div>
+          <ul className="divide-y divide-sand-soft">
+            {aSortir.map((p) => {
+              const produit = produits.find((x) => x.id === p.produitId)
+              return (
+                <li key={p.nom} className="flex items-center gap-3 px-4 py-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-sand">
+                    {produit?.image ? (
+                      <img src={produit.image} alt="" className="h-full w-full object-contain p-0.5" />
+                    ) : (
+                      <ChefHat size={18} className="text-crust" />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-semibold text-ink">{p.nom}</span>
+                  <span className="tnum shrink-0 font-display text-2xl text-crust">×{p.quantite}</span>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* 1. Clients sur place : priorité absolue */}
       {surPlace.length > 0 && (

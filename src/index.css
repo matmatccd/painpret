@@ -114,18 +114,31 @@
 
 /* Flux de couleurs qui bouge — aux vraies teintes de la façade La Pétrie
    (prune, framboise, doré). Un dégradé qui coule lentement en boucle. */
-@keyframes flux {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Le dégradé est porté par une couche surdimensionnée qu'on DÉPLACE
+   (transform = carte graphique). Avant, on animait "background-position",
+   ce qui obligeait le navigateur à repeindre toute la zone à chaque image
+   — et il y a 5 de ces fonds sur le site : source principale des lags. */
+@keyframes flux-glisse {
+  0%, 100% { transform: translate3d(-14%, 0, 0); }
+  50% { transform: translate3d(14%, 0, 0); }
 }
 .flux-petrie {
+  overflow: hidden;
+  background: #6b2a4e; /* repli si la couche n'est pas rendue */
+}
+.flux-petrie::before {
+  content: '';
+  position: absolute;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
   background: linear-gradient(
     115deg,
     #3b152e, #4e1d3a, #6b2a4e, #85305c, #9c3061, #6b2a4e, #4e1d3a, #3b152e
   );
-  background-size: 300% 300%;
-  animation: flux 28s ease-in-out infinite;
+  will-change: transform;
+  animation: flux-glisse 28s ease-in-out infinite;
 }
 
 /* "La Pétrie" : un flux bordeaux coule lentement DANS les lettres
@@ -405,7 +418,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--color-crust); }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .flux-petrie { animation: flux 28s ease-in-out infinite !important; }
+  .flux-petrie::before { animation: flux-glisse 28s ease-in-out infinite !important; }
   .marquee-petrie { animation: defile 40s linear infinite !important; }
   .titre-petrie { animation: titre-flux 18s ease-in-out infinite !important; }
   .logo-ble { animation: ondule 4s ease-in-out infinite !important; }
