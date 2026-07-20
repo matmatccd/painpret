@@ -730,6 +730,12 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
                 <span className="font-semibold text-emerald-700">{nbLivrees}</span> livrée
                 {nbLivrees > 1 ? 's' : ''}
               </p>
+              {commandes.length > 0 && (
+                <p className="mt-0.5 text-xs">
+                  panier moyen{' '}
+                  <span className="font-semibold text-ink">{formatPrix(caJour / commandes.length)}</span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -775,28 +781,46 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
           </div>
         </div>
 
-        {/* Les produits les plus vendus de la semaine */}
+        {/* Les produits les plus vendus de la semaine — version visuelle :
+            photo, rang, et une barre proportionnelle pour voir d'un coup
+            ce qui marche le mieux. */}
         {topProduits.length > 0 && (
           <div className="mt-3 rounded-xl border border-sand bg-paper p-4">
-            <p className="mb-2.5 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
+            <p className="mb-3 flex items-center gap-1.5 text-xs font-medium text-stone-warm">
               <Trophy size={13} className="text-gilt" /> Les plus vendus cette semaine
             </p>
-            <ol className="space-y-1.5">
-              {topProduits.map(([nom, quantite], i) => (
-                <li key={nom} className="flex items-center justify-between gap-2 text-sm">
-                  <span className="flex items-center gap-2 text-ink">
-                    <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white ${
-                        ['bg-gilt', 'bg-stone-warm', 'bg-[#b0713e]'][i]
-                      }`}
-                    >
-                      {i + 1}
+            <ol className="space-y-2.5">
+              {topProduits.map(([nom, quantite], i) => {
+                const produit = produits.find((p) => p.nom === nom)
+                const pct = Math.round((quantite / topProduits[0][1]) * 100)
+                return (
+                  <li key={nom} className="flex items-center gap-3">
+                    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo ring-1 ring-sand">
+                      {produit?.image ? (
+                        <img src={produit.image} alt="" className="h-full w-full object-contain p-1" />
+                      ) : (
+                        <span className="text-lg">{produit?.emoji || '🥖'}</span>
+                      )}
+                      <span
+                        className={`absolute -left-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white ring-1 ring-paper ${
+                          ['bg-gilt', 'bg-stone-warm', 'bg-[#b0713e]'][i]
+                        }`}
+                      >
+                        {i + 1}
+                      </span>
                     </span>
-                    {nom}
-                  </span>
-                  <span className="tnum font-semibold text-stone-warm">×{quantite}</span>
-                </li>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-ink">{nom}</span>
+                        <span className="tnum shrink-0 text-sm font-semibold text-stone-warm">×{quantite}</span>
+                      </div>
+                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-sand-soft">
+                        <div className="h-full rounded-full bg-gilt transition-[width] duration-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
             </ol>
           </div>
         )}
