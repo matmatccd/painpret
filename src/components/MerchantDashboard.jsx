@@ -879,7 +879,7 @@ function VueDuJour({ commandes, produits, changerStatut, ajusterStock, remettreE
 // On tape sur celui qu'on veut — et on peut revenir en arrière si on s'est trompé.
 function CarteCommande({ commande, onStatut }) {
   const livree = commande.statut === 'livree'
-  const { rembourserCommande } = useShop()
+  const { rembourserCommande, produits } = useShop()
   const [remboursement, setRemboursement] = useState('') // '' | 'encours' | message d'erreur
 
   async function rembourser() {
@@ -946,21 +946,33 @@ function CarteCommande({ commande, onStatut }) {
         </p>
       )}
 
-      <ul className="mt-3 space-y-1 text-sm text-stone-warm">
-        {commande.articles.map((a, i) => (
-          <li key={i}>
-            <span className="flex justify-between gap-2">
-              <span className="text-ink">{a.nom}</span>
-              <span className="tnum font-semibold">×{a.quantite}</span>
-            </span>
-            {/* Demande du client : bien visible pour ne pas la rater */}
-            {a.remarque && (
-              <span className="mt-0.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
-                <MessageSquare size={12} /> {a.remarque}
+      <ul className="mt-3 space-y-1.5 text-sm text-stone-warm">
+        {commande.articles.map((a, i) => {
+          const produit = produits.find((p) => p.id === a.produitId)
+          return (
+            <li key={i}>
+              <span className="flex items-center justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-photo ring-1 ring-sand">
+                    {produit?.image ? (
+                      <img src={produit.image} alt="" className="h-full w-full object-contain p-0.5" />
+                    ) : (
+                      <span className="text-sm">{produit?.emoji || '🥖'}</span>
+                    )}
+                  </span>
+                  <span className="truncate text-ink">{a.nom}</span>
+                </span>
+                <span className="tnum shrink-0 font-semibold">×{a.quantite}</span>
               </span>
-            )}
-          </li>
-        ))}
+              {/* Demande du client : bien visible pour ne pas la rater */}
+              {a.remarque && (
+                <span className="ml-10 mt-0.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                  <MessageSquare size={12} /> {a.remarque}
+                </span>
+              )}
+            </li>
+          )
+        })}
       </ul>
 
       <div className="mt-3 border-t border-sand pt-3">
@@ -1017,6 +1029,7 @@ function CarteCommande({ commande, onStatut }) {
 
 // --- Retrait : valider une commande en scannant le QR (caméra) ou en saisissant le numéro ---
 function Retrait({ validerRetrait }) {
+  const { produits } = useShop()
   const [code, setCode] = useState('')
   const [resultat, setResultat] = useState(null)
   const [cameraActive, setCameraActive] = useState(false)
@@ -1123,13 +1136,23 @@ function Retrait({ validerRetrait }) {
               <CheckCircle2 size={18} /> Commande #{resultat.commande.numero}
               {resultat.commande.client ? ` de ${resultat.commande.client}` : ''} remise au client
             </p>
-            <ul className="mt-2 space-y-0.5 text-sm text-emerald-800">
-              {resultat.commande.articles.map((a, i) => (
-                <li key={i}>
-                  {a.quantite}× {a.nom}
-                  {a.remarque && <em className="ml-1 font-semibold">→ {a.remarque}</em>}
-                </li>
-              ))}
+            <ul className="mt-2 space-y-1.5 text-sm text-emerald-800">
+              {resultat.commande.articles.map((a, i) => {
+                const produit = produits.find((p) => p.id === a.produitId)
+                return (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-photo ring-1 ring-emerald-200">
+                      {produit?.image ? (
+                        <img src={produit.image} alt="" className="h-full w-full object-contain p-0.5" />
+                      ) : (
+                        <span className="text-sm">{produit?.emoji || '🥖'}</span>
+                      )}
+                    </span>
+                    <span className="font-semibold">{a.quantite}×</span> {a.nom}
+                    {a.remarque && <em className="font-semibold">→ {a.remarque}</em>}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}
