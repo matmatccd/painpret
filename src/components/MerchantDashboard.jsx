@@ -32,7 +32,11 @@ import {
   Phone,
   Download,
   Undo2,
+  Flame,
 } from 'lucide-react'
+
+// En dessous de ce stock, on alerte le boulanger (« stock bas »).
+const SEUIL_STOCK_BAS = 5
 import { Scanner } from '@yudiel/react-qr-scanner'
 import AssistantFournil from './AssistantFournil'
 import { IllustrationPain } from './Illustrations'
@@ -1716,6 +1720,10 @@ function LigneProduit({ produit, onMoins, onPlus, onEpuise, onRemettre, onModifi
         {epuise ? (
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
             <XCircle size={13} /> Épuisé
+          </span>
+        ) : produit.stock <= SEUIL_STOCK_BAS ? (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+            <Flame size={13} /> Stock bas : {produit.stock}{uniteStock}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">

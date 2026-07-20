@@ -1,15 +1,15 @@
-import { ArrowLeft, QrCode, History, RotateCcw } from 'lucide-react'
+import { ArrowLeft, QrCode, RotateCcw, Clock, CheckCircle2, PackageCheck, ShoppingBag } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useShop } from '../context/ShopContext'
 import { useCart } from '../context/CartContext'
 import { useNotifications } from '../context/NotificationsContext'
 import { IllustrationPain } from './Illustrations'
 
-// Libellés des statuts, côté client
+// Libellés des statuts, côté client (avec une icône pour un repère immédiat)
 const LIBELLES_STATUT = {
-  'a-preparer': { label: 'En préparation', classe: 'bg-amber-50 text-amber-700 ring-amber-200' },
-  prete: { label: 'Prête à retirer', classe: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
-  livree: { label: 'Récupérée', classe: 'bg-cream text-stone-warm ring-sand' },
+  'a-preparer': { label: 'En préparation', classe: 'bg-amber-50 text-amber-700 ring-amber-200', Icone: Clock },
+  prete: { label: 'Prête à retirer', classe: 'bg-emerald-50 text-emerald-700 ring-emerald-200', Icone: CheckCircle2 },
+  livree: { label: 'Récupérée', classe: 'bg-cream text-stone-warm ring-sand', Icone: PackageCheck },
 }
 
 // Historique des commandes du client (mémorisé sur l'appareil).
@@ -58,6 +58,32 @@ export default function Historique({ historique, onRetour, onVoirQR, onPanierRem
       <h1 className="mt-1 text-3xl text-ink sm:text-4xl">Mes commandes</h1>
       <span className="filet-titre" aria-hidden="true" />
 
+      {/* Petit récap de fidélité : donne de la valeur au client régulier */}
+      {historique.length > 0 && (
+        <div className="mt-5 flex items-stretch gap-3">
+          <div className="flex flex-1 items-center gap-3 rounded-2xl border border-sand bg-paper px-4 py-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-crust/10 text-crust">
+              <ShoppingBag size={18} />
+            </span>
+            <div>
+              <p className="font-display text-xl leading-none text-ink">{historique.length}</p>
+              <p className="mt-1 text-xs text-stone-warm">commande{historique.length > 1 ? 's' : ''}</p>
+            </div>
+          </div>
+          <div className="flex flex-1 items-center gap-3 rounded-2xl border border-sand bg-paper px-4 py-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gilt/15 text-gilt">
+              <PackageCheck size={18} />
+            </span>
+            <div>
+              <p className="price font-display text-xl leading-none text-ink">
+                {formatPrix(historique.reduce((n, e) => n + (e.total || 0), 0))}
+              </p>
+              <p className="mt-1 text-xs text-stone-warm">au total chez nous</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {historique.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-sand bg-paper px-6 py-12 text-center">
           <span className="illustration-vide mx-auto block w-fit">
@@ -94,13 +120,41 @@ export default function Historique({ historique, onRetour, onVoirQR, onPanierRem
                         Remboursée
                       </span>
                     )}
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${infos.classe}`}>
-                      {infos.label}
+                    <span className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${infos.classe}`}>
+                      <infos.Icone size={12} /> {infos.label}
                     </span>
                   </span>
                 </div>
 
-                <p className="mt-2 text-sm text-stone-warm">
+                {/* Miniatures des produits commandés (avec la quantité en pastille) */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {entree.articles.slice(0, 6).map((a, i) => {
+                    const produit = produits.find((p) => p.id === a.produitId)
+                    return (
+                      <span
+                        key={i}
+                        title={`${a.quantite}× ${a.nom}`}
+                        className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-photo ring-1 ring-sand"
+                      >
+                        {produit?.image ? (
+                          <img src={produit.image} alt={a.nom} loading="lazy" className="h-full w-full object-contain p-1" />
+                        ) : (
+                          <span className="text-lg">{produit?.emoji || '🥖'}</span>
+                        )}
+                        {a.quantite > 1 && (
+                          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-crust px-1 text-[9px] font-bold text-white ring-1 ring-paper">
+                            {a.quantite}
+                          </span>
+                        )}
+                      </span>
+                    )
+                  })}
+                  {entree.articles.length > 6 && (
+                    <span className="text-xs font-medium text-stone-warm">+{entree.articles.length - 6}</span>
+                  )}
+                </div>
+
+                <p className="mt-2 text-[13px] leading-relaxed text-stone-warm">
                   {entree.articles.map((a) => `${a.quantite}× ${a.nom}`).join(' · ')}
                 </p>
 
