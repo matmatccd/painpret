@@ -41,7 +41,7 @@ function secondesRestantes(heureISO) {
 
 // Écran de confirmation : numéro, QR Code, heure de retrait, minuteur.
 export default function Confirmation({ commande, onTermine }) {
-  const { commandes, signalerArrivee } = useShop()
+  const { commandes, signalerArrivee, produits } = useShop()
   const { ajouterNotification } = useNotifications()
   // Version "vivante" de la commande (pour voir l'état "arrivé" à jour)
   const live = commandes.find((c) => c.id === commande.id) ?? commande
@@ -173,8 +173,33 @@ export default function Confirmation({ commande, onTermine }) {
           <Navigation size={15} /> Itinéraire vers la boutique
         </a>
 
+        {/* Aperçu des produits commandés */}
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          {commande.articles.map((a, i) => {
+            const produit = produits.find((p) => p.id === a.produitId)
+            return (
+              <span
+                key={i}
+                title={`${a.quantite}× ${a.nom}`}
+                className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-photo ring-1 ring-sand"
+              >
+                {produit?.image ? (
+                  <img src={produit.image} alt={a.nom} className="h-full w-full object-contain p-1" />
+                ) : (
+                  <span className="text-xl">{produit?.emoji || '🥖'}</span>
+                )}
+                {a.quantite > 1 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-crust px-1 text-[9px] font-bold text-white ring-1 ring-paper">
+                    {a.quantite}
+                  </span>
+                )}
+              </span>
+            )
+          })}
+        </div>
+
         {/* Total */}
-        <div className="mt-5 flex items-center justify-between border-t border-sand pt-4 text-left">
+        <div className="mt-4 flex items-center justify-between border-t border-sand pt-4 text-left">
           <span className="text-sm text-stone-warm">
             {commande.articles.reduce((n, a) => n + a.quantite, 0)} article(s)
           </span>

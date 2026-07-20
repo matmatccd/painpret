@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Minus, Plus, Timer, CheckCircle2, Leaf, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Minus, Plus, Timer, CheckCircle2, Leaf, ShieldAlert, Flame } from 'lucide-react'
 import { formatPrix } from '../lib/format'
 import { useCart } from '../context/CartContext'
 import { volerVersPanier } from '../lib/volAuPanier'
@@ -61,7 +61,7 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
                   // totalement invisible (et aucun effet coûteux qui
                   // saccaderait la rotation). L'effet vitrine vient du cadre
                   // arrondi et de son ombre, posés sur le crème de la page.
-                  background: '#ffffff',
+                  background: 'var(--color-photo)',
                   boxShadow: '0 18px 40px -24px rgba(52, 34, 47, 0.35)',
                 }
               : { background: `linear-gradient(150deg, ${produit.from}, ${produit.to})` }
@@ -92,11 +92,16 @@ export default function FicheProduit({ produit, onRetour, onAjoutReussi, suggest
               style={{ backgroundColor: gout.couleur, opacity: 0.4, mixBlendMode: 'multiply' }}
             />
           )}
-          {produit.nouveau && !epuise && (
-            <span className="absolute left-4 top-4 rounded-full bg-paper/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-crust">
+          {/* Rareté (« Plus que 3 ») prioritaire sur « Nouveau », comme sur les cartes */}
+          {!epuise && produit.stock > 0 && produit.stock <= 5 ? (
+            <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+              <Flame size={12} /> Plus que {produit.stock}
+            </span>
+          ) : produit.nouveau && !epuise ? (
+            <span className="absolute left-4 top-4 rounded-full bg-crust px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm ring-1 ring-[#e9cd90]/50">
               Nouveau
             </span>
-          )}
+          ) : null}
           {epuise && (
             <span className="absolute inset-x-0 bottom-0 bg-ink/70 py-2 text-center text-sm font-semibold uppercase tracking-widest text-white">
               Épuisé aujourd'hui
